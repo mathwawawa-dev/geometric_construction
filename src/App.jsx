@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.41_20260930_062500_단일점중심스냅적용'
+const VERSION = 'v0.1.42_20260930_062600_직선두께중심축스냅적용'
 
 export default function App() {
   const canvasRef = useRef(null)

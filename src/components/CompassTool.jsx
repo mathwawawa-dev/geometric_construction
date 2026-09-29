@@ -1,4 +1,5 @@
 import { useRef, useCallback } from 'react'
+import { snapToShapesCenter } from '../utils/shapeUtils'
 
 function dist(x1, y1, x2, y2) {
   return Math.hypot(x2 - x1, y2 - y1)
@@ -33,33 +34,13 @@ function snapPointToRuler(p, ruler) {
 }
 
 function snapToDrawing(p, canvasRef, shapes = [], snapRadius = 22) {
-  // 1. 단일 클릭으로 생성한 작도 점의 '중심' 최우선 자석 스냅
-  if (shapes && shapes.length > 0) {
-    let bestDist = Infinity
-    let bestPoint = null
-    for (const s of shapes) {
-      if (s.points && s.points.length === 1) {
-        const pt = s.points[0]
-        const d = Math.hypot(p.x - pt.x, p.y - pt.y)
-        const pointVisualR = Math.max((s.width || 3) * 0.8, 4)
-        if (d < pointVisualR + snapRadius && d < bestDist) {
-          bestDist = d
-          bestPoint = { x: pt.x, y: pt.y }
-        }
-      } else if (s.type === 'circle') {
-        const d = Math.hypot(p.x - s.cx, p.y - s.cy)
-        if (d < 16 && d < bestDist) {
-          bestDist = d
-          bestPoint = { x: s.cx, y: s.cy }
-        }
-      }
-    }
-    if (bestPoint) {
-      return bestPoint
-    }
+  // 1. 점 중심 및 직선/곡선/원의 '두께 중심축(위-아래 정중앙)' 최우선 자석 스냅
+  const centerSnap = snapToShapesCenter(p, shapes, snapRadius)
+  if (centerSnap) {
+    return centerSnap
   }
 
-  // 2. 픽셀 기반 스캔 스냅 (선분, 호 등)
+  // 2. 픽셀 기반 스캔 스냅 (선분, 호 등 fallback)
   const canvas = canvasRef?.current
   if (!canvas) return p
   const ctx = canvas.getContext('2d')

@@ -7,6 +7,90 @@ export function distToSegment(px, py, x1, y1, x2, y2) {
   return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)))
 }
 
+// 선분 위 최근접점 (선분의 두께 중심축 투영점)
+export function closestPointOnSegment(px, py, x1, y1, x2, y2) {
+  const dx = x2 - x1
+  const dy = y2 - y1
+  const l2 = dx * dx + dy * dy
+  if (l2 === 0) return { x: x1, y: y1 }
+  let t = ((px - x1) * dx + (py - y1) * dy) / l2
+  t = Math.max(0, Math.min(1, t))
+  return { x: x1 + t * dx, y: y1 + t * dy }
+}
+
+// 직선/곡선/원/점의 '정확한 두께 중심(스켈레톤 축선)' 자석 스냅
+export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
+  if (!shapes || shapes.length === 0) return null
+
+  let bestDist = Infinity
+  let bestPoint = null
+
+  // 1단계: 작도점(단일점) 중심, 원의 중심, 선분의 끝점에 최우선 스냅
+  for (const s of shapes) {
+    if (s.points && s.points.length === 1) {
+      const pt = s.points[0]
+      const d = Math.hypot(p.x - pt.x, p.y - pt.y)
+      const visualR = Math.max((s.width || 3) * 0.8, 4)
+      if (d <= visualR + snapThreshold && d < bestDist) {
+        bestDist = d
+        bestPoint = { x: pt.x, y: pt.y }
+      }
+    } else if (s.type === 'circle') {
+      const d = Math.hypot(p.x - s.cx, p.y - s.cy)
+      if (d <= snapThreshold && d < bestDist) {
+        bestDist = d
+        bestPoint = { x: s.cx, y: s.cy }
+      }
+    } else if (s.points && s.points.length > 1) {
+      const pStart = s.points[0]
+      const pEnd = s.points[s.points.length - 1]
+      const dStart = Math.hypot(p.x - pStart.x, p.y - pStart.y)
+      const dEnd = Math.hypot(p.x - pEnd.x, p.y - pEnd.y)
+      if (dStart <= snapThreshold && dStart < bestDist) {
+        bestDist = dStart
+        bestPoint = { x: pStart.x, y: pStart.y }
+      }
+      if (dEnd <= snapThreshold && dEnd < bestDist) {
+        bestDist = dEnd
+        bestPoint = { x: pEnd.x, y: pEnd.y }
+      }
+    }
+  }
+
+  if (bestPoint && bestDist <= snapThreshold) {
+    return bestPoint
+  }
+
+  // 2단계: 선분/호/원의 '두께 중심축(위-아래 정중앙)' 탐색
+  for (const s of shapes) {
+    const halfThick = (s.width || 3) / 2
+    const totalThreshold = halfThick + snapThreshold
+
+    if (s.type === 'circle') {
+      const dToCenter = Math.hypot(p.x - s.cx, p.y - s.cy)
+      const dToCircumference = Math.abs(dToCenter - s.r)
+      if (dToCircumference <= totalThreshold && dToCircumference < bestDist) {
+        const a = Math.atan2(p.y - s.cy, p.x - s.cx)
+        bestDist = dToCircumference
+        bestPoint = { x: s.cx + s.r * Math.cos(a), y: s.cy + s.r * Math.sin(a) }
+      }
+    } else if (s.points && s.points.length > 1) {
+      for (let i = 0; i < s.points.length - 1; i++) {
+        const pt1 = s.points[i]
+        const pt2 = s.points[i + 1]
+        const closest = closestPointOnSegment(p.x, p.y, pt1.x, pt1.y, pt2.x, pt2.y)
+        const d = Math.hypot(p.x - closest.x, p.y - closest.y)
+        if (d <= totalThreshold && d < bestDist) {
+          bestDist = d
+          bestPoint = closest // 선분의 위/아래 가장자리가 아닌 정확한 선분 중심 좌표!
+        }
+      }
+    }
+  }
+
+  return bestPoint
+}
+
 // 도형의 경계 상자 (AABB) 계산
 export function getShapeBounds(shape) {
   if (shape.type === 'circle') {

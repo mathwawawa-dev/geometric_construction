@@ -1,4 +1,5 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
+import { snapToShapesCenter } from '../utils/shapeUtils'
 
 const RULER_THICKNESS = 120
 const SNAP_DIST = 12
@@ -54,29 +55,10 @@ function calcRulerSnap(pos, ruler, currentLock) {
   return { pos, lock: null }
 }
 
-// 점의 중심(Center) 자석 스냅 함수
-function snapToPointCenters(pos, shapes, snapRadius = 22) {
-  if (!shapes || shapes.length === 0) return { pos, snappedPoint: false }
-  let bestDist = Infinity
-  let bestPoint = null
-  for (const s of shapes) {
-    if (s.points && s.points.length === 1) {
-      const pt = s.points[0]
-      const d = Math.hypot(pos.x - pt.x, pos.y - pt.y)
-      const pointVisualR = Math.max((s.width || 3) * 0.8, 4)
-      if (d < pointVisualR + snapRadius && d < bestDist) {
-        bestDist = d
-        bestPoint = { x: pt.x, y: pt.y }
-      }
-    } else if (s.type === 'circle') {
-      const d = Math.hypot(pos.x - s.cx, pos.y - s.cy)
-      if (d < 16 && d < bestDist) {
-        bestDist = d
-        bestPoint = { x: s.cx, y: s.cy }
-      }
-    }
-  }
-  return bestPoint ? { pos: bestPoint, snappedPoint: true } : { pos, snappedPoint: false }
+// 점의 중심 및 직선/곡선의 '두께 중심축(위-아래 정중앙)' 자석 스냅 함수
+function snapToPointCenters(pos, shapes, snapRadius = 20) {
+  const center = snapToShapesCenter(pos, shapes, snapRadius)
+  return center ? { pos: center, snappedPoint: true } : { pos, snappedPoint: false }
 }
 
 export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, highlightMode, stampMode, shapes }) {
