@@ -140,8 +140,11 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         angleOffset: initPencilAngle - initClickAngle,
       }
     } else if (part === 'leg') {
-      // 은색 다리: arc 드로잉
-      prevAngleRef.current = Math.atan2(pencilY - pinY, pencilX - pinX)
+      // 은색 다리 드래그: 클릭 지점 각도 오프셋 보존 (포인터 튐 방지)
+      const curAngle = Math.atan2(pencilY - pinY, pencilX - pinX)
+      const clickAngle = Math.atan2(pos.y - pinY, pos.x - pinX)
+      dragOffset.current = { angleOffset: curAngle - clickAngle }
+      prevAngleRef.current = curAngle
       onDraw?.()
     }
 
@@ -186,13 +189,18 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         }
 
       } else if (dragging.current === 'leg') {
-        // 은색 다리 드래그 → arc 그리기
-        const target = snapToDrawing(snapPointToRuler(rawP, ruler), canvasRef)
-        const curAngle = Math.atan2(target.y - pinY, target.x - pinX)
-        const newRadius = dist(pinX, pinY, target.x, target.y)
-        drawArcSegment(canvasRef.current, pinX, pinY, prevAngleRef.current, curAngle, newRadius, strokeColor, strokeWidth)
+        // 은색 다리 드래그 → arc 증분 그리기 (포인터 튐 없이, 천천히 호 생성)
+        const clickAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
+        const curAngle = clickAngle + dragOffset.current.angleOffset
+        const prev = prevAngleRef.current
+        if (prev !== null && Math.abs(curAngle - prev) > 0.001) {
+          drawArcSegment(canvasRef.current, pinX, pinY, prev, curAngle, radius, strokeColor, strokeWidth)
+        }
         prevAngleRef.current = curAngle
-        setCompass({ pencilX: target.x, pencilY: target.y })
+        setCompass({
+          pencilX: pinX + Math.cos(curAngle) * radius,
+          pencilY: pinY + Math.sin(curAngle) * radius,
+        })
       }
     }
 
@@ -284,33 +292,39 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
 
         {/* 오른쪽 다리 (연필 쪽) */}
         <g transform={`translate(${pencilX}, ${pencilY}) rotate(${rightLegAngleDeg})`} style={{ pointerEvents: 'none' }}>
-          
-          {/* 은색 다리: 조인트에서 힌지로 연결 */}
-          <line x1={jointX} y1={jointY} x2={legLength} y2="0" stroke="#cbd5e1" strokeWidth="10" strokeLinecap="round" />
-          <line x1={jointX} y1={jointY} x2={legLength} y2="0" stroke="#e2e8f0" strokeWidth="4" strokeLinecap="round" />
-          <line x1={jointX} y1={jointY} x2={legLength} y2="0" stroke="transparent" strokeWidth="30" style={{ pointerEvents: 'all', cursor: 'crosshair' }} onMouseDown={onPointerDown('leg')} onTouchStart={onPointerDown('leg')} />
-          
-          <circle cx={jointX} cy={jointY} r="4.5" fill="#94a3b8" stroke="#64748b" strokeWidth="1" />
 
-          {/* 연필 어셈블리 (항상 지면과 수직) */}
-          <g transform={`rotate(${alphaDeg})`} style={{ pointerEvents: 'none' }}>
-            
-            {/* 클램프 바디 (항상 지면과 평행) */}
-            <rect x={clampPencilX - 4} y={clampPencilY} width="8" height={Math.abs(clampPencilY)} fill="#1e293b" />
-            <rect x={clampPencilX - 7} y="-6" width="14" height="12" rx="2" fill="#1e293b" />
-            
-            {/* 연필 본체 (기존 대비 2/3 비율인 65px로 축소) */}
+          {/* 은색 다리 (연필끝→힌지) */}
+          <line x1="0" y1="0" x2={legLength} y2="0" stroke="#cbd5e1" strokeWidth="10" strokeLinecap="round" />
+          <line x1="0" y1="0" x2={legLength} y2="0" stroke="#e2e8f0" strokeWidth="4" strokeLinecap="round" />
+          {/* 클릭 영역: 다리 중간 이상 (연필끝~힌지방향) */}
+          <rect x="30" y="-15" width={legLength - 30} height="30" fill="transparent"
+            style={{ pointerEvents: 'all', cursor: 'crosshair' }}
+            onMouseDown={onPointerDown('leg')} onTouchStart={onPointerDown('leg')} />
+
+          {/* 클램프 조인트 (은색 다리에 수직 방향 아래쪽으로 뻗음, 고정 각도) */}
+          {/* clamp arm: 다리에서 아래쪽(+y 방향)으로 28px */}
+          <line x1="28" y1="0" x2="28" y2="28" stroke="#94a3b8" strokeWidth="8" strokeLinecap="round" />
+          <line x1="28" y1="0" x2="28" y2="28" stroke="#cbd5e1" strokeWidth="3" strokeLinecap="round" />
+          <circle cx="28" cy="28" r="5" fill="#64748b" stroke="#475569" strokeWidth="1" />
+
+          {/* 연필 어셈블리: 클램프 끝(28,28)에서 다리방향(+x)으로 뻗음 */}
+          <g transform="translate(28, 28) rotate(90)">
+            {/* 흑연 */}
             <path d="M0,0 L8,-2 L8,2 Z" fill="#1c1917" />
+            {/* 나무 */}
             <path d="M7,-2 L7,2 L20,4 L20,-4 Z" fill="#c8a96e" />
+            {/* 노란 몸통 */}
             <rect x="20" y="-4" width="30" height="8" fill="#f5c518" />
             <rect x="20" y="-4" width="30" height="3" fill="#f7d060" opacity="0.5" />
-            
+            {/* 페룰 */}
             <rect x="50" y="-4" width="7" height="8" fill="#9ca3af" />
             <line x1="52" y1="-4" x2="52" y2="4" stroke="#6b7280" strokeWidth="1" />
             <line x1="55" y1="-4" x2="55" y2="4" stroke="#6b7280" strokeWidth="1" />
-            
+            {/* 지우개 */}
             <rect x="57" y="-4" width="8" height="8" rx="2" fill="#f9a8a8" />
-            
+            {/* 클램프 바디 */}
+            <rect x="19" y="-8" width="16" height="16" rx="3" fill="#1e293b" />
+
             {/* 연필 드래그 영역 (반지름 조절) */}
             <g style={{ pointerEvents: 'all', cursor: 'ew-resize' }} onMouseDown={onPointerDown('pencil')} onTouchStart={onPointerDown('pencil')}>
               <rect x="0" y="-12" width="65" height="24" fill="transparent" />

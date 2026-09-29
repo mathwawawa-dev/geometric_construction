@@ -35,8 +35,26 @@ function reducer(state, action) {
     case 'SET_DRAW_MODE':
       return { ...state, drawMode: action.mode }
     case 'TOGGLE_TOOL': {
-      const key = action.tool  // 'compass' | 'ruler' | 'protractor'
-      return { ...state, [key]: { ...state[key], visible: !state[key].visible } }
+      const key = action.tool
+      const isVisible = !state[key].visible
+      const updates = { visible: isVisible }
+      if (isVisible && action.coords) {
+        if (key === 'compass') {
+          updates.pinX = action.coords.x - 100
+          updates.pinY = action.coords.y
+          updates.pencilX = action.coords.x + 100
+          updates.pencilY = action.coords.y
+        } else if (key === 'ruler') {
+          updates.x1 = action.coords.x - 300
+          updates.y1 = action.coords.y
+          updates.x2 = action.coords.x + 300
+          updates.y2 = action.coords.y
+        } else if (key === 'protractor') {
+          updates.cx = action.coords.x
+          updates.cy = action.coords.y
+        }
+      }
+      return { ...state, [key]: { ...state[key], ...updates } }
     }
     case 'SET_COLOR':
       return { ...state, strokeColor: action.color }
@@ -59,7 +77,7 @@ export function useAppState() {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const setDrawMode   = useCallback((mode) => dispatch({ type: 'SET_DRAW_MODE', mode }), [])
-  const toggleTool    = useCallback((tool) => dispatch({ type: 'TOGGLE_TOOL', tool }), [])
+  const toggleTool    = useCallback((tool, coords) => dispatch({ type: 'TOGGLE_TOOL', tool, coords }), [])
   const setColor      = useCallback((color) => dispatch({ type: 'SET_COLOR', color }), [])
   const setWidth      = useCallback((width) => dispatch({ type: 'SET_WIDTH', width }), [])
   const setCompass    = useCallback((payload) => dispatch({ type: 'SET_COMPASS', payload }), [])

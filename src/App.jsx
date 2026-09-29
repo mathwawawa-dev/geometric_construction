@@ -197,7 +197,11 @@ export default function App() {
         <Sidebar
           drawMode={state.drawMode}
           setDrawMode={setDrawMode}
-          toggleTool={toggleTool}
+          toggleTool={(tool) => {
+            const cx = 1500 - pan.x / zoom;
+            const cy = 1000 - pan.y / zoom;
+            toggleTool(tool, { x: cx, y: cy });
+          }}
           toolsVisible={toolsVisible}
           background={state.background}
           setBackground={setBackground}
