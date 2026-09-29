@@ -1,10 +1,9 @@
-import { useRef, useCallback, useState } from 'react'
+import { useRef, useCallback } from 'react'
 
 function dist(x1, y1, x2, y2) {
   return Math.hypot(x2 - x1, y2 - y1)
 }
 
-// 자 엣지에 스냅
 function snapPointToRuler(p, ruler) {
   if (!ruler || !ruler.visible) return p
   const { x1, y1, x2, y2 } = ruler
@@ -21,7 +20,7 @@ function snapPointToRuler(p, ruler) {
   const ty = p.y - cy
   const localX = tx * cos - ty * sin
   const localY = tx * sin + ty * cos
-  const halfThick = 60 // RULER_THICKNESS / 2
+  const halfThick = 60
   if (localX < -length / 2 - 20 || localX > length / 2 + 20) return p
   const snapDist = 15
   const unCos = Math.cos(angle)
@@ -33,7 +32,6 @@ function snapPointToRuler(p, ruler) {
   return p
 }
 
-// 캔버스 위 픽셀 스캔으로 그려진 도형에 snap
 function snapToDrawing(p, canvasRef, snapRadius = 18) {
   const canvas = canvasRef?.current
   if (!canvas) return p
@@ -43,54 +41,57 @@ function snapToDrawing(p, canvasRef, snapRadius = 18) {
   const y0 = Math.max(0, Math.round(p.y) - r)
   const x1 = Math.min(canvas.width - 1, Math.round(p.x) + r)
   const y1 = Math.min(canvas.height - 1, Math.round(p.y) + r)
-  const w = x1 - x0
-  const h = y1 - y0
+  const w = x1 - x0, h = y1 - y0
   if (w <= 0 || h <= 0) return p
-
   let imageData
-  try {
-    imageData = ctx.getImageData(x0, y0, w, h)
-  } catch { return p }
-
-  let bestDist = Infinity
-  let bestX = p.x, bestY = p.y
+  try { imageData = ctx.getImageData(x0, y0, w, h) } catch { return p }
+  let bestDist = Infinity, bestX = p.x, bestY = p.y
   for (let dy = 0; dy < h; dy++) {
     for (let dx = 0; dx < w; dx++) {
-      const alpha = imageData.data[(dy * w + dx) * 4 + 3]
-      if (alpha > 80) {
-        const px = x0 + dx
-        const py = y0 + dy
-        const d = Math.hypot(px - p.x, py - p.y)
-        if (d < bestDist) { bestDist = d; bestX = px; bestY = py }
+      if (imageData.data[(dy * w + dx) * 4 + 3] > 80) {
+        const d = Math.hypot(x0 + dx - p.x, y0 + dy - p.y)
+        if (d < bestDist) { bestDist = d; bestX = x0 + dx; bestY = y0 + dy }
       }
     }
   }
-  if (bestDist < snapRadius) return { x: bestX, y: bestY }
-  return p
+  return bestDist < snapRadius ? { x: bestX, y: bestY } : p
+}
+
+// arc 그리기 헬퍼
+function drawArcSegment(canvas, pinX, pinY, fromAngle, toAngle, r, strokeColor, strokeWidth) {
+  if (!canvas || r < 1) return
+  const ctx = canvas.getContext('2d')
+  ctx.beginPath()
+  ctx.arc(pinX, pinY, r, fromAngle, toAngle)
+  ctx.strokeStyle = strokeColor
+  ctx.lineWidth = strokeWidth
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.stroke()
 }
 
 export default function CompassTool({ compass, setCompass, canvasRef, strokeColor, strokeWidth, onDraw, ruler }) {
   const svgRef = useRef(null)
-  const dragging = useRef(null) // 'pin' | 'pencil' | 'whole'
-  const dragOffset = useRef({ dx: 0, dy: 0 })
-  // pencil 드래그: 이전 각도 추적
+  const dragging = useRef(null)
+  // dragOffset: 모든 드래그 파트에서 점프 방지용 공용 저장소
+  const dragOffset = useRef({})
   const prevAngleRef = useRef(null)
-  const [drawingArcAngle, setDrawingArcAngle] = useState(null) // 연필이 그린 arc 끝 각도
 
   const { pinX, pinY, pencilX, pencilY, radiusInput } = compass
   const radius = dist(pinX, pinY, pencilX, pencilY)
 
-  // 힌지 위치 계산 (현실적 컴퍼스: 다리 고정 길이)
+  // 힌지 위치: 수직 방향이 위를 향하도록 부호 반전 (dy/span, -dx/span)
   const midX = (pinX + pencilX) / 2
   const midY = (pinY + pencilY) / 2
   const dxMain = pencilX - pinX
   const dyMain = pencilY - pinY
+  const span = Math.hypot(dxMain, dyMain) || 1
   const halfDist = radius / 2
   const legLength = Math.max(280, halfDist + 60)
   const compassHeight = Math.sqrt(Math.max(0, legLength ** 2 - halfDist ** 2))
-  const span = Math.hypot(dxMain, dyMain) || 1
-  const nx = -dyMain / span
-  const ny = dxMain / span
+  // 힌지가 위쪽에 오도록: (dy, -dx) 방향
+  const nx = dyMain / span
+  const ny = -dxMain / span
   const hingeX = midX + nx * compassHeight
   const hingeY = midY + ny * compassHeight
 
@@ -112,72 +113,67 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     const pos = getSVGPos(e)
 
     if (part === 'pin') {
-      // 바늘 → 전체 이동, 반지름 유지 (dragOffset으로 점프 방지)
+      // 전체 이동: 클릭 지점과 핀 사이 오프셋 보존
       dragOffset.current = { dx: pos.x - pinX, dy: pos.y - pinY }
     } else if (part === 'whole') {
-      // 힌지 → pin 고정, 회전 (절대 각도 기준으로 진동 방지)
+      // 힌지: 절대 각도 기준 회전 (진동 없음)
       dragOffset.current = {
         initMouseAngle: Math.atan2(pos.y - pinY, pos.x - pinX),
         initPencilAngle: Math.atan2(pencilY - pinY, pencilX - pinX),
       }
-    } else if (part === 'pencil') {
-      // 연필 → 반지름 변경 + 실시간 arc 드로잉
+    } else if (part === 'pencil' || part === 'clamp') {
+      // 연필/클램프: 반지름만 조절, arc 없음 → 클릭 지점과 연필끝 각도 오프셋 보존
+      const initPencilAngle = Math.atan2(pencilY - pinY, pencilX - pinX)
+      const initClickAngle = Math.atan2(pos.y - pinY, pos.x - pinX)
+      dragOffset.current = {
+        initPencilAngle,
+        angleOffset: initPencilAngle - initClickAngle,
+      }
+    } else if (part === 'leg') {
+      // 은색 다리: arc 드로잉
       prevAngleRef.current = Math.atan2(pencilY - pinY, pencilX - pinX)
-      onDraw?.() // 히스토리 스냅샷
+      onDraw?.()
     }
 
     const onMove = (me) => {
       me.preventDefault()
       const rawP = getSVGPos(me)
-      const p = snapPointToRuler(rawP, ruler)
-      const snappedCanvas = snapToDrawing(p, canvasRef)
 
       if (dragging.current === 'pin') {
-        // 전체 이동 (반지름 유지)
         const targetPinX = rawP.x - dragOffset.current.dx
         const targetPinY = rawP.y - dragOffset.current.dy
-        const snapped = snapPointToRuler({ x: targetPinX, y: targetPinY }, ruler)
-        const snappedC = snapToDrawing(snapped, canvasRef)
-        const pdx = pencilX - pinX
-        const pdy = pencilY - pinY
-        setCompass({ pinX: snappedC.x, pinY: snappedC.y, pencilX: snappedC.x + pdx, pencilY: snappedC.y + pdy })
+        const snapped = snapToDrawing(snapPointToRuler({ x: targetPinX, y: targetPinY }, ruler), canvasRef)
+        const pdx = pencilX - pinX, pdy = pencilY - pinY
+        setCompass({ pinX: snapped.x, pinY: snapped.y, pencilX: snapped.x + pdx, pencilY: snapped.y + pdy })
+
       } else if (dragging.current === 'whole') {
-        // 힌지 드래그: pin 고정, 반지름 유지, pencil 절대 각도로 회전 (진동 없음)
         const curMouseAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
         const newPencilAngle = dragOffset.current.initPencilAngle + (curMouseAngle - dragOffset.current.initMouseAngle)
         setCompass({
           pencilX: pinX + Math.cos(newPencilAngle) * radius,
           pencilY: pinY + Math.sin(newPencilAngle) * radius,
         })
-      } else if (dragging.current === 'clamp') {
-        // 클램프 드래그 → arc 없이 반지름만 조절
-        const newPencilPos = snapToDrawing(snapPointToRuler(rawP, ruler), canvasRef)
-        const newRadius = dist(pinX, pinY, newPencilPos.x, newPencilPos.y)
+
+      } else if (dragging.current === 'pencil' || dragging.current === 'clamp') {
+        // 각도 오프셋 유지하며 반지름만 변경 (점프 없음, arc 없음)
+        const curMouseAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
+        const newPencilAngle = curMouseAngle + dragOffset.current.angleOffset
+        const newRadius = dist(pinX, pinY, rawP.x, rawP.y)
         if (newRadius > 2) {
-          setCompass({ pencilX: newPencilPos.x, pencilY: newPencilPos.y })
+          setCompass({
+            pencilX: pinX + Math.cos(newPencilAngle) * newRadius,
+            pencilY: pinY + Math.sin(newPencilAngle) * newRadius,
+          })
         }
-      } else if (dragging.current === 'pencil') {
-        // 연필 드래그 → 반지름 방향 이동 + arc 그리기
-        const newPencilPos = snapToDrawing(snapPointToRuler(rawP, ruler), canvasRef)
-        const prevAngle = prevAngleRef.current
-        const curAngle = Math.atan2(newPencilPos.y - pinY, newPencilPos.x - pinX)
-        const newRadius = dist(pinX, pinY, newPencilPos.x, newPencilPos.y)
-        if (newRadius > 2) {
-          // arc 그리기 (prevAngle → curAngle)
-          const canvas = canvasRef.current
-          if (canvas) {
-            const ctx = canvas.getContext('2d')
-            ctx.beginPath()
-            ctx.arc(pinX, pinY, newRadius, prevAngle, curAngle)
-            ctx.strokeStyle = strokeColor
-            ctx.lineWidth = strokeWidth
-            ctx.lineCap = 'round'
-            ctx.lineJoin = 'round'
-            ctx.stroke()
-          }
-          prevAngleRef.current = curAngle
-          setCompass({ pencilX: newPencilPos.x, pencilY: newPencilPos.y })
-        }
+
+      } else if (dragging.current === 'leg') {
+        // 은색 다리 드래그 → arc 그리기
+        const target = snapToDrawing(snapPointToRuler(rawP, ruler), canvasRef)
+        const curAngle = Math.atan2(target.y - pinY, target.x - pinX)
+        const newRadius = dist(pinX, pinY, target.x, target.y)
+        drawArcSegment(canvasRef.current, pinX, pinY, prevAngleRef.current, curAngle, newRadius, strokeColor, strokeWidth)
+        prevAngleRef.current = curAngle
+        setCompass({ pencilX: target.x, pencilY: target.y })
       }
     }
 
@@ -194,6 +190,18 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     window.addEventListener('touchmove', onMove, { passive: false })
     window.addEventListener('touchend', onUp)
   }, [pinX, pinY, pencilX, pencilY, radius, setCompass, ruler, canvasRef, strokeColor, strokeWidth, onDraw])
+
+  // 힌지 더블클릭 → pin/pencil 교체
+  const onHingeDblClick = useCallback((e) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setCompass({
+      pinX: pencilX,
+      pinY: pencilY,
+      pencilX: pinX,
+      pencilY: pinY,
+    })
+  }, [pinX, pinY, pencilX, pencilY, setCompass])
 
   const handleRadiusInput = (e) => {
     const val = e.target.value
@@ -225,16 +233,12 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         className="absolute inset-0 w-full h-full tool-overlay"
         style={{ touchAction: 'none', pointerEvents: 'none' }}
       >
-        {/* 왼쪽 다리 (침핀 쪽) */}
+        {/* 왼쪽 다리 (침핀 쪽) - 다리 전체가 컴퍼스 이동 핸들 */}
         <g transform={`translate(${pinX}, ${pinY}) rotate(${leftLegAngleDeg})`} style={{ pointerEvents: 'none' }}>
-          {/* 바늘 (뾰족한 끝) */}
           <polygon points="0,0 18,-1.5 18,1.5" fill="#64748b" />
-          {/* 네이비 홀더 */}
           <rect x="16" y="-5.5" width="22" height="11" rx="2.5" fill="#1e293b" />
-          {/* 은색 다리 */}
           <line x1="36" y1="0" x2={legLength} y2="0" stroke="#cbd5e1" strokeWidth="10" strokeLinecap="round" />
           <line x1="36" y1="0" x2={legLength} y2="0" stroke="#e2e8f0" strokeWidth="4" strokeLinecap="round" />
-          {/* 핸들: 침핀 다리 전체 (상단+하단 모두) → 컴퍼스 전체 이동 */}
           <g style={{ pointerEvents: 'all', cursor: 'move' }} onMouseDown={onPointerDown('pin')} onTouchStart={onPointerDown('pin')}>
             <rect x="-4" y="-18" width={legLength} height="36" fill="transparent" />
           </g>
@@ -242,70 +246,60 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
 
         {/* 오른쪽 다리 (연필 쪽) */}
         <g transform={`translate(${pencilX}, ${pencilY}) rotate(${rightLegAngleDeg})`} style={{ pointerEvents: 'none' }}>
-          {/* 은색 다리 */}
+          {/* 은색 다리: 드래그하면 arc 그려짐 */}
           <line x1="70" y1="-10" x2={legLength} y2="0" stroke="#cbd5e1" strokeWidth="10" strokeLinecap="round" />
           <line x1="70" y1="-10" x2={legLength} y2="0" stroke="#e2e8f0" strokeWidth="4" strokeLinecap="round" />
+          {/* 은색 다리 전체 클릭 영역 (leg → arc drawing) */}
+          <g style={{ pointerEvents: 'all', cursor: 'crosshair' }} onMouseDown={onPointerDown('leg')} onTouchStart={onPointerDown('leg')}>
+            <rect x="85" y="-14" width={legLength - 85} height="28" fill="transparent" />
+          </g>
 
-          {/* 연필 어셈블리 (−9도 기울어져 꽂힘, 길이 2/3로 축소) */}
+          {/* 연필 어셈블리 */}
           <g transform="rotate(-9)" style={{ pointerEvents: 'none' }}>
-            {/* 흑연+나무: 하나의 path로 이어서 흰 공백 완전 제거 */}
-            {/* 흑연 (어두운 끝) */}
+            {/* 흑연: 나무와 1px 겹쳐 gap 방지 */}
             <path d="M0,0 L11,-2.2 L11,2.2 Z" fill="#1c1917" />
-            {/* 나무 (흑연과 1px 겹침 → gap 없음) */}
+            {/* 나무 */}
             <path d="M10,-2 L10,2 L30,4.5 L30,-4.5 Z" fill="#c8a96e" />
-            {/* 나무 결 */}
             <line x1="12" y1="-1.2" x2="29" y2="-3.8" stroke="#a07040" strokeWidth="0.7" />
             <line x1="12" y1="1.2" x2="29" y2="3.8" stroke="#a07040" strokeWidth="0.7" />
-            {/* 노란 몸통 (220 → 147) */}
+            {/* 노란 몸통 */}
             <rect x="30" y="-4.5" width="147" height="9" fill="#f5c518" />
             <rect x="30" y="-4.5" width="147" height="3" fill="#f7d060" opacity="0.5" />
-            {/* 금속 페룰 (x: 250→177) */}
+            {/* 페룰 */}
             <rect x="177" y="-4.5" width="14" height="9" fill="#9ca3af" />
             <line x1="179" y1="-4.5" x2="179" y2="4.5" stroke="#6b7280" strokeWidth="1" />
             <line x1="184" y1="-4.5" x2="184" y2="4.5" stroke="#6b7280" strokeWidth="1" />
-            {/* 지우개 (x: 264→191) */}
+            {/* 지우개 */}
             <rect x="191" y="-4.5" width="12" height="9" rx="2" fill="#f9a8a8" />
-            {/* 네이비 클램프 (고정) */}
+            {/* 클램프 */}
             <rect x="58" y="-9" width="22" height="18" rx="3" fill="#1e293b" />
             <rect x="64" y="-13" width="10" height="5" rx="1.5" fill="#94a3b8" stroke="#64748b" strokeWidth="0.8" />
 
-            {/* 연필 몸통 클릭 핸들 (arc 그리기) — 클램프 제외 */}
-            <g style={{ pointerEvents: 'all', cursor: 'crosshair' }} onMouseDown={onPointerDown('pencil')} onTouchStart={onPointerDown('pencil')}>
+            {/* 연필 몸통 (반지름만, arc 없음, 점프 없음) */}
+            <g style={{ pointerEvents: 'all', cursor: 'ew-resize' }} onMouseDown={onPointerDown('pencil')} onTouchStart={onPointerDown('pencil')}>
               <rect x="0" y="-12" width="55" height="24" fill="transparent" />
               <rect x="82" y="-12" width="122" height="24" fill="transparent" />
             </g>
-
-            {/* 클램프 클릭 핸들 (반지름만 조절, arc 없음) */}
+            {/* 클램프 (반지름만, arc 없음) */}
             <g style={{ pointerEvents: 'all', cursor: 'ew-resize' }} onMouseDown={onPointerDown('clamp')} onTouchStart={onPointerDown('clamp')}>
               <rect x="55" y="-12" width="30" height="24" fill="transparent" />
             </g>
           </g>
         </g>
 
-        {/* 상단 손잡이 + 힌지 (전체 회전) */}
+        {/* 힌지 + 손잡이 */}
         <g
           style={{ pointerEvents: 'all', cursor: 'grab' }}
           onMouseDown={onPointerDown('whole')}
           onTouchStart={onPointerDown('whole')}
+          onDoubleClick={onHingeDblClick}
         >
           <circle cx={hingeX} cy={hingeY} r="32" fill="transparent" />
-          {/* 위로 뻗은 손잡이 */}
-          <line
-            x1={hingeX} y1={hingeY}
-            x2={hingeX + nx * 32} y2={hingeY + ny * 32}
-            stroke="#1e293b" strokeWidth="14" strokeLinecap="round"
-          />
-          <line
-            x1={hingeX + nx * 8} y1={hingeY + ny * 8}
-            x2={hingeX + nx * 30} y2={hingeY + ny * 30}
-            stroke="#334155" strokeWidth="6" strokeLinecap="round"
-          />
-          {/* O링 힌지 */}
+          <line x1={hingeX} y1={hingeY} x2={hingeX + nx * 32} y2={hingeY + ny * 32} stroke="#1e293b" strokeWidth="14" strokeLinecap="round" />
+          <line x1={hingeX + nx * 8} y1={hingeY + ny * 8} x2={hingeX + nx * 30} y2={hingeY + ny * 30} stroke="#334155" strokeWidth="6" strokeLinecap="round" />
           <circle cx={hingeX} cy={hingeY} r="15" fill="#1e293b" />
           <circle cx={hingeX} cy={hingeY} r="15" fill="none" stroke="#475569" strokeWidth="2" />
-          {/* 타공 구멍 */}
           <rect x={hingeX - 9} y={hingeY - 5.5} width="18" height="11" rx="3" fill="#64748b" />
-          {/* 중심 심 */}
           <circle cx={hingeX} cy={hingeY} r="3" fill="#94a3b8" />
         </g>
 
@@ -313,7 +307,6 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         <circle cx={pinX} cy={pinY} r="3" fill="#dc2626" style={{ pointerEvents: 'none' }} />
       </svg>
 
-      {/* 컴퍼스 컨트롤 패널 */}
       <div
         className="absolute bottom-4 right-4 bg-white rounded-xl shadow-lg border border-gray-200 p-3 flex flex-col gap-2 min-w-[160px]"
         style={{ zIndex: 20 }}
@@ -321,24 +314,21 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         <p className="text-xs font-bold text-gray-600 mb-1">🧭 컴퍼스</p>
         <label className="text-xs text-gray-500">반경 (px)</label>
         <input
-          type="number"
-          min="1"
+          type="number" min="1"
           value={radiusInput !== '' ? radiusInput : Math.round(radius)}
           onChange={handleRadiusInput}
           onFocus={() => setCompass({ radiusInput: String(Math.round(radius)) })}
           className="border border-gray-300 rounded px-2 py-1 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
-        <button
-          onClick={drawFullCircle}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-1.5 rounded-lg font-semibold transition-colors"
-        >
+        <button onClick={drawFullCircle} className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-1.5 rounded-lg font-semibold transition-colors">
           원 그리기 (전체)
         </button>
         <p className="text-[11px] text-gray-400 leading-tight mt-1">
-          📌 바늘: 전체 이동<br />
-          ✏️ 연필: 드래그로 arc 그리기<br />
-          🔄 힌지: pin 고정, 회전<br />
-          (도형 위에서 찰칵 스냅됨)
+          📌 침핀다리 전체: 이동<br />
+          ↔️ 연필/클램프: 반지름 조절<br />
+          🔄 힌지: 회전 | 더블클릭: pin↔연필 교체<br />
+          ✏️ 은색다리: 드래그로 arc<br />
+          (도형 위 snap 지원)
         </p>
       </div>
     </>

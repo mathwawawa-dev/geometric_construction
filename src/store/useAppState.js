@@ -8,8 +8,8 @@ const initialState = {
   strokeWidth: 2,
   compass: {
     visible: false,
-    pinX: 400, pinY: 300,
-    pencilX: 550, pencilY: 300,
+    pinX: 400, pinY: 380,
+    pencilX: 550, pencilY: 380,
     radiusInput: '',
   },
   ruler: {
