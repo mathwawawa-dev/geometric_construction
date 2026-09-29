@@ -255,16 +255,14 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     onInteractionEnd?.()
   }, [canvasRef, pinX, pinY, radius, strokeColor, strokeWidth, onDraw, onInteractionEnd])
 
-  // 클램프-연필 어셈블리 좌표 계산 (세계 좌표계 기준)
-  // 연필은 항상 수직(↓), 클램프는 항상 수평(→↔), 두 각도는 항상 90°
-  // 클램프가 은색 다리와 만나는 점: 다리 선분과 y=pencilY-clampH 수평선의 교점
-  const clampH = 22  // 연필 끝에서 클램프까지의 높이 (픽셀)
-  const clampY = pencilY - clampH
+  // 클램프 어셈블리: 다리 위 고정 거리(tFixed)에 클램프 결합점이 박혀 있음
+  // 다리가 회전해도 결합점은 다리와 함께 움직이되, 클램프 팔은 항상 수평으로 연필에 연결
+  const tFixed = 32  // 연필 끝에서 다리를 따라 tFixed px 위의 고정 결합점
   const rRad = rightLegAngleDeg * (Math.PI / 180)
-  const sinR = Math.sin(rRad)
-  // 다리 방향과 수평선의 교점: t = -clampH / sinR (단, sinR≈0이면 fallback)
-  const tLeg = Math.abs(sinR) > 0.05 ? (-clampH / sinR) : 30
-  const attachX = pencilX + tLeg * Math.cos(rRad)
+  const attachX = pencilX + tFixed * Math.cos(rRad)
+  const attachY = pencilY + tFixed * Math.sin(rRad)
+  // 클램프가 연필을 잡는 높이 = attachY (다리 각도에 따라 변하지만, 클램프 팔은 수평 유지)
+  const clampOnPencilY = attachY
 
   return (
     <>
@@ -300,13 +298,13 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
             onMouseDown={onPointerDown('leg')} onTouchStart={onPointerDown('leg')} />
         </g>
 
-        {/* 클램프 팔 (세계 좌표 수평 고정: attachX, clampY ↔ pencilX, clampY) */}
-        <line x1={attachX} y1={clampY} x2={pencilX} y2={clampY}
+        {/* 클램프 팔 (다리 고정점 attachX,attachY ↔ 연필 pencilX,clampOnPencilY, 수평 유지) */}
+        <line x1={attachX} y1={attachY} x2={pencilX} y2={clampOnPencilY}
           stroke="#94a3b8" strokeWidth="8" strokeLinecap="round" style={{ pointerEvents: 'none' }} />
-        <line x1={attachX} y1={clampY} x2={pencilX} y2={clampY}
+        <line x1={attachX} y1={attachY} x2={pencilX} y2={clampOnPencilY}
           stroke="#cbd5e1" strokeWidth="3" strokeLinecap="round" style={{ pointerEvents: 'none' }} />
-        {/* 조인트 볼 */}
-        <circle cx={attachX} cy={clampY} r="5.5" fill="#64748b" stroke="#475569" strokeWidth="1" style={{ pointerEvents: 'none' }} />
+        {/* 조인트 볼 (다리 위 고정점, 다리와 함께 이동) */}
+        <circle cx={attachX} cy={attachY} r="5.5" fill="#64748b" stroke="#475569" strokeWidth="1" style={{ pointerEvents: 'none' }} />
 
         {/* 연필 어셈블리 (세계 좌표 수직 고정, 연필 끝이 pencilX, pencilY) */}
         <g transform={`translate(${pencilX}, ${pencilY})`} style={{ pointerEvents: 'none' }}>
@@ -326,8 +324,8 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           {/* 지우개 */}
           <rect x="-4" y="-66" width="8" height="6" rx="2" fill="#f9a8a8" />
 
-          {/* 클램프 바디 (연필 수직축 기준 수평으로 뻗음) */}
-          <rect x="-7" y={-clampH - 6} width="14" height="12" rx="2.5" fill="#1e293b" />
+          {/* 클램프 바디 (attachY 기준, 다리 각도에 따라 연필 위 위치가 달라짐) */}
+          <rect x="-7" y={clampOnPencilY - pencilY - 6} width="14" height="12" rx="2.5" fill="#1e293b" />
 
           {/* 연필 반지름 조절 드래그 영역 */}
           <g style={{ pointerEvents: 'all', cursor: 'ew-resize' }} onMouseDown={onPointerDown('pencil')} onTouchStart={onPointerDown('pencil')}>
