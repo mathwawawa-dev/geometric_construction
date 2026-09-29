@@ -2,58 +2,65 @@ import { useRef, useCallback } from 'react'
 
 const MAX_HISTORY = 15
 
-export function useHistory(canvasRef) {
-  const historyRef = useRef([])   // ImageData 스냅샷 배열
-  const indexRef = useRef(-1)     // 현재 위치
+export function useHistory(canvasRef, getStateRef, restoreState) {
+  const historyRef = useRef([])
+  const indexRef = useRef(-1)
 
-  /** 현재 캔버스 상태를 스택에 저장 */
   const saveSnapshot = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
-    const snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    
+    const snap = {
+      image: imgData,
+      tools: getStateRef ? JSON.parse(JSON.stringify(getStateRef().tools)) : null
+    }
 
-    // 현재 위치 이후 데이터 제거 (redo 분기 삭제)
     historyRef.current = historyRef.current.slice(0, indexRef.current + 1)
-    historyRef.current.push(snapshot)
+    historyRef.current.push(snap)
 
-    // 최대 개수 초과 시 앞에서 제거
     if (historyRef.current.length > MAX_HISTORY) {
       historyRef.current.shift()
     }
     indexRef.current = historyRef.current.length - 1
-  }, [canvasRef])
+  }, [canvasRef, getStateRef])
 
   const undo = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    if (indexRef.current <= 0) {
-      // 스택 맨 처음 → 완전히 지우기
-      const ctx = canvas.getContext('2d')
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      indexRef.current = -1
-      return
+    if (indexRef.current > 0) {
+      indexRef.current -= 1
+      const snap = historyRef.current[indexRef.current]
+      const canvas = canvasRef.current
+      if (canvas) {
+        canvas.getContext('2d').putImageData(snap.image, 0, 0)
+      }
+      if (restoreState && snap.tools) {
+        restoreState(snap.tools)
+      }
     }
-    indexRef.current -= 1
-    const ctx = canvas.getContext('2d')
-    ctx.putImageData(historyRef.current[indexRef.current], 0, 0)
-  }, [canvasRef])
+  }, [canvasRef, restoreState])
 
   const redo = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    if (indexRef.current >= historyRef.current.length - 1) return
-    indexRef.current += 1
-    const ctx = canvas.getContext('2d')
-    ctx.putImageData(historyRef.current[indexRef.current], 0, 0)
-  }, [canvasRef])
+    if (indexRef.current < historyRef.current.length - 1) {
+      indexRef.current += 1
+      const snap = historyRef.current[indexRef.current]
+      const canvas = canvasRef.current
+      if (canvas) {
+        canvas.getContext('2d').putImageData(snap.image, 0, 0)
+      }
+      if (restoreState && snap.tools) {
+        restoreState(snap.tools)
+      }
+    }
+  }, [canvasRef, restoreState])
 
   const clear = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
     saveSnapshot()
-    const ctx = canvas.getContext('2d')
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    const canvas = canvasRef.current
+    if (canvas) {
+      const ctx = canvas.getContext('2d')
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
     saveSnapshot()
   }, [canvasRef, saveSnapshot])
 

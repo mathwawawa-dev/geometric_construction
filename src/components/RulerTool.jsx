@@ -3,7 +3,7 @@ import { useRef, useCallback } from 'react'
 const HANDLE_R = 6
 const RULER_THICKNESS = 120 // 자의 두께 (2배 증가)
 
-export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, strokeWidth, onDraw }) {
+export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, strokeWidth, onDraw, onInteractionEnd }) {
   const svgRef = useRef(null)
   const dragging = useRef(null)
   const dragOffset = useRef({ dx: 0, dy: 0 })
@@ -66,6 +66,7 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
       }
     }
     const onUp = () => {
+      if (dragging.current) onInteractionEnd?.()
       dragging.current = null
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)

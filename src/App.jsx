@@ -21,8 +21,29 @@ export default function App() {
     setCompass, setRuler, setProtractor,
     setBackground,
   } = useAppState()
-  const { saveSnapshot, undo, redo, clear } = useHistory(canvasRef)
+  const stateRef = useRef(state)
+  useEffect(() => { stateRef.current = state }, [state])
 
+  const getStateRef = useCallback(() => ({
+    tools: {
+      compass: stateRef.current.compass,
+      ruler: stateRef.current.ruler,
+      protractor: stateRef.current.protractor
+    }
+  }), [])
+
+  const restoreState = useCallback((toolsSnap) => {
+    setCompass(toolsSnap.compass)
+    setRuler(toolsSnap.ruler)
+    setProtractor(toolsSnap.protractor)
+  }, [setCompass, setRuler, setProtractor])
+
+  const { saveSnapshot, undo, redo, clear } = useHistory(canvasRef, getStateRef, restoreState)
+
+  useEffect(() => {
+    const timer = setTimeout(() => saveSnapshot(), 200)
+    return () => clearTimeout(timer)
+  }, [saveSnapshot])
   // 줌/팬 상태
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
@@ -121,8 +142,9 @@ export default function App() {
     isPanning.current = false
   }, [])
 
-  const handleDrawStart = useCallback(() => saveSnapshot(), [saveSnapshot])
-  const handleToolDraw  = useCallback(() => saveSnapshot(), [saveSnapshot])
+  const handleInteractionEnd = useCallback(() => {
+    setTimeout(() => saveSnapshot(), 0)
+  }, [saveSnapshot])
 
   const handleSave = useCallback(() => {
     const canvas = canvasRef.current
@@ -210,7 +232,7 @@ export default function App() {
               activeTool={state.drawMode}
               strokeColor={state.strokeColor}
               strokeWidth={state.strokeWidth}
-              onDrawStart={handleDrawStart}
+              onDrawEnd={handleInteractionEnd}
               ruler={state.ruler}
             />
             {state.compass.visible && (
@@ -220,7 +242,8 @@ export default function App() {
                 canvasRef={canvasRef}
                 strokeColor={state.strokeColor}
                 strokeWidth={state.strokeWidth}
-                onDraw={handleToolDraw}
+                onDraw={handleInteractionEnd}
+                onInteractionEnd={handleInteractionEnd}
                 ruler={state.ruler}
               />
             )}
@@ -231,13 +254,15 @@ export default function App() {
                 canvasRef={canvasRef}
                 strokeColor={state.strokeColor}
                 strokeWidth={state.strokeWidth}
-                onDraw={handleToolDraw}
+                onDraw={handleInteractionEnd}
+                onInteractionEnd={handleInteractionEnd}
               />
             )}
             {state.protractor.visible && (
               <ProtractorTool
                 protractor={state.protractor}
                 setProtractor={setProtractor}
+                onInteractionEnd={handleInteractionEnd}
               />
             )}
           </div>

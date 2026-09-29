@@ -2,7 +2,7 @@ import { useRef, useCallback } from 'react'
 
 const HANDLE_R = 10
 
-export default function ProtractorTool({ protractor, setProtractor }) {
+export default function ProtractorTool({ protractor, setProtractor, onInteractionEnd }) {
   const svgRef = useRef(null)
   const dragging = useRef(null) // 'center' | 'rotate' | 'resize'
   const dragOffset = useRef({ dx: 0, dy: 0 })
@@ -50,6 +50,7 @@ export default function ProtractorTool({ protractor, setProtractor }) {
       }
     }
     const onUp = () => {
+      if (dragging.current) onInteractionEnd?.()
       dragging.current = null
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)

@@ -61,7 +61,7 @@ function calcRulerSnap(pos, ruler, currentLock) {
   return { pos, lock: null }
 }
 
-export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawStart, ruler }) {
+export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, ruler }) {
   const isDrawing = useRef(false)
   const snapLock = useRef(null)
   const lastPos = useRef({ x: 0, y: 0 })
@@ -140,11 +140,13 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     snapLock.current = lock
     lastPos.current = pos
     updateFakeCursor(pos, lock !== null)
-    onDrawStart?.()
 
     // 윈도우 레벨 이벤트 연결로 드래그 끊김 방지
     const onWindowMove = (me) => handleMove(me)
     const onWindowUp = () => {
+      if (isDrawing.current) {
+        onDrawEnd?.()
+      }
       isDrawing.current = false
       snapLock.current = null
       document.body.classList.remove('is-drawing')
