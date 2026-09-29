@@ -32,7 +32,34 @@ function snapPointToRuler(p, ruler) {
   return p
 }
 
-function snapToDrawing(p, canvasRef, snapRadius = 18) {
+function snapToDrawing(p, canvasRef, shapes = [], snapRadius = 22) {
+  // 1. 단일 클릭으로 생성한 작도 점의 '중심' 최우선 자석 스냅
+  if (shapes && shapes.length > 0) {
+    let bestDist = Infinity
+    let bestPoint = null
+    for (const s of shapes) {
+      if (s.points && s.points.length === 1) {
+        const pt = s.points[0]
+        const d = Math.hypot(p.x - pt.x, p.y - pt.y)
+        const pointVisualR = Math.max((s.width || 3) * 0.8, 4)
+        if (d < pointVisualR + snapRadius && d < bestDist) {
+          bestDist = d
+          bestPoint = { x: pt.x, y: pt.y }
+        }
+      } else if (s.type === 'circle') {
+        const d = Math.hypot(p.x - s.cx, p.y - s.cy)
+        if (d < 16 && d < bestDist) {
+          bestDist = d
+          bestPoint = { x: s.cx, y: s.cy }
+        }
+      }
+    }
+    if (bestPoint) {
+      return bestPoint
+    }
+  }
+
+  // 2. 픽셀 기반 스캔 스냅 (선분, 호 등)
   const canvas = canvasRef?.current
   if (!canvas) return p
   const ctx = canvas.getContext('2d')
@@ -77,7 +104,7 @@ function drawArcSegment(canvas, pinX, pinY, fromAngle, toAngle, r, strokeColor, 
   ctx.stroke()
 }
 
-export default function CompassTool({ compass, setCompass, canvasRef, strokeColor, strokeWidth, onDraw, ruler, onInteractionEnd, onAddShape }) {
+export default function CompassTool({ compass, setCompass, canvasRef, strokeColor, strokeWidth, onDraw, ruler, onInteractionEnd, onAddShape, shapes }) {
   const svgRef = useRef(null)
   const dragging = useRef(null)
   // dragOffset: 모든 드래그 파트에서 점프 방지용 공용 저장소
@@ -171,7 +198,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       if (dragging.current === 'pin_top') {
         const targetPinX = rawP.x - dragOffset.current.dx
         const targetPinY = rawP.y - dragOffset.current.dy
-        const snapped = snapToDrawing(snapPointToRuler({ x: targetPinX, y: targetPinY }, ruler), canvasRef)
+        const snapped = snapToDrawing(snapPointToRuler({ x: targetPinX, y: targetPinY }, ruler), canvasRef, shapes)
         const pdx = pencilX - pinX, pdy = pencilY - pinY
         setCompass({ pinX: snapped.x, pinY: snapped.y, pencilX: snapped.x + pdx, pencilY: snapped.y + pdy })
       } else if (dragging.current === 'pin_bottom') {
@@ -183,7 +210,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           x: pencilX + Math.cos(newPinAngle) * newRadius,
           y: pencilY + Math.sin(newPinAngle) * newRadius,
         }
-        const snappedPin = snapToDrawing(snapPointToRuler(candidatePin, ruler), canvasRef)
+        const snappedPin = snapToDrawing(snapPointToRuler(candidatePin, ruler), canvasRef, shapes)
         setCompass({
           pinX: snappedPin.x,
           pinY: snappedPin.y,
@@ -197,7 +224,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         })
 
       } else if (dragging.current === 'pencil' || dragging.current === 'clamp') {
-        // 연필 조작 시 마우스 포인터와 클릭 위치 1:1 완벽 동기화 + 스냅 지원
+        // 연필 조작 시 마우스 포인터와 클릭 위치 1:1 완벽 동기화 + 점 중심 스냅 지원
         const curMouseAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
         const curMouseDist = Math.hypot(rawP.x - pinX, rawP.y - pinY)
         const newPencilAngle = curMouseAngle + dragOffset.current.angleOffset
@@ -206,7 +233,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           x: pinX + Math.cos(newPencilAngle) * newRadius,
           y: pinY + Math.sin(newPencilAngle) * newRadius,
         }
-        const snappedPencil = snapToDrawing(snapPointToRuler(candidatePencil, ruler), canvasRef)
+        const snappedPencil = snapToDrawing(snapPointToRuler(candidatePencil, ruler), canvasRef, shapes)
         setCompass({
           pencilX: snappedPencil.x,
           pencilY: snappedPencil.y,
@@ -257,7 +284,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     window.addEventListener('mouseup', onUp)
     window.addEventListener('touchmove', onMove, { passive: false })
     window.addEventListener('touchend', onUp)
-  }, [pinX, pinY, pencilX, pencilY, radius, setCompass, ruler, canvasRef, strokeColor, strokeWidth, onDraw, onInteractionEnd, onAddShape])
+  }, [pinX, pinY, pencilX, pencilY, radius, setCompass, ruler, canvasRef, strokeColor, strokeWidth, onDraw, onInteractionEnd, onAddShape, shapes])
 
   // 힌지 더블클릭 → pin/pencil 역할 교체 (힌지 위치는 그대로 유지!)
   const onHingeDblClick = useCallback((e) => {

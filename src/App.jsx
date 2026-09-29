@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.40_20260930_062300_화면클릭점생성지원'
+const VERSION = 'v0.1.41_20260930_062500_단일점중심스냅적용'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -308,6 +308,7 @@ export default function App() {
               ruler={state.ruler}
               highlightMode={highlightMode}
               stampMode={stampMode}
+              shapes={state.shapes}
             />
             <SelectionLayer
               active={state.drawMode === 'select'}
@@ -329,6 +330,7 @@ export default function App() {
                 onInteractionEnd={handleInteractionEnd}
                 onAddShape={handleAddShape}
                 ruler={state.ruler}
+                shapes={state.shapes}
               />
             )}
             {state.ruler.visible && (

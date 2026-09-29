@@ -54,7 +54,32 @@ function calcRulerSnap(pos, ruler, currentLock) {
   return { pos, lock: null }
 }
 
-export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, highlightMode, stampMode }) {
+// 점의 중심(Center) 자석 스냅 함수
+function snapToPointCenters(pos, shapes, snapRadius = 22) {
+  if (!shapes || shapes.length === 0) return { pos, snappedPoint: false }
+  let bestDist = Infinity
+  let bestPoint = null
+  for (const s of shapes) {
+    if (s.points && s.points.length === 1) {
+      const pt = s.points[0]
+      const d = Math.hypot(pos.x - pt.x, pos.y - pt.y)
+      const pointVisualR = Math.max((s.width || 3) * 0.8, 4)
+      if (d < pointVisualR + snapRadius && d < bestDist) {
+        bestDist = d
+        bestPoint = { x: pt.x, y: pt.y }
+      }
+    } else if (s.type === 'circle') {
+      const d = Math.hypot(pos.x - s.cx, pos.y - s.cy)
+      if (d < 16 && d < bestDist) {
+        bestDist = d
+        bestPoint = { x: s.cx, y: s.cy }
+      }
+    }
+  }
+  return bestPoint ? { pos: bestPoint, snappedPoint: true } : { pos, snappedPoint: false }
+}
+
+export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, highlightMode, stampMode, shapes }) {
   const draftCanvasRef = useRef(null)
   const isDrawing = useRef(false)
   const snapLock = useRef(null)
@@ -140,16 +165,30 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
     if (isDrawing.current && activeTool === 'pen' && !stampMode) {
       e.preventDefault()
-      const { pos, lock } = calcRulerSnap(rawPos, ruler, snapLock.current)
+      const { pos: rulerSnapped, lock } = calcRulerSnap(rawPos, ruler, snapLock.current)
+      let finalPos = rulerSnapped
+      let isPointSnapped = false
+      if (!lock) {
+        const pointRes = snapToPointCenters(rulerSnapped, shapes)
+        finalPos = pointRes.pos
+        isPointSnapped = pointRes.snappedPoint
+      }
 
-      currentStrokePoints.current.push({ x: pos.x, y: pos.y })
+      currentStrokePoints.current.push({ x: finalPos.x, y: finalPos.y })
       renderCurrentStroke()
-      updateFakeCursor(pos, lock !== null)
+      updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     } else if (activeTool === 'pen') {
-      const { pos, lock } = calcRulerSnap(rawPos, ruler, null)
-      updateFakeCursor(pos, lock !== null)
+      const { pos: rulerSnapped, lock } = calcRulerSnap(rawPos, ruler, null)
+      let finalPos = rulerSnapped
+      let isPointSnapped = false
+      if (!lock) {
+        const pointRes = snapToPointCenters(rulerSnapped, shapes)
+        finalPos = pointRes.pos
+        isPointSnapped = pointRes.snappedPoint
+      }
+      updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     }
-  }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef])
+  }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, shapes])
 
   const startDraw = useCallback((e) => {
     if (activeTool !== 'pen') return
@@ -190,11 +229,19 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
     document.body.classList.add('is-drawing')
 
-    const { pos, lock } = calcRulerSnap(rawPos, ruler, null)
+    const { pos: rulerSnapped, lock } = calcRulerSnap(rawPos, ruler, null)
+    let finalPos = rulerSnapped
+    let isPointSnapped = false
+    if (!lock) {
+      const pointRes = snapToPointCenters(rulerSnapped, shapes)
+      finalPos = pointRes.pos
+      isPointSnapped = pointRes.snappedPoint
+    }
+
     snapLock.current = lock
-    currentStrokePoints.current = [{ x: pos.x, y: pos.y }]
+    currentStrokePoints.current = [{ x: finalPos.x, y: finalPos.y }]
     renderCurrentStroke()
-    updateFakeCursor(pos, lock !== null)
+    updateFakeCursor(finalPos, lock !== null || isPointSnapped)
 
     const onWindowMove = (me) => handleMove(me)
     const onWindowUp = () => {
@@ -234,7 +281,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     window.addEventListener('mouseup', onWindowUp)
     window.addEventListener('touchmove', onWindowMove, { passive: false })
     window.addEventListener('touchend', onWindowUp)
-  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode, renderCurrentStroke])
+  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode, renderCurrentStroke, shapes])
 
   useEffect(() => {
     const canvas = canvasRef.current
