@@ -115,8 +115,11 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       // 바늘 → 전체 이동, 반지름 유지 (dragOffset으로 점프 방지)
       dragOffset.current = { dx: pos.x - pinX, dy: pos.y - pinY }
     } else if (part === 'whole') {
-      // 힌지 → pin 고정, 컴퍼스 회전
-      prevAngleRef.current = Math.atan2(pos.y - pinY, pos.x - pinX)
+      // 힌지 → pin 고정, 회전 (절대 각도 기준으로 진동 방지)
+      dragOffset.current = {
+        initMouseAngle: Math.atan2(pos.y - pinY, pos.x - pinX),
+        initPencilAngle: Math.atan2(pencilY - pinY, pencilX - pinX),
+      }
     } else if (part === 'pencil') {
       // 연필 → 반지름 변경 + 실시간 arc 드로잉
       prevAngleRef.current = Math.atan2(pencilY - pinY, pencilX - pinX)
@@ -139,15 +142,12 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         const pdy = pencilY - pinY
         setCompass({ pinX: snappedC.x, pinY: snappedC.y, pencilX: snappedC.x + pdx, pencilY: snappedC.y + pdy })
       } else if (dragging.current === 'whole') {
-        // 힌지 드래그 → pin 고정, 반지름 유지 + 회전
-        const curAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
-        const dAngle = curAngle - prevAngleRef.current
-        prevAngleRef.current = curAngle
-        const oldAngle = Math.atan2(pencilY - pinY, pencilX - pinX)
-        const newAngle = oldAngle + dAngle
+        // 힌지 드래그: pin 고정, 반지름 유지, pencil 절대 각도로 회전 (진동 없음)
+        const curMouseAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
+        const newPencilAngle = dragOffset.current.initPencilAngle + (curMouseAngle - dragOffset.current.initMouseAngle)
         setCompass({
-          pencilX: pinX + Math.cos(newAngle) * radius,
-          pencilY: pinY + Math.sin(newAngle) * radius,
+          pencilX: pinX + Math.cos(newPencilAngle) * radius,
+          pencilY: pinY + Math.sin(newPencilAngle) * radius,
         })
       } else if (dragging.current === 'clamp') {
         // 클램프 드래그 → arc 없이 반지름만 조절
@@ -234,9 +234,9 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           {/* 은색 다리 */}
           <line x1="36" y1="0" x2={legLength} y2="0" stroke="#cbd5e1" strokeWidth="10" strokeLinecap="round" />
           <line x1="36" y1="0" x2={legLength} y2="0" stroke="#e2e8f0" strokeWidth="4" strokeLinecap="round" />
-          {/* 핸들 (투명 클릭 영역: pin 전체 이동) */}
+          {/* 핸들: 침핀 다리 전체 (상단+하단 모두) → 컴퍼스 전체 이동 */}
           <g style={{ pointerEvents: 'all', cursor: 'move' }} onMouseDown={onPointerDown('pin')} onTouchStart={onPointerDown('pin')}>
-            <rect x="-4" y="-18" width={legLength * 0.35} height="36" fill="transparent" />
+            <rect x="-4" y="-18" width={legLength} height="36" fill="transparent" />
           </g>
         </g>
 
@@ -248,13 +248,14 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
 
           {/* 연필 어셈블리 (−9도 기울어져 꽂힘, 길이 2/3로 축소) */}
           <g transform="rotate(-9)" style={{ pointerEvents: 'none' }}>
-            {/* 흑연 끝 */}
-            <polygon points="0,0 10,-2 10,2" fill="#1c1917" />
-            {/* 나무 부분: 흑연 끝에 바로 맞닿게 */}
-            <polygon points="10,-2 10,2 30,-4.5 30,4.5" fill="#c8a96e" />
-            {/* 나무 결: 삼각형 안쪽에만 */}
-            <line x1="11" y1="-1.5" x2="29" y2="-4" stroke="#b8936e" strokeWidth="0.7" />
-            <line x1="11" y1="1.5" x2="29" y2="4" stroke="#b8936e" strokeWidth="0.7" />
+            {/* 흑연+나무: 하나의 path로 이어서 흰 공백 완전 제거 */}
+            {/* 흑연 (어두운 끝) */}
+            <path d="M0,0 L11,-2.2 L11,2.2 Z" fill="#1c1917" />
+            {/* 나무 (흑연과 1px 겹침 → gap 없음) */}
+            <path d="M10,-2 L10,2 L30,4.5 L30,-4.5 Z" fill="#c8a96e" />
+            {/* 나무 결 */}
+            <line x1="12" y1="-1.2" x2="29" y2="-3.8" stroke="#a07040" strokeWidth="0.7" />
+            <line x1="12" y1="1.2" x2="29" y2="3.8" stroke="#a07040" strokeWidth="0.7" />
             {/* 노란 몸통 (220 → 147) */}
             <rect x="30" y="-4.5" width="147" height="9" fill="#f5c518" />
             <rect x="30" y="-4.5" width="147" height="3" fill="#f7d060" opacity="0.5" />
