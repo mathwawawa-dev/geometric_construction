@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.37_20260930_061500_색상프리셋_형광펜_스탬프_각도기눈금snap_컴퍼스snap_우클릭수정'
+const VERSION = 'v0.1.38_20260930_061800_요청기능검증완료'
 
 export default function App() {
   const canvasRef = useRef(null)
