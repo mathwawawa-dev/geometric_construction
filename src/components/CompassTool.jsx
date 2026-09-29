@@ -57,12 +57,19 @@ function snapToDrawing(p, canvasRef, snapRadius = 18) {
   return bestDist < snapRadius ? { x: bestX, y: bestY } : p
 }
 
-// arc 그리기 헬퍼
+// arc 그리기 헬퍼: 최단 각도 방향(ccw 여부) 판별 및 원의 일부만 잉크처럼 부드럽게 증분 그리기
 function drawArcSegment(canvas, pinX, pinY, fromAngle, toAngle, r, strokeColor, strokeWidth) {
   if (!canvas || r < 1) return
+  let diff = toAngle - fromAngle
+  while (diff < -Math.PI) diff += 2 * Math.PI
+  while (diff > Math.PI) diff -= 2 * Math.PI
+  // 0.0002rad 이하이거나 90도 이상 점프(이상치)인 경우 생략
+  if (Math.abs(diff) < 0.0002 || Math.abs(diff) > Math.PI / 2) return
+
   const ctx = canvas.getContext('2d')
   ctx.beginPath()
-  ctx.arc(pinX, pinY, r, fromAngle, toAngle)
+  const ccw = diff < 0
+  ctx.arc(pinX, pinY, r, fromAngle, toAngle, ccw)
   ctx.strokeStyle = strokeColor
   ctx.lineWidth = strokeWidth
   ctx.lineCap = 'round'
@@ -118,12 +125,14 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       // 전체 이동: 클릭 지점과 핀 사이 오프셋 보존
       dragOffset.current = { dx: pos.x - pinX, dy: pos.y - pinY }
     } else if (part === 'pin_bottom') {
-      // 반지름 조절: 연필 고정, 핀 이동
-      const initPinAngle = Math.atan2(pinY - pencilY, pinX - pencilX)
-      const initClickAngle = Math.atan2(pos.y - pencilY, pos.x - pencilX)
+      // 침핀 바늘 조절: 연필 고정, 침핀 이동 (클릭 위치 오프셋 완벽 보존)
+      const curPinAngle = Math.atan2(pinY - pencilY, pinX - pencilX)
+      const curDistFromPencil = Math.hypot(pinX - pencilX, pinY - pencilY)
+      const clickAngle = Math.atan2(pos.y - pencilY, pos.x - pencilX)
+      const clickDist = Math.hypot(pos.x - pencilX, pos.y - pencilY)
       dragOffset.current = {
-        initPinAngle,
-        angleOffset: initPinAngle - initClickAngle,
+        angleOffset: curPinAngle - clickAngle,
+        distOffset: curDistFromPencil - clickDist,
       }
     } else if (part === 'whole') {
       // 힌지: 절대 각도 기준 회전 (진동 없음)
@@ -132,19 +141,26 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         initPencilAngle: Math.atan2(pencilY - pinY, pencilX - pinX),
       }
     } else if (part === 'pencil' || part === 'clamp') {
-      // 연필/클램프: 반지름만 조절, arc 없음 → 클릭 지점과 연필끝 각도 오프셋 보존
-      const initPencilAngle = Math.atan2(pencilY - pinY, pencilX - pinX)
-      const initClickAngle = Math.atan2(pos.y - pinY, pos.x - pinX)
+      // 연필/클램프: 반지름 및 각도 조절 (클릭한 위치가 마우스 포인터에 100% 밀착하여 튕김/멀어짐 원천 차단)
+      const curPencilAngle = Math.atan2(pencilY - pinY, pencilX - pinX)
+      const curDistFromPin = Math.hypot(pencilX - pinX, pencilY - pinY)
+      const clickAngle = Math.atan2(pos.y - pinY, pos.x - pinX)
+      const clickDist = Math.hypot(pos.x - pinX, pos.y - pinY)
       dragOffset.current = {
-        initPencilAngle,
-        angleOffset: initPencilAngle - initClickAngle,
+        angleOffset: curPencilAngle - clickAngle,
+        distOffset: curDistFromPin - clickDist,
       }
     } else if (part === 'leg') {
-      // 은색 다리 드래그: 클릭 지점 각도 오프셋 보존 (포인터 튐 방지)
-      const curAngle = Math.atan2(pencilY - pinY, pencilX - pinX)
+      // 은색 다리 드래그: 클릭한 다리 위치와 마우스 포인터의 각도 및 거리 오프셋 보존 (포인터 멀어짐 차단)
+      const curPencilAngle = Math.atan2(pencilY - pinY, pencilX - pinX)
+      const curDistFromPin = Math.hypot(pencilX - pinX, pencilY - pinY)
       const clickAngle = Math.atan2(pos.y - pinY, pos.x - pinX)
-      dragOffset.current = { angleOffset: curAngle - clickAngle }
-      prevAngleRef.current = curAngle
+      const clickDist = Math.hypot(pos.x - pinX, pos.y - pinY)
+      dragOffset.current = {
+        angleOffset: curPencilAngle - clickAngle,
+        distOffset: curDistFromPin - clickDist,
+      }
+      prevAngleRef.current = curPencilAngle
       onDraw?.()
     }
 
@@ -160,14 +176,13 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         setCompass({ pinX: snapped.x, pinY: snapped.y, pencilX: snapped.x + pdx, pencilY: snapped.y + pdy })
       } else if (dragging.current === 'pin_bottom') {
         const curMouseAngle = Math.atan2(rawP.y - pencilY, rawP.x - pencilX)
+        const curMouseDist = Math.hypot(rawP.x - pencilX, rawP.y - pencilY)
         const newPinAngle = curMouseAngle + dragOffset.current.angleOffset
-        const newRadius = Math.hypot(rawP.x - pencilX, rawP.y - pencilY)
-        if (newRadius > 2) {
-          setCompass({
-            pinX: pencilX + Math.cos(newPinAngle) * newRadius,
-            pinY: pencilY + Math.sin(newPinAngle) * newRadius,
-          })
-        }
+        const newRadius = Math.max(10, curMouseDist + dragOffset.current.distOffset)
+        setCompass({
+          pinX: pencilX + Math.cos(newPinAngle) * newRadius,
+          pinY: pencilY + Math.sin(newPinAngle) * newRadius,
+        })
       } else if (dragging.current === 'whole') {
         const curMouseAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
         const newPencilAngle = dragOffset.current.initPencilAngle + (curMouseAngle - dragOffset.current.initMouseAngle)
@@ -177,29 +192,31 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         })
 
       } else if (dragging.current === 'pencil' || dragging.current === 'clamp') {
-        // 각도 오프셋 유지하며 반지름만 변경 (점프 없음, arc 없음)
+        // 연필 조작 시 마우스 포인터와 클릭 위치 1:1 완벽 동기화 (점프 없음, 멀어짐 없음)
         const curMouseAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
+        const curMouseDist = Math.hypot(rawP.x - pinX, rawP.y - pinY)
         const newPencilAngle = curMouseAngle + dragOffset.current.angleOffset
-        const newRadius = dist(pinX, pinY, rawP.x, rawP.y)
-        if (newRadius > 2) {
-          setCompass({
-            pencilX: pinX + Math.cos(newPencilAngle) * newRadius,
-            pencilY: pinY + Math.sin(newPencilAngle) * newRadius,
-          })
-        }
+        const newRadius = Math.max(10, curMouseDist + dragOffset.current.distOffset)
+        setCompass({
+          pencilX: pinX + Math.cos(newPencilAngle) * newRadius,
+          pencilY: pinY + Math.sin(newPencilAngle) * newRadius,
+        })
 
       } else if (dragging.current === 'leg') {
-        // 은색 다리 드래그 → arc 증분 그리기 (포인터 튐 없이, 천천히 호 생성)
-        const clickAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
-        const curAngle = clickAngle + dragOffset.current.angleOffset
+        // 은색 다리 조작 시 마우스 포인터가 클릭 위치에 완벽 밀착되며, 연필 끝에서 잉크가 흘러나오듯 호의 일부만 점진적으로 그림
+        const curMouseAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
+        const curMouseDist = Math.hypot(rawP.x - pinX, rawP.y - pinY)
+        const curAngle = curMouseAngle + dragOffset.current.angleOffset
+        const curRadius = Math.max(10, curMouseDist + dragOffset.current.distOffset)
+
         const prev = prevAngleRef.current
-        if (prev !== null && Math.abs(curAngle - prev) > 0.001) {
-          drawArcSegment(canvasRef.current, pinX, pinY, prev, curAngle, radius, strokeColor, strokeWidth)
+        if (prev !== null) {
+          drawArcSegment(canvasRef.current, pinX, pinY, prev, curAngle, curRadius, strokeColor, strokeWidth)
         }
         prevAngleRef.current = curAngle
         setCompass({
-          pencilX: pinX + Math.cos(curAngle) * radius,
-          pencilY: pinY + Math.sin(curAngle) * radius,
+          pencilX: pinX + Math.cos(curAngle) * curRadius,
+          pencilY: pinY + Math.sin(curAngle) * curRadius,
         })
       }
     }
