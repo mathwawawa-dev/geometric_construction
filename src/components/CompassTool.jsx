@@ -166,10 +166,12 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       dragOffset.current = {
         angleOffset: curPencilAngle - clickAngle,
         fixedRadius: radius,
+        startAngle: curPencilAngle,
+        lastAngle: curPencilAngle,
+        totalAngleTraveled: 0,
       }
       prevAngleRef.current = curPencilAngle
       legArcPoints.current = [{ x: pencilX, y: pencilY }]
-      onDraw?.()
     }
 
     const onMove = (me) => {
@@ -230,6 +232,11 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
 
         const prev = prevAngleRef.current
         if (prev !== null) {
+          let diff = curAngle - prev
+          while (diff < -Math.PI) diff += 2 * Math.PI
+          while (diff > Math.PI) diff -= 2 * Math.PI
+          dragOffset.current.totalAngleTraveled = (dragOffset.current.totalAngleTraveled || 0) + diff
+          dragOffset.current.lastAngle = curAngle
           drawArcSegment(canvasRef.current, pinX, pinY, prev, curAngle, curRadius, strokeColor, strokeWidth)
         }
         prevAngleRef.current = curAngle
@@ -242,18 +249,47 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     }
 
     const onUp = () => {
+      let shapeAdded = false
       if (dragging.current === 'leg' && legArcPoints.current.length > 1) {
-        const shape = {
-          id: 'a_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-          type: 'arc',
-          color: strokeColor,
-          width: strokeWidth,
-          points: [...legArcPoints.current],
+        const totalTraveled = Math.abs(dragOffset.current.totalAngleTraveled || 0)
+        const curRadius = dragOffset.current.fixedRadius || radius
+        // 거의 한 바퀴(350도 이상) 돌았으면 완벽한 원으로 등록
+        if (totalTraveled >= Math.PI * 1.94) {
+          const circleShape = {
+            id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+            type: 'circle',
+            cx: pinX,
+            cy: pinY,
+            r: curRadius,
+            color: strokeColor,
+            width: strokeWidth,
+          }
+          onAddShape?.(circleShape)
+          shapeAdded = true
+        } else {
+          // 그 외에는 수학적 완벽한 호(arc)로 등록 (다각형 변형 방지)
+          const arcShape = {
+            id: 'a_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+            type: 'arc',
+            cx: pinX,
+            cy: pinY,
+            r: curRadius,
+            fromAngle: dragOffset.current.startAngle,
+            toAngle: dragOffset.current.lastAngle,
+            ccw: (dragOffset.current.totalAngleTraveled || 0) < 0,
+            points: [...legArcPoints.current],
+            color: strokeColor,
+            width: strokeWidth,
+          }
+          onAddShape?.(arcShape)
+          shapeAdded = true
         }
-        onAddShape?.(shape)
       }
       legArcPoints.current = []
-      if (dragging.current) onInteractionEnd?.()
+      // shape가 등록되지 않은 상호작용(예: 단순 툴 이동)인 경우에만 onInteractionEnd로 스냅샷 저장
+      if (dragging.current && !shapeAdded) {
+        onInteractionEnd?.()
+      }
       dragging.current = null
       prevAngleRef.current = null
       window.removeEventListener('mousemove', onMove)

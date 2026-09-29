@@ -185,19 +185,15 @@ export function isShapeInRect(shape, rect) {
 
 // 도형 이동 (dx, dy)
 export function moveShape(shape, dx, dy) {
-  if (shape.type === 'circle') {
-    return { ...shape, cx: shape.cx + dx, cy: shape.cy + dy }
-  }
-  if (shape.type === 'stamp') {
-    return { ...shape, x: shape.x + dx, y: shape.y + dy }
-  }
+  let updated = { ...shape }
+  if (shape.cx !== undefined) updated.cx = shape.cx + dx
+  if (shape.cy !== undefined) updated.cy = shape.cy + dy
+  if (shape.x !== undefined) updated.x = shape.x + dx
+  if (shape.y !== undefined) updated.y = shape.y + dy
   if (shape.points) {
-    return {
-      ...shape,
-      points: shape.points.map(p => ({ x: p.x + dx, y: p.y + dy }))
-    }
+    updated.points = shape.points.map(p => ({ x: p.x + dx, y: p.y + dy }))
   }
-  return shape
+  return updated
 }
 
 // 캔버스에 모든 도형 렌더링
@@ -220,6 +216,20 @@ export function renderShapes(ctx, shapes) {
       ctx.lineWidth = s.width || 3
       ctx.beginPath()
       ctx.arc(s.cx, s.cy, s.r, 0, Math.PI * 2)
+      ctx.stroke()
+    } else if (s.type === 'arc') {
+      ctx.globalAlpha = s.alpha ?? 1
+      ctx.strokeStyle = s.color || '#1e40af'
+      ctx.lineWidth = s.width || 3
+      ctx.beginPath()
+      if (s.cx !== undefined && s.cy !== undefined && s.r !== undefined && s.fromAngle !== undefined && s.toAngle !== undefined) {
+        ctx.arc(s.cx, s.cy, s.r, s.fromAngle, s.toAngle, !!s.ccw)
+      } else if (s.points && s.points.length > 0) {
+        ctx.moveTo(s.points[0].x, s.points[0].y)
+        for (let i = 1; i < s.points.length; i++) {
+          ctx.lineTo(s.points[i].x, s.points[i].y)
+        }
+      }
       ctx.stroke()
     } else if (s.points && s.points.length > 0) {
       ctx.globalAlpha = s.alpha ?? 1

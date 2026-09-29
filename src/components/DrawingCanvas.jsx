@@ -70,6 +70,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const fakePencilLineRef = useRef(null)
   const lastMousePos = useRef({ x: -9999, y: -9999 })
   const [isHovering, setIsHovering] = useState(false)
+  const isShiftDrawing = useRef(false)
+  const startPoint = useRef({ x: 0, y: 0 })
+  const initialAngle = useRef(null)
 
   // 형광펜 굵기/투명도
   const hlWidth = Math.max(strokeWidth * 6, 20)
@@ -156,6 +159,36 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         isPointSnapped = pointRes.snappedPoint
       }
 
+      // Shift 키를 누른 상태이거나 Shift로 시작한 직선 드로잉인 경우 (첫 시작 방향 각도 유지)
+      const isShift = e.shiftKey || isShiftDrawing.current
+      if (isShift && !lock) {
+        const p0 = startPoint.current
+        const p1 = finalPos
+        const d = Math.hypot(p1.x - p0.x, p1.y - p0.y)
+
+        // 6px 이상 움직였을 때 첫 시작 방향(각도) 고정
+        if (initialAngle.current === null && d >= 6) {
+          initialAngle.current = Math.atan2(p1.y - p0.y, p1.x - p0.x)
+        }
+
+        if (initialAngle.current !== null) {
+          const ang = initialAngle.current
+          const ux = Math.cos(ang)
+          const uy = Math.sin(ang)
+          const proj = (p1.x - p0.x) * ux + (p1.y - p0.y) * uy
+          const straightPos = { x: p0.x + proj * ux, y: p0.y + proj * uy }
+          currentStrokePoints.current = [p0, straightPos]
+          renderCurrentStroke()
+          updateFakeCursor(straightPos, isPointSnapped)
+          return
+        } else {
+          currentStrokePoints.current = [p0, p1]
+          renderCurrentStroke()
+          updateFakeCursor(finalPos, isPointSnapped)
+          return
+        }
+      }
+
       currentStrokePoints.current.push({ x: finalPos.x, y: finalPos.y })
       renderCurrentStroke()
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
@@ -221,6 +254,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     }
 
     snapLock.current = lock
+    isShiftDrawing.current = !!e.shiftKey
+    startPoint.current = { x: finalPos.x, y: finalPos.y }
+    initialAngle.current = null
     currentStrokePoints.current = [{ x: finalPos.x, y: finalPos.y }]
     renderCurrentStroke()
     updateFakeCursor(finalPos, lock !== null || isPointSnapped)
@@ -251,6 +287,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         onDrawEnd?.()
       }
       isDrawing.current = false
+      isShiftDrawing.current = false
+      initialAngle.current = null
       snapLock.current = null
       currentStrokePoints.current = []
       document.body.classList.remove('is-drawing')
