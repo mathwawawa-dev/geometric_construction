@@ -9,12 +9,17 @@ import CompassTool from './components/CompassTool'
 import RulerTool from './components/RulerTool'
 import ProtractorTool from './components/ProtractorTool'
 
-const VERSION = 'v0.1.0_20260930_010415_MVP초안'
+const VERSION = 'v0.1.0_20260930_012317_다중도구지원'
 
 export default function App() {
   const canvasRef = useRef(null)
-  const bgCanvasRef = useRef(null)
-  const { state, setTool, setColor, setWidth, setCompass, setRuler, setProtractor, setBackground } = useAppState()
+  const {
+    state,
+    setDrawMode, toggleTool,
+    setColor, setWidth,
+    setCompass, setRuler, setProtractor,
+    setBackground,
+  } = useAppState()
   const { saveSnapshot, undo, redo, clear } = useHistory(canvasRef)
 
   // 키보드 단축키
@@ -27,50 +32,46 @@ export default function App() {
     return () => window.removeEventListener('keydown', handler)
   }, [undo, redo])
 
-  // 펜 드로잉 시작 직전 스냅샷 저장
-  const handleDrawStart = useCallback(() => {
-    saveSnapshot()
-  }, [saveSnapshot])
-
-  // 도구 커밋 전 스냅샷 저장 (컴퍼스/자 "그리기" 버튼 클릭 시)
-  const handleToolDraw = useCallback(() => {
-    saveSnapshot()
-  }, [saveSnapshot])
+  const handleDrawStart = useCallback(() => saveSnapshot(), [saveSnapshot])
+  const handleToolDraw  = useCallback(() => saveSnapshot(), [saveSnapshot])
 
   // PNG 저장 (배경 이미지 + 드로잉 합성)
   const handleSave = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-
-    // 합성 캔버스 생성
     const merged = document.createElement('canvas')
     merged.width = canvas.width
     merged.height = canvas.height
     const ctx = merged.getContext('2d')
 
-    // 배경 이미지 먼저
+    const commit = () => {
+      ctx.drawImage(canvas, 0, 0)
+      download(merged)
+    }
+
     if (state.background.src) {
       const img = new Image()
       img.onload = () => {
         ctx.globalAlpha = state.background.opacity
-        // object-contain 방식으로 그리기
         const scale = Math.min(canvas.width / img.width, canvas.height / img.height)
         const w = img.width * scale
         const h = img.height * scale
-        const ox = (canvas.width - w) / 2
-        const oy = (canvas.height - h) / 2
-        ctx.drawImage(img, ox, oy, w, h)
+        ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h)
         ctx.globalAlpha = 1
-        // 드로잉 레이어
-        ctx.drawImage(canvas, 0, 0)
-        download(merged)
+        commit()
       }
       img.src = state.background.src
     } else {
-      ctx.drawImage(canvas, 0, 0)
-      download(merged)
+      commit()
     }
   }, [canvasRef, state.background])
+
+  // 각 도구의 visible 상태를 한 객체로 전달 (Sidebar용)
+  const toolsVisible = {
+    compass:    state.compass.visible,
+    ruler:      state.ruler.visible,
+    protractor: state.protractor.visible,
+  }
 
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden select-none">
@@ -87,8 +88,10 @@ export default function App() {
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
-          activeTool={state.activeTool}
-          setTool={setTool}
+          drawMode={state.drawMode}
+          setDrawMode={setDrawMode}
+          toggleTool={toggleTool}
+          toolsVisible={toolsVisible}
           background={state.background}
           setBackground={setBackground}
         />
@@ -101,13 +104,13 @@ export default function App() {
           {/* 레이어 1: 드로잉 캔버스 */}
           <DrawingCanvas
             canvasRef={canvasRef}
-            activeTool={state.activeTool}
+            activeTool={state.drawMode}
             strokeColor={state.strokeColor}
             strokeWidth={state.strokeWidth}
             onDrawStart={handleDrawStart}
           />
 
-          {/* 레이어 2: 도구 SVG 오버레이 */}
+          {/* 레이어 2: 도구 SVG 오버레이 — 모두 독립적으로 표시 가능 */}
           {state.compass.visible && (
             <CompassTool
               compass={state.compass}

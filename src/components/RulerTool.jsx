@@ -146,14 +146,7 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
           onMouseDown={onPointerDown('p2')}
           onTouchStart={onPointerDown('p2')}
         />
-        {/* 길이 레이블 */}
-        <text
-          x={cx} y={cy - rulerThickness / 2 - 6}
-          textAnchor="middle" fontSize="12" fill="#0369a1" fontWeight="600"
-          style={{ pointerEvents: 'none', userSelect: 'none' }}
-        >
-          {Math.round(length)}px  |  {angle.toFixed(1)}°
-        </text>
+
       </svg>
 
       {/* 자 컨트롤 패널 */}

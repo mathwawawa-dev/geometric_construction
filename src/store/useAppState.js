@@ -1,16 +1,16 @@
 import { useReducer, useCallback } from 'react'
 
-const VERSION = 'v0.1.0_20260930_010415_MVP초안'
-
 const initialState = {
-  activeTool: 'pen', // 'pen' | 'compass' | 'ruler' | 'protractor'
+  // 펜 드로잉 모드: 'pen' | 'pointer'
+  // 도구(컴퍼스/자/각도기)는 별도 visible 플래그로 독립 제어
+  drawMode: 'pen',
   strokeColor: '#1e40af',
   strokeWidth: 2,
   compass: {
     visible: false,
     pinX: 400, pinY: 300,
     pencilX: 550, pencilY: 300,
-    radiusInput: '',   // 숫자 직접 입력값
+    radiusInput: '',
   },
   ruler: {
     visible: false,
@@ -21,7 +21,7 @@ const initialState = {
     visible: false,
     cx: 400, cy: 350,
     radius: 120,
-    angle: 0, // 회전각 (radian)
+    angle: 0,
   },
   background: {
     src: null,
@@ -32,14 +32,12 @@ const initialState = {
 
 function reducer(state, action) {
   switch (action.type) {
-    case 'SET_TOOL':
-      return {
-        ...state,
-        activeTool: action.tool,
-        compass: { ...state.compass, visible: action.tool === 'compass' },
-        ruler: { ...state.ruler, visible: action.tool === 'ruler' },
-        protractor: { ...state.protractor, visible: action.tool === 'protractor' },
-      }
+    case 'SET_DRAW_MODE':
+      return { ...state, drawMode: action.mode }
+    case 'TOGGLE_TOOL': {
+      const key = action.tool  // 'compass' | 'ruler' | 'protractor'
+      return { ...state, [key]: { ...state[key], visible: !state[key].visible } }
+    }
     case 'SET_COLOR':
       return { ...state, strokeColor: action.color }
     case 'SET_WIDTH':
@@ -60,13 +58,14 @@ function reducer(state, action) {
 export function useAppState() {
   const [state, dispatch] = useReducer(reducer, initialState)
 
-  const setTool = useCallback((tool) => dispatch({ type: 'SET_TOOL', tool }), [])
-  const setColor = useCallback((color) => dispatch({ type: 'SET_COLOR', color }), [])
-  const setWidth = useCallback((width) => dispatch({ type: 'SET_WIDTH', width }), [])
-  const setCompass = useCallback((payload) => dispatch({ type: 'SET_COMPASS', payload }), [])
-  const setRuler = useCallback((payload) => dispatch({ type: 'SET_RULER', payload }), [])
+  const setDrawMode   = useCallback((mode) => dispatch({ type: 'SET_DRAW_MODE', mode }), [])
+  const toggleTool    = useCallback((tool) => dispatch({ type: 'TOGGLE_TOOL', tool }), [])
+  const setColor      = useCallback((color) => dispatch({ type: 'SET_COLOR', color }), [])
+  const setWidth      = useCallback((width) => dispatch({ type: 'SET_WIDTH', width }), [])
+  const setCompass    = useCallback((payload) => dispatch({ type: 'SET_COMPASS', payload }), [])
+  const setRuler      = useCallback((payload) => dispatch({ type: 'SET_RULER', payload }), [])
   const setProtractor = useCallback((payload) => dispatch({ type: 'SET_PROTRACTOR', payload }), [])
   const setBackground = useCallback((payload) => dispatch({ type: 'SET_BACKGROUND', payload }), [])
 
-  return { state, setTool, setColor, setWidth, setCompass, setRuler, setProtractor, setBackground, VERSION }
+  return { state, setDrawMode, toggleTool, setColor, setWidth, setCompass, setRuler, setProtractor, setBackground }
 }
