@@ -9,7 +9,7 @@ import CompassTool from './components/CompassTool'
 import RulerTool from './components/RulerTool'
 import ProtractorTool from './components/ProtractorTool'
 
-const VERSION = 'v0.1.16_20260930_031800_개선'
+const VERSION = 'v0.1.28_20260930_045000_개선'
 
 export default function App() {
   const canvasRef = useRef(null)

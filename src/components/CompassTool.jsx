@@ -255,10 +255,16 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     onInteractionEnd?.()
   }, [canvasRef, pinX, pinY, radius, strokeColor, strokeWidth, onDraw, onInteractionEnd])
 
-  // 클램프-연필 어셈블리 상수 (다리 로컬 좌표계 기준, 다리와 함께 회전)
-  const tClamp = 16   // 연필 끝에서 다리 방향으로 클램프 위치 (px)
-  const dClamp = 18   // 다리에서 수직으로 뻗는 클램프 팔 길이 (px)
-  const rRad = rightLegAngleDeg * (Math.PI / 180)
+  // 레퍼런스 이미지와 100% 동일한 강체 기하구조:
+  // 연필 각도: 다리-힌지 기준 24도 기울어짐 (업라이트 상태에서 연필이 완벽한 수직 -90도를 이룸)
+  // 클램프 팔: 연필과 정확히 90도 수직을 이루며 안쪽으로 22px 뻗어 은색 다리와 결합
+  const pencilAngleDeg = 24
+  const pencilAngleRad = pencilAngleDeg * (Math.PI / 180)
+  const clampPos = 26      // 연필 촉에서 클램프 칼라까지 거리 (px)
+  const clampLength = 22   // 클램프 팔 길이 (px)
+  // 다리 로컬 좌표계에서 클램프 조인트 위치 계산:
+  const jointX = clampPos * Math.cos(pencilAngleRad) + clampLength * Math.sin(pencilAngleRad)
+  const jointY = clampPos * Math.sin(pencilAngleRad) - clampLength * Math.cos(pencilAngleRad)
 
   return (
     <>
@@ -269,10 +275,20 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       >
         {/* 왼쪽 다리 (침핀 쪽) */}
         <g transform={`translate(${pinX}, ${pinY}) rotate(${leftLegAngleDeg})`} style={{ pointerEvents: 'none' }}>
-          <polygon points="0,0 18,-1.5 18,1.5" fill="#ef4444" />
-          <rect x="16" y="-5.5" width="22" height="11" rx="2.5" fill="#1e293b" />
+          {/* 은색 메인 다리 */}
           <line x1="36" y1="0" x2={legLength} y2="0" stroke="#cbd5e1" strokeWidth="10" strokeLinecap="round" />
           <line x1="36" y1="0" x2={legLength} y2="0" stroke="#e2e8f0" strokeWidth="4" strokeLinecap="round" />
+
+          {/* 침핀 홀더 (검정 캡) */}
+          <rect x="18" y="-6" width="18" height="12" rx="2.5" fill="#1e293b" />
+          
+          {/* 금속 바늘 */}
+          <polygon points="0,0 20,-1.5 20,1.5" fill="#64748b" />
+          <line x1="0" y1="0" x2="20" y2="0" stroke="#94a3b8" strokeWidth="1" />
+          
+          {/* 침핀 끝 빨간 볼 (레퍼런스 이미지와 동일) */}
+          <circle cx="0" cy="0" r="4" fill="#dc2626" stroke="#b91c1c" strokeWidth="0.5" />
+
           {/* 침핀 하단(빨간 끝 부근) → 반지름 조절 */}
           <g style={{ pointerEvents: 'all', cursor: 'ew-resize' }} onMouseDown={onPointerDown('pin_bottom')} onTouchStart={onPointerDown('pin_bottom')}>
             <rect x="-10" y="-15" width="46" height="30" fill="transparent" />
@@ -283,46 +299,51 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           </g>
         </g>
 
-        {/* 오른쪽 은색 다리 (연필끝 → 힌지, 회전함) */}
-        {/* 오른쪽 다리 + 클램프 + 연필 (모두 다리 로컬 좌표계, 다리와 함께 회전) */}
+        {/* 오른쪽 다리 + 클램프 + 연필 (모두 다리 로컬 좌표계, 다리와 함께 완벽한 강체로 회전) */}
         <g transform={`translate(${pencilX}, ${pencilY}) rotate(${rightLegAngleDeg})`} style={{ pointerEvents: 'none' }}>
-          {/* 은색 다리 (연필 끝 → 힌지) */}
-          <line x1="0" y1="0" x2={legLength} y2="0" stroke="#cbd5e1" strokeWidth="10" strokeLinecap="round" />
-          <line x1="0" y1="0" x2={legLength} y2="0" stroke="#e2e8f0" strokeWidth="4" strokeLinecap="round" />
-          {/* arc 드래그 히트 영역 */}
-          <rect x="30" y="-15" width={legLength - 30} height="30" fill="transparent"
+          {/* 은색 다리: 힌지(legLength, 0)에서 클램프 조인트(jointX, jointY)까지만 연결! */}
+          <line x1={jointX} y1={jointY} x2={legLength} y2="0" stroke="#cbd5e1" strokeWidth="10" strokeLinecap="round" />
+          <line x1={jointX} y1={jointY} x2={legLength} y2="0" stroke="#e2e8f0" strokeWidth="4" strokeLinecap="round" />
+          
+          {/* 다리 클릭/드래그 히트 영역 (호 그리기) */}
+          <line x1={jointX} y1={jointY} x2={legLength} y2="0" stroke="transparent" strokeWidth="30"
             style={{ pointerEvents: 'all', cursor: 'crosshair' }}
             onMouseDown={onPointerDown('leg')} onTouchStart={onPointerDown('leg')} />
 
-          {/* 클램프 팔 (다리 수직 방향, 고정 위치 tClamp에서 뻗음) */}
-          <line x1={tClamp} y1="0" x2={tClamp} y2={-dClamp} stroke="#94a3b8" strokeWidth="7" strokeLinecap="round" />
-          <line x1={tClamp} y1="0" x2={tClamp} y2={-dClamp} stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" />
-          {/* 조인트 볼 (다리-클램프 결합점, 항상 다리 위 고정) */}
-          <circle cx={tClamp} cy="0" r="5" fill="#64748b" stroke="#475569" strokeWidth="1" />
+          {/* 연필 & 클램프 어셈블리: 연필축 24도 회전 그룹 */}
+          <g transform={`rotate(${pencilAngleDeg})`}>
+            {/* 클램프 팔: 연필(clampPos, 0)에서 안쪽 수직(-y 방향)으로 뻗어 조인트(clampPos, -clampLength)까지 */}
+            <line x1={clampPos} y1="0" x2={clampPos} y2={-clampLength} stroke="#1e293b" strokeWidth="7" strokeLinecap="round" />
+            <line x1={clampPos} y1="0" x2={clampPos} y2={-clampLength} stroke="#334155" strokeWidth="2.5" strokeLinecap="round" />
+            
+            {/* 조인트 볼 (은색 다리와 클램프가 만나는 결합부) */}
+            <circle cx={clampPos} cy={-clampLength} r="6" fill="#1e293b" />
+            <circle cx={clampPos} cy={-clampLength} r="3" fill="#64748b" />
 
-          {/* 연필 어셈블리 (다리에 평행, 클램프 끝에 위치) */}
-          <g transform={`translate(0, ${-dClamp})`}>
-            {/* 흑연 */}
-            <path d="M0,0 L-2,8 L2,8 Z" fill="#1c1917" />
-            {/* 나무 */}
-            <path d="M-2,7 L2,7 L3,20 L-3,20 Z" fill="#c8a96e" />
-            <line x1="-2" y1="7" x2="-3" y2="20" stroke="#a07040" strokeWidth="0.7" />
-            <line x1="2" y1="7" x2="3" y2="20" stroke="#a07040" strokeWidth="0.7" />
-            {/* 노란 몸통 */}
-            <rect x="-4" y="20" width="8" height="28" fill="#f5c518" />
-            <rect x="-4" y="20" width="3" height="28" fill="#f7d060" opacity="0.5" />
-            {/* 페룰 */}
-            <rect x="-4" y="48" width="8" height="6" fill="#9ca3af" />
-            <line x1="-4" y1="50" x2="4" y2="50" stroke="#6b7280" strokeWidth="1" />
-            <line x1="-4" y1="52" x2="4" y2="52" stroke="#6b7280" strokeWidth="1" />
-            {/* 지우개 */}
-            <rect x="-3.5" y="54" width="7" height="5" rx="1.5" fill="#f9a8a8" />
-            {/* 클램프 바디 */}
-            <rect x="-6" y="10" width="12" height="14" rx="2" fill="#1e293b" />
+            {/* 클램프 칼라 (연필을 감싸고 있는 검정 홀더) */}
+            <rect x={clampPos - 5} y="-6.5" width="10" height="13" rx="2" fill="#1e293b" />
+            <rect x={clampPos - 3} y="-8" width="6" height="3" rx="1" fill="#475569" />
 
-            {/* 연필 반지름 조절 드래그 영역 */}
+            {/* 연필 본체 (끝점이 정확히 0, 0에 위치!) */}
+            {/* 1. 흑연 촉 (0,0 ~ 8,0) */}
+            <polygon points="0,0 8,-2.5 8,2.5" fill="#1c1917" />
+            {/* 2. 깎인 나무 부분 (8 ~ 20) */}
+            <polygon points="8,-2.5 8,2.5 20,4.5 20,-4.5" fill="#c8a96e" />
+            <line x1="9" y1="-1" x2="19" y2="-3" stroke="#a07040" strokeWidth="0.6" />
+            <line x1="9" y1="1" x2="19" y2="3" stroke="#a07040" strokeWidth="0.6" />
+            {/* 3. 노란 연필 바디 (20 ~ 54) */}
+            <rect x="20" y="-4.5" width="34" height="9" fill="#f5c518" />
+            <rect x="20" y="-4.5" width="34" height="2.5" fill="#f7d060" opacity="0.6" />
+            {/* 4. 은색 페룰 금속 밴드 (54 ~ 61) */}
+            <rect x="54" y="-4.5" width="7" height="9" fill="#9ca3af" />
+            <line x1="56" y1="-4.5" x2="56" y2="4.5" stroke="#6b7280" strokeWidth="0.8" />
+            <line x1="58" y1="-4.5" x2="58" y2="4.5" stroke="#6b7280" strokeWidth="0.8" />
+            {/* 5. 분홍색 지우개 (61 ~ 68) */}
+            <rect x="61" y="-4" width="7" height="8" rx="2" fill="#f9a8a8" />
+
+            {/* 연필 드래그 히트 영역 (반지름 조절) */}
             <g style={{ pointerEvents: 'all', cursor: 'ew-resize' }} onMouseDown={onPointerDown('pencil')} onTouchStart={onPointerDown('pencil')}>
-              <rect x="-12" y="0" width="24" height="59" fill="transparent" />
+              <rect x="0" y="-12" width="70" height="24" fill="transparent" />
             </g>
           </g>
         </g>
