@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.35_20260930_054000_힌지더블클릭연필침범수정'
+const VERSION = 'v0.1.36_20260930_055000_힌지더블클릭연필방향완전수정'
 
 export default function App() {
   const canvasRef = useRef(null)

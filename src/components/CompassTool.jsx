@@ -299,14 +299,15 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
   // 레퍼런스 이미지와 100% 동일한 강체 기하구조:
   // 연필 각도: 다리-힌지 기준 24도 기울어짐 (업라이트 상태에서 연필이 완벽한 수직 -90도를 이룸)
   // hingeSide에 따라 부호 반전 → swap 후에도 연필이 항상 외부를 향함
-  // 클램프 팔: 연필과 정확히 90도 수직을 이루며 안쪽으로 22px 뻗어 은색 다리와 결합
+  // 클램프 팔: 연필과 정확히 90도 수직을 이루며 다리와 결합 (hingeSide에 따라 방향 반전)
   const pencilAngleDeg = 24 * hingeSide
   const pencilAngleRad = pencilAngleDeg * (Math.PI / 180)
-  const clampPos = 26      // 연필 촉에서 클램프 칼라까지 거리 (px)
-  const clampLength = 22   // 클램프 팔 길이 (px)
-  // 다리 로컬 좌표계에서 클램프 조인트 위치 계산:
-  const jointX = clampPos * Math.cos(pencilAngleRad) + clampLength * Math.sin(pencilAngleRad)
-  const jointY = clampPos * Math.sin(pencilAngleRad) - clampLength * Math.cos(pencilAngleRad)
+  const clampPos = 26             // 연필 촉에서 클램프 칼라까지 거리 (px)
+  const clampLength = 22          // 클램프 팔 길이 (px)
+  const clampLengthSigned = clampLength * hingeSide  // hingeSide=-1일 때 방향 반전
+  // 다리 로컬 좌표계에서 클램프 조인트 위치 계산 (hingeSide 반영):
+  const jointX = clampPos * Math.cos(pencilAngleRad) + clampLengthSigned * Math.sin(pencilAngleRad)
+  const jointY = clampPos * Math.sin(pencilAngleRad) - clampLengthSigned * Math.cos(pencilAngleRad)
 
   return (
     <>
@@ -352,15 +353,15 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
             style={{ pointerEvents: 'all', cursor: 'crosshair' }}
             onMouseDown={onPointerDown('leg')} onTouchStart={onPointerDown('leg')} />
 
-          {/* 연필 & 클램프 어셈블리: 연필축 24도 회전 그룹 */}
+          {/* 연필 & 클램프 어셈블리: 연필축 pencilAngleDeg 회전 그룹 */}
           <g transform={`rotate(${pencilAngleDeg})`}>
-            {/* 클램프 팔: 연필(clampPos, 0)에서 안쪽 수직(-y 방향)으로 뻗어 조인트(clampPos, -clampLength)까지 */}
-            <line x1={clampPos} y1="0" x2={clampPos} y2={-clampLength} stroke="#1e293b" strokeWidth="7" strokeLinecap="round" />
-            <line x1={clampPos} y1="0" x2={clampPos} y2={-clampLength} stroke="#334155" strokeWidth="2.5" strokeLinecap="round" />
+            {/* 클램프 팔: hingeSide에 따라 +y/-y 방향으로 뻗어 조인트까지 */}
+            <line x1={clampPos} y1="0" x2={clampPos} y2={-clampLengthSigned} stroke="#1e293b" strokeWidth="7" strokeLinecap="round" />
+            <line x1={clampPos} y1="0" x2={clampPos} y2={-clampLengthSigned} stroke="#334155" strokeWidth="2.5" strokeLinecap="round" />
             
             {/* 조인트 볼 (은색 다리와 클램프가 만나는 결합부) */}
-            <circle cx={clampPos} cy={-clampLength} r="6" fill="#1e293b" />
-            <circle cx={clampPos} cy={-clampLength} r="3" fill="#64748b" />
+            <circle cx={clampPos} cy={-clampLengthSigned} r="6" fill="#1e293b" />
+            <circle cx={clampPos} cy={-clampLengthSigned} r="3" fill="#64748b" />
 
             {/* 클램프 칼라 (연필을 감싸고 있는 검정 홀더) */}
             <rect x={clampPos - 5} y="-6.5" width="10" height="13" rx="2" fill="#1e293b" />
