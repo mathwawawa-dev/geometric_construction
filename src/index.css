@@ -1,1 +1,4 @@
 @import "tailwindcss";
+
+body.is-drawing .tool-overlay * { pointer-events: none !important; cursor: none !important; }
+

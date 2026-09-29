@@ -2,17 +2,12 @@ import { useRef, useCallback } from 'react'
 
 const HANDLE_R = 10
 
-export default function ProtractorTool({ protractor, setProtractor, isInteractive }) {
+export default function ProtractorTool({ protractor, setProtractor }) {
   const svgRef = useRef(null)
   const dragging = useRef(null) // 'center' | 'rotate' | 'resize'
   const dragOffset = useRef({ dx: 0, dy: 0 })
 
   const { cx, cy, radius, angle } = protractor
-
-  const pointerStyle = isInteractive ? 'all' : 'none'
-  const grabCursor = isInteractive ? 'grab' : 'default'
-  const rotateCursor = isInteractive ? 'crosshair' : 'default'
-  const resizeCursor = isInteractive ? 'nwse-resize' : 'default'
 
   const getSVGPos = (e) => {
     const svg = svgRef.current
@@ -26,7 +21,6 @@ export default function ProtractorTool({ protractor, setProtractor, isInteractiv
   }
 
   const onPointerDown = useCallback((part) => (e) => {
-    if (!isInteractive) return
     e.stopPropagation()
     e.preventDefault()
     dragging.current = part
@@ -64,20 +58,20 @@ export default function ProtractorTool({ protractor, setProtractor, isInteractiv
     window.addEventListener('mouseup', onUp)
     window.addEventListener('touchmove', onMove, { passive: false })
     window.addEventListener('touchend', onUp)
-  }, [cx, cy, radius, angle, setProtractor, isInteractive])
+  }, [cx, cy, radius, angle, setProtractor])
 
   const degAngle = angle * (180 / Math.PI)
 
   return (
     <svg
       ref={svgRef}
-      className="absolute inset-0 w-full h-full"
+      className="absolute inset-0 w-full h-full tool-overlay"
       style={{ touchAction: 'none', pointerEvents: 'none' }}
     >
       {/* 각도기 반원 몸통 */}
       <g
         transform={`rotate(${degAngle}, ${cx}, ${cy})`}
-        style={{ pointerEvents: pointerStyle, cursor: grabCursor }}
+        style={{ pointerEvents: 'all', cursor: 'grab' }}
         onMouseDown={onPointerDown('center')}
         onTouchStart={onPointerDown('center')}
       >
@@ -114,7 +108,7 @@ export default function ProtractorTool({ protractor, setProtractor, isInteractiv
         cy={cy + radius * Math.sin(angle)}
         r={HANDLE_R}
         fill="#eab308" stroke="white" strokeWidth="2"
-        style={{ pointerEvents: pointerStyle, cursor: rotateCursor }}
+        style={{ pointerEvents: 'all', cursor: 'crosshair' }}
         onMouseDown={onPointerDown('rotate')}
         onTouchStart={onPointerDown('rotate')}
       />
@@ -125,7 +119,7 @@ export default function ProtractorTool({ protractor, setProtractor, isInteractiv
         cy={cy + radius * Math.sin(angle - Math.PI / 2)}
         r={HANDLE_R}
         fill="#22c55e" stroke="white" strokeWidth="2"
-        style={{ pointerEvents: pointerStyle, cursor: resizeCursor }}
+        style={{ pointerEvents: 'all', cursor: 'nwse-resize' }}
         onMouseDown={onPointerDown('resize')}
         onTouchStart={onPointerDown('resize')}
       />

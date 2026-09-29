@@ -1,7 +1,7 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
 
 const RULER_THICKNESS = 60
-const SNAP_DIST = 20
+const SNAP_DIST = 12 // 스냅 반경 축소 (20 -> 12)
 
 function calcRulerSnap(pos, ruler, currentLock) {
   if (!ruler || !ruler.visible) return { pos, lock: null }
@@ -65,7 +65,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const snapLock = useRef(null)
   const lastPos = useRef({ x: 0, y: 0 })
   const fakeCursorRef = useRef(null)
-  const fakeRulerIconRef = useRef(null)
+  const fakePencilLineRef = useRef(null)
   const [isHovering, setIsHovering] = useState(false)
 
   const getPos = (e, canvas) => {
@@ -90,8 +90,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     if (fakeCursorRef.current) {
       fakeCursorRef.current.style.transform = `translate(${pos.x - 2}px, ${pos.y - 22}px)`
     }
-    if (fakeRulerIconRef.current) {
-      fakeRulerIconRef.current.style.display = snapped ? 'block' : 'none'
+    if (fakePencilLineRef.current) {
+      // 스냅 시 연필 가운데 선 표시
+      fakePencilLineRef.current.style.opacity = snapped ? '1' : '0'
     }
   }, [])
 
@@ -128,6 +129,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     isDrawing.current = true
     snapLock.current = null
 
+    // 드로잉 중 툴 오버레이 이벤트 차단
+    document.body.classList.add('is-drawing')
+
     const canvas = canvasRef.current
     const rawPos = getPos(e, canvas)
     const { pos, lock } = calcRulerSnap(rawPos, ruler, null)
@@ -142,6 +146,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     const onWindowUp = () => {
       isDrawing.current = false
       snapLock.current = null
+      document.body.classList.remove('is-drawing')
       window.removeEventListener('mousemove', onWindowMove)
       window.removeEventListener('mouseup', onWindowUp)
       window.removeEventListener('touchmove', onWindowMove)
@@ -190,18 +195,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           className="absolute top-0 left-0 pointer-events-none drop-shadow-md"
           style={{ zIndex: 9999, willChange: 'transform' }}
         >
-          {/* 연필 아이콘 (tip이 2, 22에 위치) */}
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="#1e40af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+            <line ref={fakePencilLineRef} x1="18" y1="6" x2="6" y2="18" stroke="#ef4444" strokeWidth="2" style={{ opacity: 0, transition: 'opacity 0.15s' }} />
           </svg>
-          {/* 스냅 표시 아이콘 (우측 상단) */}
-          <div 
-            ref={fakeRulerIconRef}
-            className="absolute bg-sky-100 border border-sky-400 rounded px-1 shadow-sm flex items-center justify-center transition-opacity"
-            style={{ top: '-12px', left: '16px', display: 'none', transform: 'rotate(-15deg)' }}
-          >
-            <span className="text-[12px] leading-none">📏</span>
-          </div>
         </div>
       )}
     </div>
