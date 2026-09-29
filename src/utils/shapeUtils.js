@@ -19,7 +19,7 @@ export function getShapeBounds(shape) {
     }
   }
   if (shape.type === 'stamp') {
-    const half = (shape.fontSize || 48) * 0.6
+    const half = (shape.fontSize || 53) * 0.6
     return { minX: shape.x - half, maxX: shape.x + half, minY: shape.y - half, maxY: shape.y + half }
   }
   if (shape.points && shape.points.length > 0) {
@@ -117,7 +117,7 @@ export function renderShapes(ctx, shapes) {
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
     if (s.type === 'stamp') {
-      ctx.font = `bold ${s.fontSize || 48}px serif`
+      ctx.font = `bold ${s.fontSize || 53}px serif`
       ctx.fillStyle = s.color || '#000000'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'

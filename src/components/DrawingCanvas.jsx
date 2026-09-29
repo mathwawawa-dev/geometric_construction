@@ -55,9 +55,9 @@ function calcRulerSnap(pos, ruler, currentLock) {
 }
 
 export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, highlightMode, stampMode }) {
+  const draftCanvasRef = useRef(null)
   const isDrawing = useRef(false)
   const snapLock = useRef(null)
-  const lastPos = useRef({ x: 0, y: 0 })
   const currentStrokePoints = useRef([])
   const fakeCursorRef = useRef(null)
   const fakePencilLineRef = useRef(null)
@@ -97,6 +97,32 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     }
   }, [])
 
+  // 드래프트 캔버스에 현재 스트로크 단일 경로로 렌더링 (동그라미 겹침 방지)
+  const renderCurrentStroke = useCallback(() => {
+    const draftCanvas = draftCanvasRef.current
+    if (!draftCanvas) return
+    const ctx = draftCanvas.getContext('2d')
+    ctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height)
+
+    const pts = currentStrokePoints.current
+    if (!pts || pts.length === 0) return
+
+    ctx.save()
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.globalAlpha = highlightMode ? hlAlpha : 1
+    ctx.strokeStyle = strokeColor
+    ctx.lineWidth = highlightMode ? hlWidth : strokeWidth
+
+    ctx.beginPath()
+    ctx.moveTo(pts[0].x, pts[0].y)
+    for (let i = 1; i < pts.length; i++) {
+      ctx.lineTo(pts[i].x, pts[i].y)
+    }
+    ctx.stroke()
+    ctx.restore()
+  }, [highlightMode, hlAlpha, hlWidth, strokeColor, strokeWidth])
+
   const handleMove = useCallback((e) => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -105,34 +131,16 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
     if (isDrawing.current && activeTool === 'pen' && !stampMode) {
       e.preventDefault()
-      const ctx = canvas.getContext('2d')
       const { pos, lock } = calcRulerSnap(rawPos, ruler, snapLock.current)
 
-      ctx.beginPath()
-      ctx.moveTo(lastPos.current.x, lastPos.current.y)
-      ctx.lineTo(pos.x, pos.y)
-      if (highlightMode) {
-        ctx.globalAlpha = hlAlpha
-        ctx.strokeStyle = strokeColor
-        ctx.lineWidth = hlWidth
-      } else {
-        ctx.globalAlpha = 1
-        ctx.strokeStyle = strokeColor
-        ctx.lineWidth = strokeWidth
-      }
-      ctx.lineCap = 'round'
-      ctx.lineJoin = 'round'
-      ctx.stroke()
-      ctx.globalAlpha = 1
-
-      lastPos.current = pos
       currentStrokePoints.current.push({ x: pos.x, y: pos.y })
+      renderCurrentStroke()
       updateFakeCursor(pos, lock !== null)
     } else if (activeTool === 'pen') {
       const { pos, lock } = calcRulerSnap(rawPos, ruler, null)
       updateFakeCursor(pos, lock !== null)
     }
-  }, [activeTool, strokeColor, strokeWidth, ruler, updateFakeCursor, highlightMode, hlWidth, hlAlpha, stampMode])
+  }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef])
 
   const startDraw = useCallback((e) => {
     if (activeTool !== 'pen') return
@@ -143,10 +151,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     const canvas = canvasRef.current
     const rawPos = getPos(e, canvas)
 
-    // 넘버스탬프 클릭
+    // 넘버스탬프 클릭 (기존 48에서 5만큼 키운 53px)
     if (stampMode) {
       const ctx = canvas.getContext('2d')
-      const fontSize = 48
+      const fontSize = 53
       ctx.save()
       ctx.font = `bold ${fontSize}px serif`
       ctx.fillStyle = strokeColor
@@ -175,13 +183,22 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
     const { pos, lock } = calcRulerSnap(rawPos, ruler, null)
     snapLock.current = lock
-    lastPos.current = pos
     currentStrokePoints.current = [{ x: pos.x, y: pos.y }]
+    renderCurrentStroke()
     updateFakeCursor(pos, lock !== null)
 
     const onWindowMove = (me) => handleMove(me)
     const onWindowUp = () => {
       if (isDrawing.current) {
+        const draftCanvas = draftCanvasRef.current
+        const mainCanvas = canvasRef.current
+        if (draftCanvas && mainCanvas) {
+          const mainCtx = mainCanvas.getContext('2d')
+          mainCtx.drawImage(draftCanvas, 0, 0)
+          const draftCtx = draftCanvas.getContext('2d')
+          draftCtx.clearRect(0, 0, draftCanvas.width, draftCanvas.height)
+        }
+
         if (currentStrokePoints.current.length > 1) {
           const shape = {
             id: 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
@@ -208,10 +225,11 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     window.addEventListener('mouseup', onWindowUp)
     window.addEventListener('touchmove', onWindowMove, { passive: false })
     window.addEventListener('touchend', onWindowUp)
-  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode])
+  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode, renderCurrentStroke])
 
   useEffect(() => {
     const canvas = canvasRef.current
+    const draftCanvas = draftCanvasRef.current
     if (!canvas) return
     const resize = () => {
       const parent = canvas.parentElement
@@ -225,6 +243,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }
       canvas.width = parent.clientWidth
       canvas.height = parent.clientHeight
+      if (draftCanvas) {
+        draftCanvas.width = parent.clientWidth
+        draftCanvas.height = parent.clientHeight
+      }
       if (tmp.width > 0 && tmp.height > 0) {
         ctx.drawImage(tmp, 0, 0)
       }
@@ -252,6 +274,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }}
     >
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+      <canvas ref={draftCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
 
       {activeTool === 'pen' && isHovering && lastMousePos.current.x > -100 && (
         <div
@@ -264,7 +287,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           }}
         >
           {isStampMode ? (
-            <div style={{ fontSize: 36, lineHeight: 1, userSelect: 'none', opacity: 0.7 }}>
+            <div style={{ fontSize: 41, lineHeight: 1, userSelect: 'none', opacity: 0.75 }}>
               {stampMode}
             </div>
           ) : (

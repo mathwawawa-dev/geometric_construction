@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.38_20260930_061800_요청기능검증완료'
+const VERSION = 'v0.1.39_20260930_062000_도장크기확대_형광펜동그라미해결'
 
 export default function App() {
   const canvasRef = useRef(null)
