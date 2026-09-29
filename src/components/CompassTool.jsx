@@ -85,10 +85,10 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
   const prevAngleRef = useRef(null)
   const legArcPoints = useRef([])
 
-  const { pinX, pinY, pencilX, pencilY, radiusInput } = compass
+  const { pinX, pinY, pencilX, pencilY, radiusInput, hingeSide = 1 } = compass
   const radius = dist(pinX, pinY, pencilX, pencilY)
 
-  // 힌지 위치: 수직 방향이 위를 향하도록 부호 반전 (dy/span, -dx/span)
+  // 힌지 위치: 수직 방향 (dy/span, -dx/span) * hingeSide (더블클릭 교체 시 힌지 위치 불변 유지)
   const midX = (pinX + pencilX) / 2
   const midY = (pinY + pencilY) / 2
   const dxMain = pencilX - pinX
@@ -97,9 +97,9 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
   const halfDist = radius / 2
   const legLength = Math.max(280, halfDist + 60)
   const compassHeight = Math.sqrt(Math.max(0, legLength ** 2 - halfDist ** 2))
-  // 힌지가 위쪽에 오도록: (dy, -dx) 방향
-  const nx = dyMain / span
-  const ny = -dxMain / span
+  
+  const nx = (dyMain / span) * hingeSide
+  const ny = (-dxMain / span) * hingeSide
   const hingeX = midX + nx * compassHeight
   const hingeY = midY + ny * compassHeight
 
@@ -249,7 +249,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     window.addEventListener('touchend', onUp)
   }, [pinX, pinY, pencilX, pencilY, radius, setCompass, ruler, canvasRef, strokeColor, strokeWidth, onDraw, onInteractionEnd, onAddShape])
 
-  // 힌지 더블클릭 → pin/pencil 교체
+  // 힌지 더블클릭 → pin/pencil 교체 (힌지 위치는 그대로 유지!)
   const onHingeDblClick = useCallback((e) => {
     e.stopPropagation()
     e.preventDefault()
@@ -258,8 +258,9 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       pinY: pencilY,
       pencilX: pinX,
       pencilY: pinY,
+      hingeSide: -hingeSide,
     })
-  }, [pinX, pinY, pencilX, pencilY, setCompass])
+  }, [pinX, pinY, pencilX, pencilY, hingeSide, setCompass])
 
   const handleRadiusInput = (e) => {
     const val = e.target.value

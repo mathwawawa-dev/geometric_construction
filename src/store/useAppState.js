@@ -13,6 +13,7 @@ const initialState = {
     pinX: 400, pinY: 380,
     pencilX: 550, pencilY: 380,
     radiusInput: '',
+    hingeSide: 1,
   },
   ruler: {
     visible: false,
@@ -46,6 +47,7 @@ function reducer(state, action) {
           updates.pinY = action.coords.y
           updates.pencilX = action.coords.x + 100
           updates.pencilY = action.coords.y
+          updates.hingeSide = 1
         } else if (key === 'ruler') {
           updates.x1 = action.coords.x - 300
           updates.y1 = action.coords.y
