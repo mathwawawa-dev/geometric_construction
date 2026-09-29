@@ -31,29 +31,14 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
   const hingeX = (pinX + pencilX) / 2
   const hingeY = (pinY + pencilY) / 2 - radius * 0.35
 
-  // SVG 뷰포트 크기를 부모에서 가져옴
-  const [svgSize, setSvgSize] = useState({ w: 800, h: 600 })
-  useEffect(() => {
-    const el = svgRef.current?.closest('.canvas-area')
-    if (!el) return
-    const ro = new ResizeObserver(() => {
-      setSvgSize({ w: el.clientWidth, h: el.clientHeight })
-    })
-    ro.observe(el)
-    setSvgSize({ w: el.clientWidth, h: el.clientHeight })
-    return () => ro.disconnect()
-  }, [])
-
   const getSVGPos = (e) => {
     const svg = svgRef.current
     const rect = svg.getBoundingClientRect()
-    const scaleX = svgSize.w / rect.width
-    const scaleY = svgSize.h / rect.height
     const clientX = e.touches ? e.touches[0].clientX : e.clientX
     const clientY = e.touches ? e.touches[0].clientY : e.clientY
     return {
-      x: (clientX - rect.left) * scaleX,
-      y: (clientY - rect.top) * scaleY,
+      x: clientX - rect.left,
+      y: clientY - rect.top,
     }
   }
 
@@ -134,7 +119,6 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       <svg
         ref={svgRef}
         className="absolute inset-0 w-full h-full"
-        viewBox={`0 0 ${svgSize.w} ${svgSize.h}`}
         style={{ touchAction: 'none', pointerEvents: 'none' }}
       >
         {/* 왼쪽 다리 (침핀) */}

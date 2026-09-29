@@ -108,6 +108,7 @@ export default function App() {
             strokeColor={state.strokeColor}
             strokeWidth={state.strokeWidth}
             onDrawStart={handleDrawStart}
+            ruler={state.ruler}
           />
 
           {/* 레이어 2: 도구 SVG 오버레이 — 모두 독립적으로 표시 가능 */}

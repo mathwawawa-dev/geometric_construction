@@ -1,13 +1,8 @@
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { useRef, useCallback } from 'react'
 
 const HANDLE_R = 10
+const RULER_THICKNESS = 60 // 자의 두께
 
-/**
- * 눈금없는 자 SVG 오버레이
- * - 자 전체 드래그 (몸통 중앙)
- * - 양 끝 핸들 드래그 → 회전 및 길이 조절
- * - "선 그리기" 버튼 → Canvas에 직선 커밋
- */
 export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, strokeWidth, onDraw }) {
   const svgRef = useRef(null)
   const dragging = useRef(null)
@@ -20,26 +15,15 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
   const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI)
   const length = Math.hypot(x2 - x1, y2 - y1)
 
-  const [svgSize, setSvgSize] = useState({ w: 800, h: 600 })
-  useEffect(() => {
-    const el = svgRef.current?.closest('.canvas-area')
-    if (!el) return
-    const ro = new ResizeObserver(() => setSvgSize({ w: el.clientWidth, h: el.clientHeight }))
-    ro.observe(el)
-    setSvgSize({ w: el.clientWidth, h: el.clientHeight })
-    return () => ro.disconnect()
-  }, [])
-
   const getSVGPos = (e) => {
     const svg = svgRef.current
     const rect = svg.getBoundingClientRect()
-    const scaleX = svgSize.w / rect.width
-    const scaleY = svgSize.h / rect.height
     const clientX = e.touches ? e.touches[0].clientX : e.clientX
     const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    // svg 요소 자체의 clientRect 안에서의 상대 좌표 반환 (1:1 매핑)
     return {
-      x: (clientX - rect.left) * scaleX,
-      y: (clientY - rect.top) * scaleY,
+      x: clientX - rect.left,
+      y: clientY - rect.top,
     }
   }
 
@@ -95,18 +79,13 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
     ctx.stroke()
   }, [canvasRef, x1, y1, x2, y2, strokeColor, strokeWidth, onDraw])
 
-  // 자 너비 (시각적)
-  const rulerThickness = 24
-
   return (
     <>
       <svg
         ref={svgRef}
         className="absolute inset-0 w-full h-full"
-        viewBox={`0 0 ${svgSize.w} ${svgSize.h}`}
         style={{ touchAction: 'none', pointerEvents: 'none' }}
       >
-        {/* 자 몸통 — 회전된 사각형 */}
         <g
           transform={`rotate(${angle}, ${cx}, ${cy})`}
           style={{ pointerEvents: 'all', cursor: 'grab' }}
@@ -115,22 +94,20 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
         >
           <rect
             x={cx - length / 2}
-            y={cy - rulerThickness / 2}
+            y={cy - RULER_THICKNESS / 2}
             width={length}
-            height={rulerThickness}
+            height={RULER_THICKNESS}
             rx="4"
-            fill="rgba(186, 230, 253, 0.55)"
+            fill="rgba(186, 230, 253, 0.45)"
             stroke="#0ea5e9"
             strokeWidth="1.5"
           />
         </g>
-        {/* 자 중앙 라인 (눈금 없음) */}
         <line
           x1={x1} y1={y1} x2={x2} y2={y2}
           stroke="#0ea5e9" strokeWidth="1" strokeDasharray="4 4"
           style={{ pointerEvents: 'none' }}
         />
-        {/* 끝점 핸들 1 */}
         <circle
           cx={x1} cy={y1} r={HANDLE_R}
           fill="#0ea5e9" stroke="white" strokeWidth="2"
@@ -138,7 +115,6 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
           onMouseDown={onPointerDown('p1')}
           onTouchStart={onPointerDown('p1')}
         />
-        {/* 끝점 핸들 2 */}
         <circle
           cx={x2} cy={y2} r={HANDLE_R}
           fill="#0ea5e9" stroke="white" strokeWidth="2"
@@ -146,10 +122,8 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
           onMouseDown={onPointerDown('p2')}
           onTouchStart={onPointerDown('p2')}
         />
-
       </svg>
 
-      {/* 자 컨트롤 패널 */}
       <div
         className="absolute bottom-4 right-4 bg-white rounded-xl shadow-lg border border-gray-200 p-3 flex flex-col gap-2 min-w-[160px]"
         style={{ zIndex: 20 }}
