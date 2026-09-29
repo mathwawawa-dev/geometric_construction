@@ -49,18 +49,32 @@ export default function App() {
     return () => window.removeEventListener('keydown', handler)
   }, [undo, redo, setDrawMode, state.drawMode])
 
-  // 마우스 휠 줌
+  // 마우스 휠 줌 (포인터 위치 기준)
   useEffect(() => {
     const el = canvasAreaRef.current
     if (!el) return
     const onWheel = (e) => {
       e.preventDefault()
-      const delta = e.deltaY > 0 ? 0.9 : 1.1
-      setZoom(prev => Math.min(8, Math.max(0.2, prev * delta)))
+      const rect = el.getBoundingClientRect()
+      // 컨테이너 내 마우스 좌표
+      const mx = e.clientX - rect.left
+      const my = e.clientY - rect.top
+      const factor = e.deltaY < 0 ? 1.1 : 0.9
+      setZoom(prevZoom => {
+        const newZoom = Math.min(8, Math.max(0.2, prevZoom * factor))
+        // 마우스 포인터 위치를 줌 중심으로: 월드 좌표 불변 조건
+        // screenX = worldX * zoom + panX  =>  worldX = (mx - panX) / prevZoom
+        // 새 pan: mx = worldX * newZoom + newPanX  =>  newPanX = mx - worldX * newZoom
+        setPan(prevPan => ({
+          x: mx - ((mx - prevPan.x) / prevZoom) * newZoom,
+          y: my - ((my - prevPan.y) / prevZoom) * newZoom,
+        }))
+        return newZoom
+      })
     }
     el.addEventListener('wheel', onWheel, { passive: false })
     return () => el.removeEventListener('wheel', onWheel)
-  }, [])
+  }, [])  // setPan/setZoom은 stable ref이므로 deps 불필요
 
   // 스페이스바 + 드래그로 팬
   useEffect(() => {
