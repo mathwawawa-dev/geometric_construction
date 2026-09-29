@@ -159,7 +159,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     window.addEventListener('mouseup', onWindowUp)
     window.addEventListener('touchmove', onWindowMove, { passive: false })
     window.addEventListener('touchend', onWindowUp)
-  }, [activeTool, canvasRef, onDrawStart, ruler, handleMove, updateFakeCursor])
+  }, [activeTool, canvasRef, onDrawEnd, ruler, handleMove, updateFakeCursor])
 
   useEffect(() => {
     const canvas = canvasRef.current
