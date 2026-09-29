@@ -1,0 +1,196 @@
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { isPointNearShape, isShapeInRect, getShapeBounds } from '../utils/shapeUtils'
+
+export default function SelectionLayer({
+  active,
+  shapes,
+  selectedIds,
+  setSelectedIds,
+  onMoveShapes,
+  onFinishMove,
+  onDeleteSelected,
+}) {
+  const [marquee, setMarquee] = useState(null)
+  const isDraggingShapes = useRef(false)
+  const dragStartPos = useRef({ x: 0, y: 0 })
+  const lastPos = useRef({ x: 0, y: 0 })
+  const svgRef = useRef(null)
+
+  const getSVGPos = useCallback((e) => {
+    const svg = svgRef.current
+    if (!svg) return { x: 0, y: 0 }
+    const rect = svg.getBoundingClientRect()
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    const scaleX = svg.clientWidth / rect.width || 1
+    const scaleY = svg.clientHeight / rect.height || 1
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY,
+    }
+  }, [])
+
+  // 키보드 단축키 (Delete, Backspace, Escape)
+  useEffect(() => {
+    if (!active) return
+    const onKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedIds.length > 0) {
+          e.preventDefault()
+          onDeleteSelected()
+        }
+      } else if (e.key === 'Escape') {
+        setSelectedIds([])
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [active, selectedIds, onDeleteSelected, setSelectedIds])
+
+  const handlePointerDown = (e) => {
+    if (!active) return
+    e.stopPropagation()
+    const pos = getSVGPos(e)
+    dragStartPos.current = pos
+    lastPos.current = pos
+
+    // 1. 이미 선택된 도형 위를 클릭했는지 확인 (이동 시작)
+    const clickedSelected = shapes.find(
+      (s) => selectedIds.includes(s.id) && isPointNearShape(pos.x, pos.y, s)
+    )
+
+    if (clickedSelected) {
+      isDraggingShapes.current = true
+    } else {
+      // 2. 다른 도형을 클릭했는지 확인 (단일 선택 또는 Shift 다중 선택)
+      const hit = [...shapes].reverse().find((s) => isPointNearShape(pos.x, pos.y, s))
+      if (hit) {
+        if (e.shiftKey) {
+          const next = selectedIds.includes(hit.id)
+            ? selectedIds.filter((id) => id !== hit.id)
+            : [...selectedIds, hit.id]
+          setSelectedIds(next)
+        } else {
+          setSelectedIds([hit.id])
+        }
+        isDraggingShapes.current = true
+      } else {
+        // 3. 빈 공간 클릭 -> 영역 드래그 선택 (블록 지정) 시작
+        if (!e.shiftKey) {
+          setSelectedIds([])
+        }
+        setMarquee({ x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y })
+      }
+    }
+
+    const onPointerMove = (me) => {
+      const curPos = getSVGPos(me)
+      if (isDraggingShapes.current) {
+        const dx = curPos.x - lastPos.current.x
+        const dy = curPos.y - lastPos.current.y
+        lastPos.current = curPos
+        if (dx !== 0 || dy !== 0) {
+          onMoveShapes(dx, dy)
+        }
+      } else if (setMarquee) {
+        setMarquee((prev) => (prev ? { ...prev, x2: curPos.x, y2: curPos.y } : null))
+      }
+    }
+
+    const onPointerUp = (ue) => {
+      window.removeEventListener('mousemove', onPointerMove)
+      window.removeEventListener('mouseup', onPointerUp)
+      window.removeEventListener('touchmove', onPointerMove)
+      window.removeEventListener('touchend', onPointerUp)
+
+      if (isDraggingShapes.current) {
+        isDraggingShapes.current = false
+        const endPos = getSVGPos(ue)
+        const moved = Math.hypot(endPos.x - dragStartPos.current.x, endPos.y - dragStartPos.current.y) > 2
+        if (moved) {
+          onFinishMove()
+        }
+      }
+
+      setMarquee((m) => {
+        if (m) {
+          const w = Math.abs(m.x2 - m.x1)
+          const h = Math.abs(m.y2 - m.y1)
+          if (w > 3 || h > 3) {
+            const inBox = shapes.filter((s) => isShapeInRect(s, m)).map((s) => s.id)
+            setSelectedIds((prev) => (e.shiftKey ? Array.from(new Set([...prev, ...inBox])) : inBox))
+          }
+        }
+        return null
+      })
+    }
+
+    window.addEventListener('mousemove', onPointerMove)
+    window.addEventListener('mouseup', onPointerUp)
+    window.addEventListener('touchmove', onPointerMove)
+    window.addEventListener('touchend', onPointerUp)
+  }
+
+  if (!active && selectedIds.length === 0) return null
+
+  return (
+    <svg
+      ref={svgRef}
+      className="absolute inset-0 w-full h-full"
+      style={{
+        pointerEvents: active ? 'all' : 'none',
+        cursor: active ? (isDraggingShapes.current ? 'grabbing' : 'default') : 'none',
+        zIndex: 15,
+      }}
+      onMouseDown={handlePointerDown}
+      onTouchStart={handlePointerDown}
+    >
+      {/* 1. 선택된 도형들의 경계 상자 및 코너 핸들 렌더링 */}
+      {shapes
+        .filter((s) => selectedIds.includes(s.id))
+        .map((s) => {
+          const b = getShapeBounds(s)
+          const w = Math.max(12, b.maxX - b.minX)
+          const h = Math.max(12, b.maxY - b.minY)
+          const x = b.minX
+          const y = b.minY
+          return (
+            <g key={s.id} className="pointer-events-none">
+              {/* 반투명 선택 박스 */}
+              <rect
+                x={x}
+                y={y}
+                width={w}
+                height={h}
+                fill="rgba(59, 130, 246, 0.08)"
+                stroke="#2563eb"
+                strokeWidth="1.5"
+                strokeDasharray="4 3"
+              />
+              {/* 4개 코너 핸들 */}
+              <rect x={x - 3.5} y={y - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
+              <rect x={x + w - 3.5} y={y - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
+              <rect x={x - 3.5} y={y + h - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
+              <rect x={x + w - 3.5} y={y + h - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
+            </g>
+          )
+        })}
+
+      {/* 2. 블록 지정 드래그 영역 (마키 박스) */}
+      {marquee && (
+        <rect
+          x={Math.min(marquee.x1, marquee.x2)}
+          y={Math.min(marquee.y1, marquee.y2)}
+          width={Math.abs(marquee.x2 - marquee.x1)}
+          height={Math.abs(marquee.y2 - marquee.y1)}
+          fill="rgba(37, 99, 235, 0.12)"
+          stroke="#2563eb"
+          strokeWidth="1.5"
+          strokeDasharray="4 3"
+          className="pointer-events-none"
+        />
+      )}
+    </svg>
+  )
+}

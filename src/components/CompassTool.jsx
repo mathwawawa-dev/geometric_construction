@@ -77,12 +77,13 @@ function drawArcSegment(canvas, pinX, pinY, fromAngle, toAngle, r, strokeColor, 
   ctx.stroke()
 }
 
-export default function CompassTool({ compass, setCompass, canvasRef, strokeColor, strokeWidth, onDraw, ruler, onInteractionEnd }) {
+export default function CompassTool({ compass, setCompass, canvasRef, strokeColor, strokeWidth, onDraw, ruler, onInteractionEnd, onAddShape }) {
   const svgRef = useRef(null)
   const dragging = useRef(null)
   // dragOffset: 모든 드래그 파트에서 점프 방지용 공용 저장소
   const dragOffset = useRef({})
   const prevAngleRef = useRef(null)
+  const legArcPoints = useRef([])
 
   const { pinX, pinY, pencilX, pencilY, radiusInput } = compass
   const radius = dist(pinX, pinY, pencilX, pencilY)
@@ -159,6 +160,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         fixedRadius: radius,
       }
       prevAngleRef.current = curPencilAngle
+      legArcPoints.current = [{ x: pencilX, y: pencilY }]
       onDraw?.()
     }
 
@@ -205,20 +207,34 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         const curMouseAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
         const curAngle = curMouseAngle + dragOffset.current.angleOffset
         const curRadius = dragOffset.current.fixedRadius
+        const newPx = pinX + Math.cos(curAngle) * curRadius
+        const newPy = pinY + Math.sin(curAngle) * curRadius
 
         const prev = prevAngleRef.current
         if (prev !== null) {
           drawArcSegment(canvasRef.current, pinX, pinY, prev, curAngle, curRadius, strokeColor, strokeWidth)
         }
         prevAngleRef.current = curAngle
+        legArcPoints.current.push({ x: newPx, y: newPy })
         setCompass({
-          pencilX: pinX + Math.cos(curAngle) * curRadius,
-          pencilY: pinY + Math.sin(curAngle) * curRadius,
+          pencilX: newPx,
+          pencilY: newPy,
         })
       }
     }
 
     const onUp = () => {
+      if (dragging.current === 'leg' && legArcPoints.current.length > 1) {
+        const shape = {
+          id: 'a_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+          type: 'arc',
+          color: strokeColor,
+          width: strokeWidth,
+          points: [...legArcPoints.current],
+        }
+        onAddShape?.(shape)
+      }
+      legArcPoints.current = []
       if (dragging.current) onInteractionEnd?.()
       dragging.current = null
       prevAngleRef.current = null
@@ -231,7 +247,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     window.addEventListener('mouseup', onUp)
     window.addEventListener('touchmove', onMove, { passive: false })
     window.addEventListener('touchend', onUp)
-  }, [pinX, pinY, pencilX, pencilY, radius, setCompass, ruler, canvasRef, strokeColor, strokeWidth, onDraw])
+  }, [pinX, pinY, pencilX, pencilY, radius, setCompass, ruler, canvasRef, strokeColor, strokeWidth, onDraw, onInteractionEnd, onAddShape])
 
   // 힌지 더블클릭 → pin/pencil 교체
   const onHingeDblClick = useCallback((e) => {
@@ -266,8 +282,18 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     ctx.lineWidth = strokeWidth
     ctx.lineCap = 'round'
     ctx.stroke()
+    const shape = {
+      id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      type: 'circle',
+      cx: pinX,
+      cy: pinY,
+      r: radius,
+      color: strokeColor,
+      width: strokeWidth,
+    }
+    onAddShape?.(shape)
     onInteractionEnd?.()
-  }, [canvasRef, pinX, pinY, radius, strokeColor, strokeWidth, onDraw, onInteractionEnd])
+  }, [canvasRef, pinX, pinY, radius, strokeColor, strokeWidth, onDraw, onInteractionEnd, onAddShape])
 
   // 레퍼런스 이미지와 100% 동일한 강체 기하구조:
   // 연필 각도: 다리-힌지 기준 24도 기울어짐 (업라이트 상태에서 연필이 완벽한 수직 -90도를 이룸)

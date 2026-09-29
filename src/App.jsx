@@ -8,8 +8,10 @@ import BackgroundLayer from './components/BackgroundLayer'
 import CompassTool from './components/CompassTool'
 import RulerTool from './components/RulerTool'
 import ProtractorTool from './components/ProtractorTool'
+import SelectionLayer from './components/SelectionLayer'
+import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.30_20260930_045700_개선'
+const VERSION = 'v0.1.31_20260930_050500_개선'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -20,23 +22,36 @@ export default function App() {
     setColor, setWidth,
     setCompass, setRuler, setProtractor,
     setBackground,
+    addShape, setShapes, deleteShapes, moveShapes,
   } = useAppState()
   const stateRef = useRef(state)
   useEffect(() => { stateRef.current = state }, [state])
+
+  // 개체 선택 상태
+  const [selectedIds, setSelectedIds] = useState([])
 
   const getStateRef = useCallback(() => ({
     tools: {
       compass: stateRef.current.compass,
       ruler: stateRef.current.ruler,
       protractor: stateRef.current.protractor
-    }
+    },
+    shapes: stateRef.current.shapes,
   }), [])
 
-  const restoreState = useCallback((toolsSnap) => {
-    setCompass(toolsSnap.compass)
-    setRuler(toolsSnap.ruler)
-    setProtractor(toolsSnap.protractor)
-  }, [setCompass, setRuler, setProtractor])
+  const restoreState = useCallback((toolsSnap, shapesSnap) => {
+    if (toolsSnap) {
+      setCompass(toolsSnap.compass)
+      setRuler(toolsSnap.ruler)
+      setProtractor(toolsSnap.protractor)
+    }
+    if (shapesSnap) {
+      setShapes(shapesSnap)
+      if (canvasRef.current) {
+        renderShapes(canvasRef.current.getContext('2d'), shapesSnap)
+      }
+    }
+  }, [setCompass, setRuler, setProtractor, setShapes, canvasRef])
 
   const { saveSnapshot, undo, redo, clear } = useHistory(canvasRef, getStateRef, restoreState)
 
@@ -44,31 +59,78 @@ export default function App() {
     const timer = setTimeout(() => saveSnapshot(), 200)
     return () => clearTimeout(timer)
   }, [saveSnapshot])
+
+  // 도형 이동 및 삭제 핸들러
+  const handleMoveSelected = useCallback((dx, dy) => {
+    if (selectedIds.length === 0) return
+    moveShapes(selectedIds, dx, dy)
+    if (canvasRef.current) {
+      const set = new Set(selectedIds)
+      const updated = stateRef.current.shapes.map(s => set.has(s.id) ? moveShape(s, dx, dy) : s)
+      renderShapes(canvasRef.current.getContext('2d'), updated)
+    }
+  }, [moveShapes, selectedIds, canvasRef])
+
+  const handleFinishMove = useCallback(() => {
+    setTimeout(() => saveSnapshot(), 0)
+  }, [saveSnapshot])
+
+  const handleDeleteSelected = useCallback(() => {
+    if (selectedIds.length === 0) return
+    deleteShapes(selectedIds)
+    if (canvasRef.current) {
+      const set = new Set(selectedIds)
+      const updated = stateRef.current.shapes.filter(s => !set.has(s.id))
+      renderShapes(canvasRef.current.getContext('2d'), updated)
+    }
+    setSelectedIds([])
+    setTimeout(() => saveSnapshot(), 0)
+  }, [selectedIds, deleteShapes, canvasRef, saveSnapshot])
+
+  const handleAddShape = useCallback((shape) => {
+    addShape(shape)
+    setTimeout(() => saveSnapshot(), 0)
+  }, [addShape, saveSnapshot])
+
   // 줌/팬 상태
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const isPanning = useRef(false)
   const panStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 })
 
-  // 키보드 단축키
+  // 키보드 단축키 (S: 선택, P: 펜, V: 이동, Delete/Backspace: 삭제)
   useEffect(() => {
     const handler = (e) => {
       // 입력 필드 포커스 시 단축키 무시
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
       if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo() }
       if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redo() }
+      // S 키: 선택(Select) 모드 토글
+      if (e.key === 's' || e.key === 'S') {
+        e.preventDefault()
+        setDrawMode(state.drawMode === 'select' ? 'pen' : 'select')
+      }
       // V 키: pointer(이동) 모드 토글
       if (e.key === 'v' || e.key === 'V') {
+        e.preventDefault()
         setDrawMode(state.drawMode === 'pointer' ? 'pen' : 'pointer')
       }
       // P 키: 펜 모드
       if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault()
         setDrawMode('pen')
+      }
+      // Delete / Backspace 키: 선택된 개체 삭제
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedIds.length > 0) {
+          e.preventDefault()
+          handleDeleteSelected()
+        }
       }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [undo, redo, setDrawMode, state.drawMode])
+  }, [undo, redo, setDrawMode, state.drawMode, selectedIds, handleDeleteSelected])
 
   // 마우스 휠 줌 (포인터 위치 기준)
   useEffect(() => {
@@ -237,7 +299,17 @@ export default function App() {
               strokeColor={state.strokeColor}
               strokeWidth={state.strokeWidth}
               onDrawEnd={handleInteractionEnd}
+              onAddShape={handleAddShape}
               ruler={state.ruler}
+            />
+            <SelectionLayer
+              active={state.drawMode === 'select'}
+              shapes={state.shapes}
+              selectedIds={selectedIds}
+              setSelectedIds={setSelectedIds}
+              onMoveShapes={handleMoveSelected}
+              onFinishMove={handleFinishMove}
+              onDeleteSelected={handleDeleteSelected}
             />
             {state.compass.visible && (
               <CompassTool
@@ -248,6 +320,7 @@ export default function App() {
                 strokeWidth={state.strokeWidth}
                 onDraw={handleInteractionEnd}
                 onInteractionEnd={handleInteractionEnd}
+                onAddShape={handleAddShape}
                 ruler={state.ruler}
               />
             )}
@@ -271,9 +344,9 @@ export default function App() {
             )}
           </div>
 
-          {/* 줌 레벨 표시 */}
+          {/* 줌 레벨 및 단축키 안내 */}
           <div className="absolute bottom-14 left-2 text-[11px] text-gray-400 bg-white/70 px-2 py-0.5 rounded pointer-events-none">
-            {Math.round(zoom * 100)}% | V: 이동모드 | 우클릭+드래그: 팬 | 휠: 줌
+            {Math.round(zoom * 100)}% | S: 선택 | P: 펜 | V: 이동 | Del: 삭제 | 우클릭+드래그: 팬 | 휠: 줌
           </div>
         </div>
       </div>

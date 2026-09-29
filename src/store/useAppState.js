@@ -1,11 +1,13 @@
 import { useReducer, useCallback } from 'react'
+import { moveShape } from '../utils/shapeUtils'
 
 const initialState = {
-  // 펜 드로잉 모드: 'pen' | 'pointer'
+  // 드로잉 모드: 'pen' | 'select' | 'pointer'
   // 도구(컴퍼스/자/각도기)는 별도 visible 플래그로 독립 제어
   drawMode: 'pen',
   strokeColor: '#1e40af',
-  strokeWidth: 2,
+  strokeWidth: 3, // 기본 선 굵기: 보통(3)
+  shapes: [],     // 개체 단위 벡터 도형 목록 (선택, 이동, 삭제 가능)
   compass: {
     visible: false,
     pinX: 400, pinY: 380,
@@ -68,6 +70,21 @@ function reducer(state, action) {
       return { ...state, protractor: { ...state.protractor, ...action.payload } }
     case 'SET_BACKGROUND':
       return { ...state, background: { ...state.background, ...action.payload } }
+    case 'ADD_SHAPE':
+      return { ...state, shapes: [...state.shapes, action.shape] }
+    case 'SET_SHAPES':
+      return { ...state, shapes: action.shapes }
+    case 'DELETE_SHAPES': {
+      const set = new Set(action.ids)
+      return { ...state, shapes: state.shapes.filter(s => !set.has(s.id)) }
+    }
+    case 'MOVE_SHAPES': {
+      const set = new Set(action.ids)
+      return {
+        ...state,
+        shapes: state.shapes.map(s => set.has(s.id) ? moveShape(s, action.dx, action.dy) : s)
+      }
+    }
     default:
       return state
   }
@@ -84,6 +101,24 @@ export function useAppState() {
   const setRuler      = useCallback((payload) => dispatch({ type: 'SET_RULER', payload }), [])
   const setProtractor = useCallback((payload) => dispatch({ type: 'SET_PROTRACTOR', payload }), [])
   const setBackground = useCallback((payload) => dispatch({ type: 'SET_BACKGROUND', payload }), [])
+  const addShape      = useCallback((shape) => dispatch({ type: 'ADD_SHAPE', shape }), [])
+  const setShapes     = useCallback((shapes) => dispatch({ type: 'SET_SHAPES', shapes }), [])
+  const deleteShapes  = useCallback((ids) => dispatch({ type: 'DELETE_SHAPES', ids }), [])
+  const moveShapes    = useCallback((ids, dx, dy) => dispatch({ type: 'MOVE_SHAPES', ids, dx, dy }), [])
 
-  return { state, setDrawMode, toggleTool, setColor, setWidth, setCompass, setRuler, setProtractor, setBackground }
+  return {
+    state,
+    setDrawMode,
+    toggleTool,
+    setColor,
+    setWidth,
+    setCompass,
+    setRuler,
+    setProtractor,
+    setBackground,
+    addShape,
+    setShapes,
+    deleteShapes,
+    moveShapes,
+  }
 }

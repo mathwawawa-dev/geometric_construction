@@ -11,10 +11,12 @@ export function useHistory(canvasRef, getStateRef, restoreState) {
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const stateData = getStateRef ? getStateRef() : null
     
     const snap = {
       image: imgData,
-      tools: getStateRef ? JSON.parse(JSON.stringify(getStateRef().tools)) : null
+      tools: stateData?.tools ? JSON.parse(JSON.stringify(stateData.tools)) : null,
+      shapes: stateData?.shapes ? JSON.parse(JSON.stringify(stateData.shapes)) : [],
     }
 
     historyRef.current = historyRef.current.slice(0, indexRef.current + 1)
@@ -31,11 +33,11 @@ export function useHistory(canvasRef, getStateRef, restoreState) {
       indexRef.current -= 1
       const snap = historyRef.current[indexRef.current]
       const canvas = canvasRef.current
-      if (canvas) {
+      if (canvas && snap.image) {
         canvas.getContext('2d').putImageData(snap.image, 0, 0)
       }
-      if (restoreState && snap.tools) {
-        restoreState(snap.tools)
+      if (restoreState) {
+        restoreState(snap.tools, snap.shapes)
       }
     }
   }, [canvasRef, restoreState])
@@ -45,11 +47,11 @@ export function useHistory(canvasRef, getStateRef, restoreState) {
       indexRef.current += 1
       const snap = historyRef.current[indexRef.current]
       const canvas = canvasRef.current
-      if (canvas) {
+      if (canvas && snap.image) {
         canvas.getContext('2d').putImageData(snap.image, 0, 0)
       }
-      if (restoreState && snap.tools) {
-        restoreState(snap.tools)
+      if (restoreState) {
+        restoreState(snap.tools, snap.shapes)
       }
     }
   }, [canvasRef, restoreState])
@@ -61,8 +63,11 @@ export function useHistory(canvasRef, getStateRef, restoreState) {
       const ctx = canvas.getContext('2d')
       ctx.clearRect(0, 0, canvas.width, canvas.height)
     }
+    if (restoreState) {
+      restoreState(null, [])
+    }
     saveSnapshot()
-  }, [canvasRef, saveSnapshot])
+  }, [canvasRef, restoreState, saveSnapshot])
 
   return { saveSnapshot, undo, redo, clear }
 }

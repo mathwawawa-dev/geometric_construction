@@ -61,12 +61,14 @@ function calcRulerSnap(pos, ruler, currentLock) {
   return { pos, lock: null }
 }
 
-export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, ruler }) {
+export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler }) {
   const isDrawing = useRef(false)
   const snapLock = useRef(null)
   const lastPos = useRef({ x: 0, y: 0 })
+  const currentStrokePoints = useRef([])
   const fakeCursorRef = useRef(null)
   const fakePencilLineRef = useRef(null)
+  const lastMousePos = useRef({ x: -9999, y: -9999 })
   const [isHovering, setIsHovering] = useState(false)
 
   const getPos = (e, canvas) => {
@@ -88,8 +90,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   }
 
   const updateFakeCursor = useCallback((pos, snapped) => {
+    lastMousePos.current = pos
     if (fakeCursorRef.current) {
       fakeCursorRef.current.style.transform = `translate(${pos.x - 2}px, ${pos.y - 22}px)`
+      fakeCursorRef.current.style.display = 'block'
     }
     if (fakePencilLineRef.current) {
       // 스냅 시 연필 가운데 선 표시
@@ -101,6 +105,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     const canvas = canvasRef.current
     if (!canvas) return
     const rawPos = getPos(e, canvas)
+    lastMousePos.current = rawPos
     
     if (isDrawing.current && activeTool === 'pen') {
       e.preventDefault()
@@ -117,6 +122,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       ctx.stroke()
 
       lastPos.current = pos
+      currentStrokePoints.current.push({ x: pos.x, y: pos.y })
       updateFakeCursor(pos, lock !== null)
     } else if (activeTool === 'pen') {
       const { pos, lock } = calcRulerSnap(rawPos, ruler, null)
@@ -139,16 +145,28 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     
     snapLock.current = lock
     lastPos.current = pos
+    currentStrokePoints.current = [{ x: pos.x, y: pos.y }]
     updateFakeCursor(pos, lock !== null)
 
     // 윈도우 레벨 이벤트 연결로 드래그 끊김 방지
     const onWindowMove = (me) => handleMove(me)
     const onWindowUp = () => {
       if (isDrawing.current) {
+        if (currentStrokePoints.current.length > 1) {
+          const shape = {
+            id: 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+            type: 'stroke',
+            color: strokeColor,
+            width: strokeWidth,
+            points: [...currentStrokePoints.current],
+          }
+          onAddShape?.(shape)
+        }
         onDrawEnd?.()
       }
       isDrawing.current = false
       snapLock.current = null
+      currentStrokePoints.current = []
       document.body.classList.remove('is-drawing')
       window.removeEventListener('mousemove', onWindowMove)
       window.removeEventListener('mouseup', onWindowUp)
@@ -159,7 +177,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     window.addEventListener('mouseup', onWindowUp)
     window.addEventListener('touchmove', onWindowMove, { passive: false })
     window.addEventListener('touchend', onWindowUp)
-  }, [activeTool, canvasRef, onDrawEnd, ruler, handleMove, updateFakeCursor])
+  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -195,15 +213,22 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       onTouchMove={handleMove}
       onMouseDown={startDraw}
       onTouchStart={startDraw}
-      style={{ cursor: activeTool === 'pen' ? 'none' : 'default', touchAction: 'none' }}
+      style={{
+        cursor: activeTool === 'pen' ? 'none' : (activeTool === 'pointer' ? 'grab' : 'default'),
+        touchAction: 'none',
+      }}
     >
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
       
-      {activeTool === 'pen' && (isHovering || isDrawing.current) && (
+      {activeTool === 'pen' && isHovering && lastMousePos.current.x > -100 && (
         <div 
           ref={fakeCursorRef} 
           className="absolute top-0 left-0 pointer-events-none drop-shadow-md"
-          style={{ zIndex: 9999, willChange: 'transform' }}
+          style={{
+            zIndex: 9999,
+            willChange: 'transform',
+            transform: `translate(${lastMousePos.current.x - 2}px, ${lastMousePos.current.y - 22}px)`,
+          }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="#1e40af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
