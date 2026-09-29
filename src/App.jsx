@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.33_20260930_051000_개선'
+const VERSION = 'v0.1.35_20260930_054000_힌지더블클릭연필침범수정'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -110,11 +110,6 @@ export default function App() {
       if (e.key === 's' || e.key === 'S') {
         e.preventDefault()
         setDrawMode(state.drawMode === 'select' ? 'pen' : 'select')
-      }
-      // V 키: pointer(이동) 모드 토글
-      if (e.key === 'v' || e.key === 'V') {
-        e.preventDefault()
-        setDrawMode(state.drawMode === 'pointer' ? 'pen' : 'pointer')
       }
       // P 키: 펜 모드
       if (e.key === 'p' || e.key === 'P') {

@@ -2,9 +2,8 @@ import { useRef } from 'react'
 
 // 드로잉 모드 버튼 (캔버스 인터랙션)
 const drawModes = [
-  { id: 'pen',     icon: '✏️', label: '펜 (P)' },
-  { id: 'select',  icon: '↖️', label: '선택 (S)' },
-  { id: 'pointer', icon: '🖱️', label: '이동 (V)' },
+  { id: 'pen',    icon: '✏️', label: '펜 (P)' },
+  { id: 'select', icon: '↖️', label: '선택 (S)' },
 ]
 
 // 도구 토글 버튼 (독립적으로 on/off, 동시에 여러 개 활성 가능)

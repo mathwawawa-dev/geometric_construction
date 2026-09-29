@@ -249,7 +249,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     window.addEventListener('touchend', onUp)
   }, [pinX, pinY, pencilX, pencilY, radius, setCompass, ruler, canvasRef, strokeColor, strokeWidth, onDraw, onInteractionEnd, onAddShape])
 
-  // 힌지 더블클릭 → pin/pencil 교체 (힌지 위치는 그대로 유지!)
+  // 힌지 더블클릭 → pin/pencil 역할 교체 (힌지 위치는 그대로 유지!)
   const onHingeDblClick = useCallback((e) => {
     e.stopPropagation()
     e.preventDefault()
@@ -298,8 +298,9 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
 
   // 레퍼런스 이미지와 100% 동일한 강체 기하구조:
   // 연필 각도: 다리-힌지 기준 24도 기울어짐 (업라이트 상태에서 연필이 완벽한 수직 -90도를 이룸)
+  // hingeSide에 따라 부호 반전 → swap 후에도 연필이 항상 외부를 향함
   // 클램프 팔: 연필과 정확히 90도 수직을 이루며 안쪽으로 22px 뻗어 은색 다리와 결합
-  const pencilAngleDeg = 24
+  const pencilAngleDeg = 24 * hingeSide
   const pencilAngleRad = pencilAngleDeg * (Math.PI / 180)
   const clampPos = 26      // 연필 촉에서 클램프 칼라까지 거리 (px)
   const clampLength = 22   // 클램프 팔 길이 (px)
