@@ -1,7 +1,5 @@
 import { useRef, useCallback } from 'react'
 
-const HANDLE_R = 8
-
 function dist(x1, y1, x2, y2) {
   return Math.hypot(x2 - x1, y2 - y1)
 }
@@ -60,21 +58,29 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
   const { pinX, pinY, pencilX, pencilY, radiusInput } = compass
   const radius = dist(pinX, pinY, pencilX, pencilY)
 
-  // 힌지 위치 계산 (다리 길이 유지하며 위로)
+  // 1. 다리 길이 및 힌지(손잡이) 높이 계산 (실제 컴퍼스 원리 적용)
   const midX = (pinX + pencilX) / 2
   const midY = (pinY + pencilY) / 2
   const dx = pencilX - pinX
   const dy = pencilY - pinY
-  const length = Math.hypot(dx, dy) || 1
+  const halfDist = radius / 2
+
+  // 고정된 다리 길이 (반지름이 매우 클 때만 유연하게 증가)
+  const legLength = Math.max(260, halfDist + 50)
   
-  // 직교 벡터
+  // 피타고라스 정리로 높이 계산 (반지름이 커지면 컴퍼스 높이는 낮아짐!)
+  const compassHeight = Math.sqrt(legLength ** 2 - halfDist ** 2)
+  
+  const length = Math.hypot(dx, dy) || 1
   const nx = -dy / length
   const ny = dx / length
   
-  // 컴퍼스 높이: 최소 180px 정도로 실제 컴퍼스처럼 길게 보이도록 함
-  const compassHeight = Math.max(180, length * 1.5)
   const hingeX = midX + nx * compassHeight
   const hingeY = midY + ny * compassHeight
+
+  // 다리 각도 계산 (부품 회전용)
+  const leftLegAngleDeg = Math.atan2(hingeY - pinY, hingeX - pinX) * (180 / Math.PI)
+  const rightLegAngleDeg = Math.atan2(hingeY - pencilY, hingeX - pencilX) * (180 / Math.PI)
 
   const getSVGPos = (e) => {
     const svg = svgRef.current
@@ -110,14 +116,13 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       } else if (dragging.current === 'pencil') {
         setCompass({ pencilX: p.x, pencilY: p.y })
       } else if (dragging.current === 'whole') {
-        const rawWholeP = getSVGPos(me) // 전체 이동은 raw로 계산 후 pin 기준 스냅
+        const rawWholeP = getSVGPos(me)
         let targetPinX = rawWholeP.x - dragOffset.current.dx
         let targetPinY = rawWholeP.y - dragOffset.current.dy
         
         const pdx = pencilX - pinX
         const pdy = pencilY - pinY
 
-        // pin 위치를 스냅
         const snappedPin = snapPointToRuler({ x: targetPinX, y: targetPinY }, ruler)
         setCompass({ pinX: snappedPin.x, pinY: snappedPin.y, pencilX: snappedPin.x + pdx, pencilY: snappedPin.y + pdy })
       }
@@ -135,7 +140,6 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     window.addEventListener('touchend', onUp)
   }, [pinX, pinY, pencilX, pencilY, setCompass, ruler])
 
-  // 숫자 입력 → 반경 설정
   const handleRadiusInput = (e) => {
     const val = e.target.value
     setCompass({ radiusInput: val })
@@ -170,33 +174,44 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         className="absolute inset-0 w-full h-full tool-overlay"
         style={{ touchAction: 'none', pointerEvents: 'none' }}
       >
-        {/* 컴퍼스 다리 (메탈 느낌) */}
+        {/* 왼쪽 다리 (은색 메탈) */}
         <line
           x1={hingeX} y1={hingeY}
-          x2={pinX} y2={pinY}
-          stroke="#94a3b8" strokeWidth="6" strokeLinecap="round"
-          style={{ pointerEvents: 'none' }}
-        />
-        <line
-          x1={hingeX} y1={hingeY}
-          x2={pencilX} y2={pencilY}
-          stroke="#94a3b8" strokeWidth="6" strokeLinecap="round"
+          x2={pinX + (hingeX - pinX) * (30 / legLength)}
+          y2={pinY + (hingeY - pinY) * (30 / legLength)}
+          stroke="#94a3b8" strokeWidth="8" strokeLinecap="round"
           style={{ pointerEvents: 'none' }}
         />
         
-        {/* 침핀 끝 뾰족한 부분 */}
-        <circle cx={pinX} cy={pinY} r={3} fill="#475569" style={{ pointerEvents: 'none' }} />
-        
-        {/* 연필 끝 부분 (흑연 느낌) */}
-        <polygon 
-          points={`
-            ${pencilX},${pencilY} 
-            ${pencilX - 4 + (hingeX - pencilX)*0.05},${pencilY - 4 + (hingeY - pencilY)*0.05} 
-            ${pencilX + 4 + (hingeX - pencilX)*0.05},${pencilY + 4 + (hingeY - pencilY)*0.05}
-          `} 
-          fill="#334155" 
-          style={{ pointerEvents: 'none' }} 
+        {/* 침핀 끝 뾰족한 부분 (회전) */}
+        <g transform={`translate(${pinX}, ${pinY}) rotate(${leftLegAngleDeg})`} style={{ pointerEvents: 'none' }}>
+          <polygon points="0,0 30,-4 30,4" fill="#cbd5e1" stroke="#475569" strokeWidth="1.5" />
+        </g>
+
+        {/* 오른쪽 다리 (은색 메탈) */}
+        <line
+          x1={hingeX} y1={hingeY}
+          x2={pencilX + (hingeX - pencilX) * (50 / legLength)}
+          y2={pencilY + (hingeY - pencilY) * (50 / legLength)}
+          stroke="#94a3b8" strokeWidth="8" strokeLinecap="round"
+          style={{ pointerEvents: 'none' }}
         />
+
+        {/* 연필 어셈블리 (회전) */}
+        <g transform={`translate(${pencilX}, ${pencilY}) rotate(${rightLegAngleDeg})`} style={{ pointerEvents: 'none' }}>
+          {/* 흑연 및 나무 */}
+          <polygon points="0,0 12,-4 12,4" fill="#334155" />
+          <polygon points="12,-4 12,4 35,-7 35,7" fill="#deb887" />
+          {/* 노란색 몸통 */}
+          <rect x="35" y="-7" width="70" height="14" fill="#fbbf24" />
+          <line x1="35" y1="-2.5" x2="105" y2="-2.5" stroke="#f59e0b" strokeWidth="1" />
+          <line x1="35" y1="2.5" x2="105" y2="2.5" stroke="#f59e0b" strokeWidth="1" />
+          {/* 금속 밴드 및 지우개 */}
+          <rect x="105" y="-7" width="15" height="14" fill="#94a3b8" />
+          <rect x="120" y="-7" width="10" height="14" fill="#f87171" rx="2" />
+          {/* 컴퍼스 다리와 연필을 연결하는 클램프 */}
+          <rect x="40" y="-10" width="16" height="20" rx="3" fill="#cbd5e1" stroke="#475569" strokeWidth="1.5" />
+        </g>
 
         {/* 힌지 조인트 (중앙 나사) */}
         <circle
@@ -208,18 +223,22 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         />
         <circle cx={hingeX} cy={hingeY} r={6} fill="#475569" style={{ pointerEvents: 'none' }} />
 
-        {/* 침핀 핸들 (금속 조절 나사) */}
+        {/* 침핀 고정 나사 (핸들) */}
         <circle
-          cx={pinX + (hingeX - pinX)*0.15} cy={pinY + (hingeY - pinY)*0.15} r={HANDLE_R + 2}
+          cx={pinX + (hingeX - pinX) * (50 / legLength)} 
+          cy={pinY + (hingeY - pinY) * (50 / legLength)} 
+          r={10}
           fill="#cbd5e1" stroke="#475569" strokeWidth="2"
           style={{ pointerEvents: 'all', cursor: 'move' }}
           onMouseDown={onPointerDown('pin')}
           onTouchStart={onPointerDown('pin')}
         />
         
-        {/* 연필 고정 나사 (금속) */}
+        {/* 연필 고정 나사 (핸들) - 클램프 위에 위치 */}
         <circle
-          cx={pencilX + (hingeX - pencilX)*0.15} cy={pencilY + (hingeY - pencilY)*0.15} r={HANDLE_R + 2}
+          cx={pencilX + (hingeX - pencilX) * (48 / legLength)} 
+          cy={pencilY + (hingeY - pencilY) * (48 / legLength)} 
+          r={10}
           fill="#cbd5e1" stroke="#475569" strokeWidth="2"
           style={{ pointerEvents: 'all', cursor: 'move' }}
           onMouseDown={onPointerDown('pencil')}
@@ -232,6 +251,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           fill="none" stroke="#93c5fd" strokeWidth="1.5" strokeDasharray="6 4"
           style={{ pointerEvents: 'none' }}
         />
+        {/* 반경 레이블 */}
         <text
           x={(pinX + pencilX) / 2}
           y={(pinY + pencilY) / 2 - 8}
