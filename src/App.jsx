@@ -120,6 +120,7 @@ export default function App() {
               strokeColor={state.strokeColor}
               strokeWidth={state.strokeWidth}
               onDraw={handleToolDraw}
+              ruler={state.ruler}
             />
           )}
           {state.ruler.visible && (

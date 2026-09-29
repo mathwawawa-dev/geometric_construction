@@ -46,8 +46,9 @@ function calcRulerSnap(pos, ruler, currentLock) {
   }
 
   if (edge) {
-    // 자의 길이 밖으로 벗어나지 않게 X축도 단단히 고정
-    const snappedLocalX = Math.max(-length / 2, Math.min(length / 2, localX))
+    // X축을 자의 길이에 강제로 가두지 않고 무한선으로 처리하여
+    // 마우스의 물리적 X 위치와 포인터가 완벽히 일치하도록 함 (점프 현상 해결)
+    const snappedLocalX = localX
     
     // 다시 원래 좌표계로 복구
     const unCos = Math.cos(angle)
