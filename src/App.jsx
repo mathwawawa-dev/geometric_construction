@@ -120,6 +120,7 @@ export default function App() {
               strokeColor={state.strokeColor}
               strokeWidth={state.strokeWidth}
               onDraw={handleToolDraw}
+              isInteractive={state.drawMode === 'pointer'}
             />
           )}
           {state.ruler.visible && (
@@ -130,12 +131,14 @@ export default function App() {
               strokeColor={state.strokeColor}
               strokeWidth={state.strokeWidth}
               onDraw={handleToolDraw}
+              isInteractive={state.drawMode === 'pointer'}
             />
           )}
           {state.protractor.visible && (
             <ProtractorTool
               protractor={state.protractor}
               setProtractor={setProtractor}
+              isInteractive={state.drawMode === 'pointer'}
             />
           )}
         </div>

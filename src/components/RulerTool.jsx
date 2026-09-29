@@ -3,7 +3,7 @@ import { useRef, useCallback } from 'react'
 const HANDLE_R = 10
 const RULER_THICKNESS = 60 // 자의 두께
 
-export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, strokeWidth, onDraw }) {
+export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, strokeWidth, onDraw, isInteractive }) {
   const svgRef = useRef(null)
   const dragging = useRef(null)
   const dragOffset = useRef({ dx: 0, dy: 0 })
@@ -14,6 +14,10 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
   const cy = (y1 + y2) / 2
   const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI)
   const length = Math.hypot(x2 - x1, y2 - y1)
+
+  const pointerStyle = isInteractive ? 'all' : 'none'
+  const grabCursor = isInteractive ? 'grab' : 'default'
+  const resizeCursor = isInteractive ? 'nwse-resize' : 'default'
 
   const getSVGPos = (e) => {
     const svg = svgRef.current
@@ -28,6 +32,7 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
   }
 
   const onPointerDown = useCallback((part) => (e) => {
+    if (!isInteractive) return
     e.stopPropagation()
     e.preventDefault()
     dragging.current = part
@@ -63,9 +68,10 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
     window.addEventListener('mouseup', onUp)
     window.addEventListener('touchmove', onMove, { passive: false })
     window.addEventListener('touchend', onUp)
-  }, [x1, y1, x2, y2, cx, cy, setRuler])
+  }, [x1, y1, x2, y2, cx, cy, setRuler, isInteractive])
 
   const drawLine = useCallback(() => {
+    if (!isInteractive) return
     const canvas = canvasRef.current
     if (!canvas) return
     onDraw?.()
@@ -77,7 +83,7 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
     ctx.lineWidth = strokeWidth
     ctx.lineCap = 'round'
     ctx.stroke()
-  }, [canvasRef, x1, y1, x2, y2, strokeColor, strokeWidth, onDraw])
+  }, [canvasRef, x1, y1, x2, y2, strokeColor, strokeWidth, onDraw, isInteractive])
 
   return (
     <>
@@ -88,7 +94,7 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
       >
         <g
           transform={`rotate(${angle}, ${cx}, ${cy})`}
-          style={{ pointerEvents: 'all', cursor: 'grab' }}
+          style={{ pointerEvents: pointerStyle, cursor: grabCursor }}
           onMouseDown={onPointerDown('whole')}
           onTouchStart={onPointerDown('whole')}
         >
@@ -111,27 +117,29 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
         <circle
           cx={x1} cy={y1} r={HANDLE_R}
           fill="#0ea5e9" stroke="white" strokeWidth="2"
-          style={{ pointerEvents: 'all', cursor: 'nwse-resize' }}
+          style={{ pointerEvents: pointerStyle, cursor: resizeCursor }}
           onMouseDown={onPointerDown('p1')}
           onTouchStart={onPointerDown('p1')}
         />
         <circle
           cx={x2} cy={y2} r={HANDLE_R}
           fill="#0ea5e9" stroke="white" strokeWidth="2"
-          style={{ pointerEvents: 'all', cursor: 'nwse-resize' }}
+          style={{ pointerEvents: pointerStyle, cursor: resizeCursor }}
           onMouseDown={onPointerDown('p2')}
           onTouchStart={onPointerDown('p2')}
         />
       </svg>
 
+      {/* 자 컨트롤 패널 */}
       <div
         className="absolute bottom-4 right-4 bg-white rounded-xl shadow-lg border border-gray-200 p-3 flex flex-col gap-2 min-w-[160px]"
-        style={{ zIndex: 20 }}
+        style={{ zIndex: 20, pointerEvents: pointerStyle, opacity: isInteractive ? 1 : 0.5 }}
       >
         <p className="text-xs font-bold text-gray-600 mb-1">📏 눈금없는 자</p>
         <button
           onClick={drawLine}
-          className="bg-sky-500 hover:bg-sky-600 text-white text-sm py-1.5 rounded-lg font-semibold transition-colors"
+          disabled={!isInteractive}
+          className="bg-sky-500 hover:bg-sky-600 disabled:bg-gray-400 text-white text-sm py-1.5 rounded-lg font-semibold transition-colors"
         >
           선 그리기
         </button>

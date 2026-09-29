@@ -1,18 +1,18 @@
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { useRef, useCallback } from 'react'
 
 const HANDLE_R = 10
 
-/**
- * 각도기 SVG 오버레이 (반원형)
- * - 몸통 드래그 → 이동
- * - 회전 핸들 드래그 → 회전
- * - 크기 조절 핸들 드래그 → 반경 변경
- */
-export default function ProtractorTool({ protractor, setProtractor }) {
+export default function ProtractorTool({ protractor, setProtractor, isInteractive }) {
   const svgRef = useRef(null)
-  const dragging = useRef(null)
+  const dragging = useRef(null) // 'center' | 'rotate' | 'resize'
+  const dragOffset = useRef({ dx: 0, dy: 0 })
 
   const { cx, cy, radius, angle } = protractor
+
+  const pointerStyle = isInteractive ? 'all' : 'none'
+  const grabCursor = isInteractive ? 'grab' : 'default'
+  const rotateCursor = isInteractive ? 'crosshair' : 'default'
+  const resizeCursor = isInteractive ? 'nwse-resize' : 'default'
 
   const getSVGPos = (e) => {
     const svg = svgRef.current
@@ -26,21 +26,31 @@ export default function ProtractorTool({ protractor, setProtractor }) {
   }
 
   const onPointerDown = useCallback((part) => (e) => {
+    if (!isInteractive) return
     e.stopPropagation()
     e.preventDefault()
     dragging.current = part
+    const pos = getSVGPos(e)
+    
+    if (part === 'center') {
+      dragOffset.current = { dx: pos.x - cx, dy: pos.y - cy }
+    } else {
+      dragOffset.current = { dx: 0, dy: 0 }
+    }
 
     const onMove = (me) => {
       me.preventDefault()
       const p = getSVGPos(me)
-      if (dragging.current === 'whole') {
-        setProtractor({ cx: p.x, cy: p.y })
-      } else if (dragging.current === 'rotate') {
-        const a = Math.atan2(p.y - cy, p.x - cx)
-        setProtractor({ angle: a })
+      if (dragging.current === 'center') {
+        const nx = p.x - dragOffset.current.dx
+        const ny = p.y - dragOffset.current.dy
+        setProtractor({ cx: nx, cy: ny })
       } else if (dragging.current === 'resize') {
-        const r = Math.hypot(p.x - cx, p.y - cy)
-        if (r > 40) setProtractor({ radius: r })
+        const nr = Math.hypot(p.x - cx, p.y - cy)
+        setProtractor({ radius: Math.max(50, nr) })
+      } else if (dragging.current === 'rotate') {
+        let a = Math.atan2(p.y - cy, p.x - cx)
+        setProtractor({ angle: a })
       }
     }
     const onUp = () => {
@@ -54,25 +64,9 @@ export default function ProtractorTool({ protractor, setProtractor }) {
     window.addEventListener('mouseup', onUp)
     window.addEventListener('touchmove', onMove, { passive: false })
     window.addEventListener('touchend', onUp)
-  }, [cx, cy, angle, radius, setProtractor])
+  }, [cx, cy, radius, angle, setProtractor, isInteractive])
 
-  // 각도기 경로 — 반원 (arc) + 지름선
-  const startAngle = angle        // 회전 적용된 시작
-  const endAngle = angle + Math.PI
-
-  const arcPath = describeArc(cx, cy, radius, startAngle, endAngle)
-
-  // 회전 핸들: 반원 중앙 상단
-  const rotatHandleAngle = angle + Math.PI / 2
-  const rotateHandleX = cx + Math.cos(rotatHandleAngle) * (radius + 20)
-  const rotateHandleY = cy + Math.sin(rotatHandleAngle) * (radius + 20)
-
-  // 리사이즈 핸들: 오른쪽 끝
-  const resizeHandleX = cx + Math.cos(angle) * radius
-  const resizeHandleY = cy + Math.sin(angle) * radius
-
-  // 각도 눈금 (0°, 30°, 60°, 90°, 120°, 150°, 180°)
-  const tickAngles = [0, 30, 60, 90, 120, 150, 180]
+  const degAngle = angle * (180 / Math.PI)
 
   return (
     <svg
@@ -81,81 +75,60 @@ export default function ProtractorTool({ protractor, setProtractor }) {
       style={{ touchAction: 'none', pointerEvents: 'none' }}
     >
       {/* 각도기 반원 몸통 */}
-      <path
-        d={arcPath}
-        fill="rgba(254, 240, 138, 0.45)"
-        stroke="#ca8a04"
-        strokeWidth="2"
-        style={{ pointerEvents: 'all', cursor: 'grab' }}
-        onMouseDown={onPointerDown('whole')}
-        onTouchStart={onPointerDown('whole')}
-      />
-      {/* 지름선 */}
-      <line
-        x1={cx + Math.cos(angle) * radius}
-        y1={cy + Math.sin(angle) * radius}
-        x2={cx + Math.cos(angle + Math.PI) * radius}
-        y2={cy + Math.sin(angle + Math.PI) * radius}
-        stroke="#ca8a04" strokeWidth="2"
-        style={{ pointerEvents: 'none' }}
-      />
-      {/* 중심점 */}
-      <circle cx={cx} cy={cy} r={4} fill="#ca8a04" style={{ pointerEvents: 'none' }} />
+      <g
+        transform={`rotate(${degAngle}, ${cx}, ${cy})`}
+        style={{ pointerEvents: pointerStyle, cursor: grabCursor }}
+        onMouseDown={onPointerDown('center')}
+        onTouchStart={onPointerDown('center')}
+      >
+        <path
+          d={`M ${cx - radius} ${cy} 
+              A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy} 
+              Z`}
+          fill="rgba(254, 240, 138, 0.4)"
+          stroke="#ca8a04"
+          strokeWidth="2"
+        />
+        {/* 눈금선들 */}
+        {Array.from({ length: 19 }).map((_, i) => {
+          const tickAngle = Math.PI + (i * Math.PI) / 18
+          const isMajor = i % 2 === 0
+          const r1 = radius
+          const r2 = isMajor ? radius - 15 : radius - 8
+          const x1 = cx + r1 * Math.cos(tickAngle)
+          const y1 = cy + r1 * Math.sin(tickAngle)
+          const x2 = cx + r2 * Math.cos(tickAngle)
+          const y2 = cy + r2 * Math.sin(tickAngle)
+          return (
+            <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#ca8a04" strokeWidth="1.5" />
+          )
+        })}
+        {/* 중앙 표시 */}
+        <line x1={cx} y1={cy - 10} x2={cx} y2={cy + 10} stroke="#ca8a04" strokeWidth="2" />
+        <line x1={cx - 10} y1={cy} x2={cx + 10} y2={cy} stroke="#ca8a04" strokeWidth="2" />
+      </g>
 
-      {/* 각도 눈금 */}
-      {tickAngles.map((deg) => {
-        const tickAngle = angle + (deg / 180) * Math.PI
-        const inner = radius - 12
-        const outer = radius
-        const labelR = radius - 22
-        return (
-          <g key={deg} style={{ pointerEvents: 'none' }}>
-            <line
-              x1={cx + Math.cos(tickAngle) * inner}
-              y1={cy + Math.sin(tickAngle) * inner}
-              x2={cx + Math.cos(tickAngle) * outer}
-              y2={cy + Math.sin(tickAngle) * outer}
-              stroke="#92400e" strokeWidth="1.5"
-            />
-            <text
-              x={cx + Math.cos(tickAngle) * labelR}
-              y={cy + Math.sin(tickAngle) * labelR + 4}
-              textAnchor="middle"
-              fontSize="10"
-              fill="#92400e"
-              fontWeight="500"
-              style={{ userSelect: 'none' }}
-            >
-              {deg}
-            </text>
-          </g>
-        )
-      })}
-
-      {/* 회전 핸들 */}
+      {/* 회전 핸들 (0도 방향 끝부분) */}
       <circle
-        cx={rotateHandleX} cy={rotateHandleY} r={HANDLE_R}
-        fill="#f59e0b" stroke="white" strokeWidth="2"
-        style={{ pointerEvents: 'all', cursor: 'grab' }}
+        cx={cx + radius * Math.cos(angle)}
+        cy={cy + radius * Math.sin(angle)}
+        r={HANDLE_R}
+        fill="#eab308" stroke="white" strokeWidth="2"
+        style={{ pointerEvents: pointerStyle, cursor: rotateCursor }}
         onMouseDown={onPointerDown('rotate')}
         onTouchStart={onPointerDown('rotate')}
       />
-      {/* 리사이즈 핸들 */}
+
+      {/* 크기 조절 핸들 (90도 방향 끝부분) */}
       <circle
-        cx={resizeHandleX} cy={resizeHandleY} r={HANDLE_R}
-        fill="#16a34a" stroke="white" strokeWidth="2"
-        style={{ pointerEvents: 'all', cursor: 'ew-resize' }}
+        cx={cx + radius * Math.cos(angle - Math.PI / 2)}
+        cy={cy + radius * Math.sin(angle - Math.PI / 2)}
+        r={HANDLE_R}
+        fill="#22c55e" stroke="white" strokeWidth="2"
+        style={{ pointerEvents: pointerStyle, cursor: resizeCursor }}
         onMouseDown={onPointerDown('resize')}
         onTouchStart={onPointerDown('resize')}
       />
     </svg>
   )
-}
-
-function describeArc(cx, cy, r, startAngle, endAngle) {
-  const x1 = cx + r * Math.cos(startAngle)
-  const y1 = cy + r * Math.sin(startAngle)
-  const x2 = cx + r * Math.cos(endAngle)
-  const y2 = cy + r * Math.sin(endAngle)
-  return `M ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} L ${cx} ${cy} Z`
 }

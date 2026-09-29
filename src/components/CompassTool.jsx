@@ -19,7 +19,7 @@ function dist(ax, ay, bx, by) {
  * - 반경 숫자 직접 입력
  * - "원호 그리기" 버튼 → canvasRef에 arc 커밋
  */
-export default function CompassTool({ compass, setCompass, canvasRef, strokeColor, strokeWidth, onDraw }) {
+export default function CompassTool({ compass, setCompass, canvasRef, strokeColor, strokeWidth, onDraw, isInteractive }) {
   const svgRef = useRef(null)
   const dragging = useRef(null) // 'pin' | 'pencil' | 'whole'
   const dragOffset = useRef({ dx: 0, dy: 0 })
@@ -30,6 +30,10 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
   // 힌지(손잡이) 위치 — 두 다리의 중점에서 위로
   const hingeX = (pinX + pencilX) / 2
   const hingeY = (pinY + pencilY) / 2 - radius * 0.35
+
+  const pointerStyle = isInteractive ? 'all' : 'none'
+  const moveCursor = isInteractive ? 'move' : 'default'
+  const grabCursor = isInteractive ? 'grab' : 'default'
 
   const getSVGPos = (e) => {
     const svg = svgRef.current
@@ -43,6 +47,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
   }
 
   const onPointerDown = useCallback((part) => (e) => {
+    if (!isInteractive) return
     e.stopPropagation()
     e.preventDefault()
     dragging.current = part
@@ -81,10 +86,11 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     window.addEventListener('mouseup', onUp)
     window.addEventListener('touchmove', onMove, { passive: false })
     window.addEventListener('touchend', onUp)
-  }, [pinX, pinY, pencilX, pencilY, setCompass])
+  }, [pinX, pinY, pencilX, pencilY, setCompass, isInteractive])
 
   // 숫자 입력 → 반경 설정 (연필이 오른쪽 방향으로)
   const handleRadiusInput = (e) => {
+    if (!isInteractive) return
     const val = e.target.value
     setCompass({ radiusInput: val })
     const num = parseFloat(val)
@@ -101,6 +107,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
 
   // 원호 그리기 → Canvas에 커밋
   const drawArc = useCallback(() => {
+    if (!isInteractive) return
     const canvas = canvasRef.current
     if (!canvas) return
     onDraw?.()
@@ -111,7 +118,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     ctx.lineWidth = strokeWidth
     ctx.lineCap = 'round'
     ctx.stroke()
-  }, [canvasRef, pinX, pinY, radius, strokeColor, strokeWidth, onDraw])
+  }, [canvasRef, pinX, pinY, radius, strokeColor, strokeWidth, onDraw, isInteractive])
 
   return (
     <>
@@ -139,7 +146,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         <circle
           cx={hingeX} cy={hingeY} r={14}
           fill={HINGE_COLOR}
-          style={{ pointerEvents: 'all', cursor: 'grab' }}
+          style={{ pointerEvents: pointerStyle, cursor: grabCursor }}
           onMouseDown={onPointerDown('whole')}
           onTouchStart={onPointerDown('whole')}
         />
@@ -147,7 +154,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         <circle
           cx={pinX} cy={pinY} r={HANDLE_R}
           fill="#ef4444" stroke="white" strokeWidth="2"
-          style={{ pointerEvents: 'all', cursor: 'move' }}
+          style={{ pointerEvents: pointerStyle, cursor: moveCursor }}
           onMouseDown={onPointerDown('pin')}
           onTouchStart={onPointerDown('pin')}
         />
@@ -155,7 +162,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         <circle
           cx={pencilX} cy={pencilY} r={HANDLE_R}
           fill="#f59e0b" stroke="white" strokeWidth="2"
-          style={{ pointerEvents: 'all', cursor: 'move' }}
+          style={{ pointerEvents: pointerStyle, cursor: moveCursor }}
           onMouseDown={onPointerDown('pencil')}
           onTouchStart={onPointerDown('pencil')}
         />
@@ -179,7 +186,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       {/* 컴퍼스 컨트롤 패널 (우측 하단 고정) */}
       <div
         className="absolute bottom-4 right-4 bg-white rounded-xl shadow-lg border border-gray-200 p-3 flex flex-col gap-2 min-w-[160px]"
-        style={{ zIndex: 20 }}
+        style={{ zIndex: 20, pointerEvents: pointerStyle, opacity: isInteractive ? 1 : 0.5 }}
       >
         <p className="text-xs font-bold text-gray-600 mb-1">🧭 컴퍼스</p>
         <label className="text-xs text-gray-500">반경 (px)</label>
@@ -189,11 +196,13 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           value={radiusInput !== '' ? radiusInput : Math.round(radius)}
           onChange={handleRadiusInput}
           onFocus={() => setCompass({ radiusInput: String(Math.round(radius)) })}
+          disabled={!isInteractive}
           className="border border-gray-300 rounded px-2 py-1 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         <button
           onClick={drawArc}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-1.5 rounded-lg font-semibold transition-colors"
+          disabled={!isInteractive}
+          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-sm py-1.5 rounded-lg font-semibold transition-colors"
         >
           원 그리기
         </button>
