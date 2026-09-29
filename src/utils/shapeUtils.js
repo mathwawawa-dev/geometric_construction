@@ -23,6 +23,11 @@ export function getShapeBounds(shape) {
     return { minX: shape.x - half, maxX: shape.x + half, minY: shape.y - half, maxY: shape.y + half }
   }
   if (shape.points && shape.points.length > 0) {
+    if (shape.points.length === 1) {
+      const p = shape.points[0]
+      const r = Math.max((shape.width || 3) * 0.8, 4)
+      return { minX: p.x - r, maxX: p.x + r, minY: p.y - r, maxY: p.y + r }
+    }
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
     for (const p of shape.points) {
       if (p.x < minX) minX = p.x
@@ -64,13 +69,16 @@ export function isPointNearShape(px, py, shape, threshold = 8) {
     return Math.abs(d - shape.r) <= tolerance
   }
   if (shape.type === 'stamp') {
-    const half = (shape.fontSize || 48) * 0.6
+    const half = (shape.fontSize || 53) * 0.6
     return Math.abs(px - shape.x) < half && Math.abs(py - shape.y) < half
   }
   if (shape.type === 'stroke' || shape.type === 'arc') {
     const pts = shape.points
     if (!pts || pts.length === 0) return false
-    if (pts.length === 1) return Math.hypot(px - pts[0].x, py - pts[0].y) <= tolerance
+    if (pts.length === 1) {
+      const r = Math.max((shape.width || 3) * 0.8, 4) + threshold
+      return Math.hypot(px - pts[0].x, py - pts[0].y) <= r
+    }
     for (let i = 0; i < pts.length - 1; i++) {
       if (distToSegment(px, py, pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y) <= tolerance) {
         return true
@@ -131,14 +139,23 @@ export function renderShapes(ctx, shapes) {
       ctx.stroke()
     } else if (s.points && s.points.length > 0) {
       ctx.globalAlpha = s.alpha ?? 1
+      ctx.fillStyle = s.color || '#1e40af'
       ctx.strokeStyle = s.color || '#1e40af'
       ctx.lineWidth = s.width || 3
-      ctx.beginPath()
-      ctx.moveTo(s.points[0].x, s.points[0].y)
-      for (let i = 1; i < s.points.length; i++) {
-        ctx.lineTo(s.points[i].x, s.points[i].y)
+      if (s.points.length === 1) {
+        const p = s.points[0]
+        const r = Math.max((s.width || 3) * 0.8, 4)
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2)
+        ctx.fill()
+      } else {
+        ctx.beginPath()
+        ctx.moveTo(s.points[0].x, s.points[0].y)
+        for (let i = 1; i < s.points.length; i++) {
+          ctx.lineTo(s.points[i].x, s.points[i].y)
+        }
+        ctx.stroke()
       }
-      ctx.stroke()
     }
     ctx.restore()
   }

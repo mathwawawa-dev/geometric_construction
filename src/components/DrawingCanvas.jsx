@@ -111,15 +111,24 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
     ctx.globalAlpha = highlightMode ? hlAlpha : 1
+    ctx.fillStyle = strokeColor
     ctx.strokeStyle = strokeColor
-    ctx.lineWidth = highlightMode ? hlWidth : strokeWidth
+    const curWidth = highlightMode ? hlWidth : strokeWidth
+    ctx.lineWidth = curWidth
 
-    ctx.beginPath()
-    ctx.moveTo(pts[0].x, pts[0].y)
-    for (let i = 1; i < pts.length; i++) {
-      ctx.lineTo(pts[i].x, pts[i].y)
+    if (pts.length === 1) {
+      const r = Math.max(curWidth * 0.8, 4)
+      ctx.beginPath()
+      ctx.arc(pts[0].x, pts[0].y, r, 0, Math.PI * 2)
+      ctx.fill()
+    } else {
+      ctx.beginPath()
+      ctx.moveTo(pts[0].x, pts[0].y)
+      for (let i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i].x, pts[i].y)
+      }
+      ctx.stroke()
     }
-    ctx.stroke()
     ctx.restore()
   }, [highlightMode, hlAlpha, hlWidth, strokeColor, strokeWidth])
 
@@ -199,7 +208,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           draftCtx.clearRect(0, 0, draftCanvas.width, draftCanvas.height)
         }
 
-        if (currentStrokePoints.current.length > 1) {
+        if (currentStrokePoints.current.length >= 1) {
           const shape = {
             id: 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
             type: 'stroke',
