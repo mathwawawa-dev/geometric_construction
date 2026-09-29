@@ -1,6 +1,6 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
 
-const RULER_THICKNESS = 60
+const RULER_THICKNESS = 120
 const SNAP_DIST = 12 // 스냅 반경 축소 (20 -> 12)
 
 function calcRulerSnap(pos, ruler, currentLock) {

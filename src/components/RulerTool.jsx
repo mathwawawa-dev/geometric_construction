@@ -1,7 +1,7 @@
 import { useRef, useCallback } from 'react'
 
-const HANDLE_R = 10
-const RULER_THICKNESS = 60 // 자의 두께
+const HANDLE_R = 6
+const RULER_THICKNESS = 120 // 자의 두께 (2배 증가)
 
 export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, strokeWidth, onDraw }) {
   const svgRef = useRef(null)
@@ -40,10 +40,22 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
     const onMove = (me) => {
       me.preventDefault()
       const p = getSVGPos(me)
+      const isShift = me.shiftKey
+
       if (dragging.current === 'p1') {
-        setRuler({ x1: p.x, y1: p.y })
+        let currentAngle = Math.atan2(p.y - y2, p.x - x2)
+        if (isShift) {
+          currentAngle = Math.round((currentAngle * 180 / Math.PI) / 5) * 5 * (Math.PI / 180)
+        }
+        const dist = Math.hypot(p.x - x2, p.y - y2)
+        setRuler({ x1: x2 + dist * Math.cos(currentAngle), y1: y2 + dist * Math.sin(currentAngle) })
       } else if (dragging.current === 'p2') {
-        setRuler({ x2: p.x, y2: p.y })
+        let currentAngle = Math.atan2(p.y - y1, p.x - x1)
+        if (isShift) {
+          currentAngle = Math.round((currentAngle * 180 / Math.PI) / 5) * 5 * (Math.PI / 180)
+        }
+        const dist = Math.hypot(p.x - x1, p.y - y1)
+        setRuler({ x2: x1 + dist * Math.cos(currentAngle), y2: y1 + dist * Math.sin(currentAngle) })
       } else if (dragging.current === 'whole') {
         const dx = x2 - x1
         const dy = y2 - y1
@@ -94,28 +106,25 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
             width={length}
             height={RULER_THICKNESS}
             rx="4"
-            fill="rgba(186, 230, 253, 0.45)"
+            fill="rgba(186, 230, 253, 0.2)"
             stroke="rgba(14, 165, 233, 0.15)"
             strokeWidth="1.5"
             style={{ pointerEvents: 'none' }}
           />
-          {/* 실제 드래그 가능한 투명 영역 (가운데 36px) */}
+          {/* 실제 드래그 가능한 투명 영역 (가운데 60px) */}
           <rect
             x={cx - length / 2 + 15}
-            y={cy - 18}
+            y={cy - 30}
             width={Math.max(0, length - 30)}
-            height={36}
+            height={60}
             fill="transparent"
             style={{ pointerEvents: 'all', cursor: 'grab' }}
             onMouseDown={onPointerDown('whole')}
             onTouchStart={onPointerDown('whole')}
           />
         </g>
-        <line
-          x1={x1} y1={y1} x2={x2} y2={y2}
-          stroke="#0ea5e9" strokeWidth="1" strokeDasharray="4 4"
-          style={{ pointerEvents: 'none' }}
-        />
+        
+        {/* 양쪽 원 (핸들) */}
         <circle
           cx={x1} cy={y1} r={HANDLE_R}
           fill="#0ea5e9" stroke="white" strokeWidth="2"
@@ -145,8 +154,9 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
           선 그리기
         </button>
         <p className="text-[11px] text-gray-400 leading-tight">
-          🔵 끝점 드래그: 회전/길이<br />
-          자 몸통 드래그: 이동
+          🔹 끝점 드래그: 회전/길이<br />
+          (Shift 누르고 회전 시 5도 스냅)<br />
+          🔹 중앙 드래그: 자 이동
         </p>
       </div>
     </>

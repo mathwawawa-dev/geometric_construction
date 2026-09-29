@@ -24,7 +24,7 @@ function snapPointToRuler(p, ruler) {
   const ty = p.y - cy
   const localX = tx * cos - ty * sin
   const localY = tx * sin + ty * cos
-  const halfThick = 60 / 2 // RULER_THICKNESS
+  const halfThick = 120 / 2 // RULER_THICKNESS
   
   // 자의 길이 범위를 약간 벗어난 곳까지는 스냅 허용
   if (localX < -length/2 - 20 || localX > length/2 + 20) return p
