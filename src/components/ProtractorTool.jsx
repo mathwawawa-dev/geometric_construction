@@ -14,9 +14,11 @@ export default function ProtractorTool({ protractor, setProtractor }) {
     const rect = svg.getBoundingClientRect()
     const clientX = e.touches ? e.touches[0].clientX : e.clientX
     const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    const scaleX = svg.clientWidth / rect.width || 1
+    const scaleY = svg.clientHeight / rect.height || 1
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY,
     }
   }
 

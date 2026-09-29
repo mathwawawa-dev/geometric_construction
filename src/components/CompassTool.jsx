@@ -103,7 +103,9 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     const rect = svg.getBoundingClientRect()
     const clientX = e.touches ? e.touches[0].clientX : e.clientX
     const clientY = e.touches ? e.touches[0].clientY : e.clientY
-    return { x: clientX - rect.left, y: clientY - rect.top }
+    const scaleX = svg.clientWidth / rect.width || 1
+    const scaleY = svg.clientHeight / rect.height || 1
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY }
   }
 
   const onPointerDown = useCallback((part) => (e) => {

@@ -61,20 +61,21 @@ export default function App() {
       const my = e.clientY - rect.top
       const factor = e.deltaY < 0 ? 1.1 : 0.9
       setZoom(prevZoom => {
-        const newZoom = Math.min(8, Math.max(0.2, prevZoom * factor))
-        // 마우스 포인터 위치를 줌 중심으로: 월드 좌표 불변 조건
-        // screenX = worldX * zoom + panX  =>  worldX = (mx - panX) / prevZoom
-        // 새 pan: mx = worldX * newZoom + newPanX  =>  newPanX = mx - worldX * newZoom
-        setPan(prevPan => ({
-          x: mx - ((mx - prevPan.x) / prevZoom) * newZoom,
-          y: my - ((my - prevPan.y) / prevZoom) * newZoom,
-        }))
+        const newZoom = Math.min(8, Math.max(0.1, prevZoom * factor))
+        setPan(prevPan => {
+          const worldOffsetX = (mx - rect.width / 2 - prevPan.x) / prevZoom
+          const worldOffsetY = (my - rect.height / 2 - prevPan.y) / prevZoom
+          return {
+            x: mx - rect.width / 2 - worldOffsetX * newZoom,
+            y: my - rect.height / 2 - worldOffsetY * newZoom,
+          }
+        })
         return newZoom
       })
     }
     el.addEventListener('wheel', onWheel, { passive: false })
     return () => el.removeEventListener('wheel', onWheel)
-  }, [])  // setPan/setZoom은 stable ref이므로 deps 불필요
+  }, [])
 
   // 스페이스바 + 드래그로 팬
   useEffect(() => {
@@ -183,21 +184,24 @@ export default function App() {
         {/* 캔버스 영역 */}
         <div
           ref={canvasAreaRef}
-          className="canvas-area relative flex-1 bg-white overflow-hidden"
+          className="canvas-area relative flex-1 bg-gray-200 overflow-hidden"
           onMouseDown={handleCanvasMouseDown}
           onMouseMove={handleCanvasMouseMove}
           onMouseUp={handleCanvasMouseUp}
           onContextMenu={(e) => e.preventDefault()}
         >
-          {/* 줌/팬 래퍼 */}
+          {/* 줌/팬 래퍼 (고정 3000x2000 캔버스) */}
           <div
             style={{
               position: 'absolute',
-              inset: 0,
-              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+              left: '50%',
+              top: '50%',
+              width: 3000,
+              height: 2000,
+              transform: `translate(calc(-50% + ${pan.x}px), calc(-50% + ${pan.y}px)) scale(${zoom})`,
               transformOrigin: 'center center',
-              width: '100%',
-              height: '100%',
+              backgroundColor: 'white',
+              boxShadow: '0 0 40px rgba(0,0,0,0.1)',
             }}
           >
             <BackgroundLayer background={state.background} />

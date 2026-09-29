@@ -20,10 +20,11 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
     const rect = svg.getBoundingClientRect()
     const clientX = e.touches ? e.touches[0].clientX : e.clientX
     const clientY = e.touches ? e.touches[0].clientY : e.clientY
-    // svg 요소 자체의 clientRect 안에서의 상대 좌표 반환 (1:1 매핑)
+    const scaleX = svg.clientWidth / rect.width || 1
+    const scaleY = svg.clientHeight / rect.height || 1
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY,
     }
   }
 

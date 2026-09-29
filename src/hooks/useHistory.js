@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react'
 
-const MAX_HISTORY = 50
+const MAX_HISTORY = 15
 
 export function useHistory(canvasRef) {
   const historyRef = useRef([])   // ImageData 스냅샷 배열

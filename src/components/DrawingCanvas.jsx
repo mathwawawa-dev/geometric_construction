@@ -71,8 +71,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
   const getPos = (e, canvas) => {
     const rect = canvas.getBoundingClientRect()
-    const scaleX = canvas.width / rect.width
-    const scaleY = canvas.height / rect.height
     let clientX, clientY
     if (e.touches && e.touches.length > 0) {
       clientX = e.touches[0].clientX
@@ -81,6 +79,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       clientX = e.clientX || 0
       clientY = e.clientY || 0
     }
+    const scaleX = canvas.clientWidth / rect.width || 1
+    const scaleY = canvas.clientHeight / rect.height || 1
     return {
       x: (clientX - rect.left) * scaleX,
       y: (clientY - rect.top) * scaleY,
