@@ -3,8 +3,11 @@ import { useRef, useEffect, useCallback } from 'react'
 const RULER_THICKNESS = 60
 const SNAP_DIST = 20
 
-function snapToRuler(pos, ruler) {
-  if (!ruler || !ruler.visible) return pos
+// 연필 모양 커서 (Tip이 x=2, y=22 위치)
+const PENCIL_CURSOR = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>') 2 22, crosshair`
+
+function calcRulerSnap(pos, ruler, currentLock) {
+  if (!ruler || !ruler.visible) return { pos, lock: null }
 
   const { x1, y1, x2, y2 } = ruler
   const cx = (x1 + x2) / 2
@@ -13,7 +16,7 @@ function snapToRuler(pos, ruler) {
   const dy = y2 - y1
   const length = Math.hypot(dx, dy)
 
-  if (length === 0) return pos
+  if (length === 0) return { pos, lock: null }
 
   const angle = Math.atan2(dy, dx)
   const cos = Math.cos(-angle)
@@ -28,21 +31,25 @@ function snapToRuler(pos, ruler) {
   const halfThick = RULER_THICKNESS / 2
 
   let snappedY = localY
-  let snapped = false
+  let edge = null
 
-  // 위쪽 모서리에 스냅
-  if (Math.abs(localY - (-halfThick)) < SNAP_DIST) {
-    snappedY = -halfThick
-    snapped = true
-  }
-  // 아래쪽 모서리에 스냅
-  else if (Math.abs(localY - halfThick) < SNAP_DIST) {
-    snappedY = halfThick
-    snapped = true
+  // 드로잉 중이면 기존 스냅 엣지 유지 (자를 벗어나지 않게 고정)
+  if (currentLock) {
+    edge = currentLock.edge
+    snappedY = edge === 'top' ? -halfThick : halfThick
+  } else {
+    // 처음 드래그 시작 시 스냅 여부 판단
+    if (Math.abs(localY - (-halfThick)) < SNAP_DIST) {
+      snappedY = -halfThick
+      edge = 'top'
+    } else if (Math.abs(localY - halfThick) < SNAP_DIST) {
+      snappedY = halfThick
+      edge = 'bottom'
+    }
   }
 
-  if (snapped) {
-    // 자의 길이 밖으로 벗어나지 않게 제한
+  if (edge) {
+    // 자의 길이 밖으로 벗어나지 않게 X축도 단단히 고정
     const snappedLocalX = Math.max(-length / 2, Math.min(length / 2, localX))
     
     // 다시 원래 좌표계로 복구
@@ -50,19 +57,19 @@ function snapToRuler(pos, ruler) {
     const unSin = Math.sin(angle)
     const globalX = snappedLocalX * unCos - snappedY * unSin + cx
     const globalY = snappedLocalX * unSin + snappedY * unCos + cy
-    return { x: globalX, y: globalY }
+    return { pos: { x: globalX, y: globalY }, lock: { edge } }
   }
 
-  return pos
+  return { pos, lock: null }
 }
 
 export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawStart, ruler }) {
   const isDrawing = useRef(false)
+  const snapLock = useRef(null)
   const lastPos = useRef({ x: 0, y: 0 })
 
   const getPos = (e, canvas) => {
     const rect = canvas.getBoundingClientRect()
-    // 캔버스 크기 비율을 고려 (width=100% 등으로 CSS 크기와 내장 크기가 다를 수 있음)
     const scaleX = canvas.width / rect.width
     const scaleY = canvas.height / rect.height
     let clientX, clientY
@@ -83,9 +90,14 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     if (activeTool !== 'pen') return
     e.preventDefault()
     isDrawing.current = true
+    snapLock.current = null
+
     const canvas = canvasRef.current
     const rawPos = getPos(e, canvas)
-    lastPos.current = snapToRuler(rawPos, ruler)
+    const { pos, lock } = calcRulerSnap(rawPos, ruler, null)
+    
+    snapLock.current = lock
+    lastPos.current = pos
     onDrawStart?.()
   }, [activeTool, canvasRef, onDrawStart, ruler])
 
@@ -94,8 +106,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     e.preventDefault()
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
+    
     const rawPos = getPos(e, canvas)
-    const pos = snapToRuler(rawPos, ruler)
+    const { pos } = calcRulerSnap(rawPos, ruler, snapLock.current)
 
     ctx.beginPath()
     ctx.moveTo(lastPos.current.x, lastPos.current.y)
@@ -111,6 +124,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
   const endDraw = useCallback(() => {
     isDrawing.current = false
+    snapLock.current = null
   }, [])
 
   useEffect(() => {
@@ -135,7 +149,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full"
-      style={{ cursor: activeTool === 'pen' ? 'crosshair' : 'default', touchAction: 'none' }}
+      style={{ cursor: activeTool === 'pen' ? PENCIL_CURSOR : 'default', touchAction: 'none' }}
       onMouseDown={startDraw}
       onMouseMove={draw}
       onMouseUp={endDraw}
