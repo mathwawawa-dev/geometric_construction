@@ -18,6 +18,10 @@ export function getShapeBounds(shape) {
       maxY: shape.cy + shape.r + pad,
     }
   }
+  if (shape.type === 'stamp') {
+    const half = (shape.fontSize || 48) * 0.6
+    return { minX: shape.x - half, maxX: shape.x + half, minY: shape.y - half, maxY: shape.y + half }
+  }
   if (shape.points && shape.points.length > 0) {
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
     for (const p of shape.points) {
@@ -59,6 +63,10 @@ export function isPointNearShape(px, py, shape, threshold = 8) {
     const d = Math.hypot(px - shape.cx, py - shape.cy)
     return Math.abs(d - shape.r) <= tolerance
   }
+  if (shape.type === 'stamp') {
+    const half = (shape.fontSize || 48) * 0.6
+    return Math.abs(px - shape.x) < half && Math.abs(py - shape.y) < half
+  }
   if (shape.type === 'stroke' || shape.type === 'arc') {
     const pts = shape.points
     if (!pts || pts.length === 0) return false
@@ -88,6 +96,9 @@ export function moveShape(shape, dx, dy) {
   if (shape.type === 'circle') {
     return { ...shape, cx: shape.cx + dx, cy: shape.cy + dy }
   }
+  if (shape.type === 'stamp') {
+    return { ...shape, x: shape.x + dx, y: shape.y + dy }
+  }
   if (shape.points) {
     return {
       ...shape,
@@ -102,19 +113,33 @@ export function renderShapes(ctx, shapes) {
   if (!ctx || !ctx.canvas) return
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
   for (const s of shapes) {
-    ctx.strokeStyle = s.color || '#1e40af'
-    ctx.lineWidth = s.width || 3
+    ctx.save()
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
-    ctx.beginPath()
-    if (s.type === 'circle') {
+    if (s.type === 'stamp') {
+      ctx.font = `bold ${s.fontSize || 48}px serif`
+      ctx.fillStyle = s.color || '#000000'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(s.char, s.x, s.y)
+    } else if (s.type === 'circle') {
+      ctx.globalAlpha = s.alpha ?? 1
+      ctx.strokeStyle = s.color || '#1e40af'
+      ctx.lineWidth = s.width || 3
+      ctx.beginPath()
       ctx.arc(s.cx, s.cy, s.r, 0, Math.PI * 2)
+      ctx.stroke()
     } else if (s.points && s.points.length > 0) {
+      ctx.globalAlpha = s.alpha ?? 1
+      ctx.strokeStyle = s.color || '#1e40af'
+      ctx.lineWidth = s.width || 3
+      ctx.beginPath()
       ctx.moveTo(s.points[0].x, s.points[0].y)
       for (let i = 1; i < s.points.length; i++) {
         ctx.lineTo(s.points[i].x, s.points[i].y)
       }
+      ctx.stroke()
     }
-    ctx.stroke()
+    ctx.restore()
   }
 }

@@ -13,7 +13,10 @@ const toolDefs = [
   { id: 'protractor', icon: '📐', label: '각도기' },
 ]
 
-export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisible, background, setBackground }) {
+// 넘버스탬프 목록 ①~⑩
+const STAMPS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩']
+
+export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisible, background, setBackground, stampMode, setStampMode }) {
   const fileRef = useRef(null)
 
   const handleImageUpload = (e) => {
@@ -26,16 +29,16 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
   }
 
   return (
-    <aside className="flex flex-col items-center gap-2 p-2 bg-gray-50 border-r border-gray-200 w-16 shrink-0">
+    <aside className="flex flex-col items-center gap-2 p-2 bg-gray-50 border-r border-gray-200 w-16 shrink-0 overflow-y-auto">
 
       {/* ─── 드로잉 모드 ─── */}
       {drawModes.map((m) => (
         <button
           key={m.id}
-          onClick={() => setDrawMode(m.id)}
+          onClick={() => { setDrawMode(m.id); setStampMode(null) }}
           title={m.label}
           className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center text-xl transition-all
-            ${drawMode === m.id
+            ${drawMode === m.id && !stampMode
               ? 'bg-blue-100 ring-2 ring-blue-500 shadow'
               : 'bg-white hover:bg-gray-100 border border-gray-200'
             }`}
@@ -44,6 +47,31 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
           <span className="text-[9px] text-gray-500 leading-none mt-0.5">{m.label}</span>
         </button>
       ))}
+
+      <div className="w-10 border-t border-gray-300 my-1" />
+
+      {/* ─── 넘버스탬프 ─── */}
+      <span className="text-[9px] text-gray-400 leading-none">도장</span>
+      <div className="flex flex-col gap-1">
+        {STAMPS.map((ch) => (
+          <button
+            key={ch}
+            title={`넘버스탬프 ${ch}`}
+            onClick={() => {
+              const next = stampMode === ch ? null : ch
+              setStampMode(next)
+              if (next) setDrawMode('pen')
+            }}
+            className={`w-12 h-8 rounded-lg text-base font-bold flex items-center justify-center transition-all ${
+              stampMode === ch
+                ? 'bg-orange-100 ring-2 ring-orange-400 text-orange-700'
+                : 'bg-white hover:bg-orange-50 border border-gray-200 text-gray-700'
+            }`}
+          >
+            {ch}
+          </button>
+        ))}
+      </div>
 
       <div className="w-10 border-t border-gray-300 my-1" />
 

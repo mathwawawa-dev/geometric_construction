@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.36_20260930_055000_힌지더블클릭연필방향완전수정'
+const VERSION = 'v0.1.37_20260930_061500_색상프리셋_형광펜_스탬프_각도기눈금snap_컴퍼스snap_우클릭수정'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -29,6 +29,11 @@ export default function App() {
 
   // 개체 선택 상태
   const [selectedIds, setSelectedIds] = useState([])
+
+  // 형광펜 / 넘버스탬프 모드
+  const [highlightMode, setHighlightMode] = useState(false)
+  const [stampMode, setStampMode] = useState(null)
+
 
   const getStateRef = useCallback(() => ({
     tools: {
@@ -249,6 +254,8 @@ export default function App() {
         onRedo={redo}
         onClear={clear}
         onSave={handleSave}
+        highlightMode={highlightMode}
+        setHighlightMode={setHighlightMode}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -263,6 +270,8 @@ export default function App() {
           toolsVisible={toolsVisible}
           background={state.background}
           setBackground={setBackground}
+          stampMode={stampMode}
+          setStampMode={setStampMode}
         />
 
         {/* 캔버스 영역 */}
@@ -297,6 +306,8 @@ export default function App() {
               onDrawEnd={handleInteractionEnd}
               onAddShape={handleAddShape}
               ruler={state.ruler}
+              highlightMode={highlightMode}
+              stampMode={stampMode}
             />
             <SelectionLayer
               active={state.drawMode === 'select'}
@@ -342,7 +353,7 @@ export default function App() {
 
           {/* 줌 레벨 및 단축키 안내 */}
           <div className="absolute bottom-14 left-2 text-[11px] text-gray-400 bg-white/70 px-2 py-0.5 rounded pointer-events-none">
-            {Math.round(zoom * 100)}% | S: 선택 | P: 펜 | V: 이동 | Del: 삭제 | 우클릭+드래그: 팬 | 휠: 줌
+            {Math.round(zoom * 100)}% | S: 선택 | P: 펜 | Del: 삭제 | 우클릭+드래그: 화면 이동 | 휠: 줌
           </div>
         </div>
       </div>

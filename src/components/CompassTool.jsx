@@ -179,9 +179,14 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         const curMouseDist = Math.hypot(rawP.x - pencilX, rawP.y - pencilY)
         const newPinAngle = curMouseAngle + dragOffset.current.angleOffset
         const newRadius = Math.max(10, curMouseDist + dragOffset.current.distOffset)
+        const candidatePin = {
+          x: pencilX + Math.cos(newPinAngle) * newRadius,
+          y: pencilY + Math.sin(newPinAngle) * newRadius,
+        }
+        const snappedPin = snapToDrawing(snapPointToRuler(candidatePin, ruler), canvasRef)
         setCompass({
-          pinX: pencilX + Math.cos(newPinAngle) * newRadius,
-          pinY: pencilY + Math.sin(newPinAngle) * newRadius,
+          pinX: snappedPin.x,
+          pinY: snappedPin.y,
         })
       } else if (dragging.current === 'whole') {
         const curMouseAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
@@ -192,14 +197,19 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         })
 
       } else if (dragging.current === 'pencil' || dragging.current === 'clamp') {
-        // 연필 조작 시 마우스 포인터와 클릭 위치 1:1 완벽 동기화 (점프 없음, 멀어짐 없음)
+        // 연필 조작 시 마우스 포인터와 클릭 위치 1:1 완벽 동기화 + 스냅 지원
         const curMouseAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
         const curMouseDist = Math.hypot(rawP.x - pinX, rawP.y - pinY)
         const newPencilAngle = curMouseAngle + dragOffset.current.angleOffset
         const newRadius = Math.max(10, curMouseDist + dragOffset.current.distOffset)
+        const candidatePencil = {
+          x: pinX + Math.cos(newPencilAngle) * newRadius,
+          y: pinY + Math.sin(newPencilAngle) * newRadius,
+        }
+        const snappedPencil = snapToDrawing(snapPointToRuler(candidatePencil, ruler), canvasRef)
         setCompass({
-          pencilX: pinX + Math.cos(newPencilAngle) * newRadius,
-          pencilY: pinY + Math.sin(newPencilAngle) * newRadius,
+          pencilX: snappedPencil.x,
+          pencilY: snappedPencil.y,
         })
 
       } else if (dragging.current === 'leg') {

@@ -1,7 +1,7 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
 
 const RULER_THICKNESS = 120
-const SNAP_DIST = 12 // 스냅 반경 축소 (20 -> 12)
+const SNAP_DIST = 12
 
 function calcRulerSnap(pos, ruler, currentLock) {
   if (!ruler || !ruler.visible) return { pos, lock: null }
@@ -19,7 +19,6 @@ function calcRulerSnap(pos, ruler, currentLock) {
   const cos = Math.cos(-angle)
   const sin = Math.sin(-angle)
 
-  // 자의 중심을 원점으로 변환하고 회전
   const tx = pos.x - cx
   const ty = pos.y - cy
   const localX = tx * cos - ty * sin
@@ -30,12 +29,10 @@ function calcRulerSnap(pos, ruler, currentLock) {
   let snappedY = localY
   let edge = null
 
-  // 드로잉 중이면 기존 스냅 엣지 유지 (자를 벗어나지 않게 고정)
   if (currentLock) {
     edge = currentLock.edge
     snappedY = edge === 'top' ? -halfThick : halfThick
   } else {
-    // 처음 드래그 시작 시 스냅 여부 판단
     if (Math.abs(localY - (-halfThick)) < SNAP_DIST) {
       snappedY = -halfThick
       edge = 'top'
@@ -46,11 +43,7 @@ function calcRulerSnap(pos, ruler, currentLock) {
   }
 
   if (edge) {
-    // X축을 자의 길이에 강제로 가두지 않고 무한선으로 처리하여
-    // 마우스의 물리적 X 위치와 포인터가 완벽히 일치하도록 함 (점프 현상 해결)
     const snappedLocalX = localX
-    
-    // 다시 원래 좌표계로 복구
     const unCos = Math.cos(angle)
     const unSin = Math.sin(angle)
     const globalX = snappedLocalX * unCos - snappedY * unSin + cx
@@ -61,7 +54,7 @@ function calcRulerSnap(pos, ruler, currentLock) {
   return { pos, lock: null }
 }
 
-export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler }) {
+export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, highlightMode, stampMode }) {
   const isDrawing = useRef(false)
   const snapLock = useRef(null)
   const lastPos = useRef({ x: 0, y: 0 })
@@ -70,6 +63,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const fakePencilLineRef = useRef(null)
   const lastMousePos = useRef({ x: -9999, y: -9999 })
   const [isHovering, setIsHovering] = useState(false)
+
+  // 형광펜 굵기/투명도
+  const hlWidth = Math.max(strokeWidth * 6, 20)
+  const hlAlpha = 0.35
 
   const getPos = (e, canvas) => {
     const rect = canvas.getBoundingClientRect()
@@ -96,7 +93,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       fakeCursorRef.current.style.display = 'block'
     }
     if (fakePencilLineRef.current) {
-      // 스냅 시 연필 가운데 선 표시
       fakePencilLineRef.current.style.opacity = snapped ? '1' : '0'
     }
   }, [])
@@ -106,8 +102,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     if (!canvas) return
     const rawPos = getPos(e, canvas)
     lastMousePos.current = rawPos
-    
-    if (isDrawing.current && activeTool === 'pen') {
+
+    if (isDrawing.current && activeTool === 'pen' && !stampMode) {
       e.preventDefault()
       const ctx = canvas.getContext('2d')
       const { pos, lock } = calcRulerSnap(rawPos, ruler, snapLock.current)
@@ -115,11 +111,19 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       ctx.beginPath()
       ctx.moveTo(lastPos.current.x, lastPos.current.y)
       ctx.lineTo(pos.x, pos.y)
-      ctx.strokeStyle = strokeColor
-      ctx.lineWidth = strokeWidth
+      if (highlightMode) {
+        ctx.globalAlpha = hlAlpha
+        ctx.strokeStyle = strokeColor
+        ctx.lineWidth = hlWidth
+      } else {
+        ctx.globalAlpha = 1
+        ctx.strokeStyle = strokeColor
+        ctx.lineWidth = strokeWidth
+      }
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
       ctx.stroke()
+      ctx.globalAlpha = 1
 
       lastPos.current = pos
       currentStrokePoints.current.push({ x: pos.x, y: pos.y })
@@ -128,27 +132,53 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       const { pos, lock } = calcRulerSnap(rawPos, ruler, null)
       updateFakeCursor(pos, lock !== null)
     }
-  }, [activeTool, strokeColor, strokeWidth, ruler, updateFakeCursor])
+  }, [activeTool, strokeColor, strokeWidth, ruler, updateFakeCursor, highlightMode, hlWidth, hlAlpha, stampMode])
 
   const startDraw = useCallback((e) => {
     if (activeTool !== 'pen') return
+    // 우클릭(button=2) / 중간클릭(button=1) 은 드로잉 시작하지 않음 (화면 이동 전용)
+    if (e.button !== undefined && e.button !== 0) return
     e.preventDefault()
-    isDrawing.current = true
-    snapLock.current = null
-
-    // 드로잉 중 툴 오버레이 이벤트 차단
-    document.body.classList.add('is-drawing')
 
     const canvas = canvasRef.current
     const rawPos = getPos(e, canvas)
+
+    // 넘버스탬프 클릭
+    if (stampMode) {
+      const ctx = canvas.getContext('2d')
+      const fontSize = 48
+      ctx.save()
+      ctx.font = `bold ${fontSize}px serif`
+      ctx.fillStyle = strokeColor
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(stampMode, rawPos.x, rawPos.y)
+      ctx.restore()
+      const shape = {
+        id: 'st_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        type: 'stamp',
+        char: stampMode,
+        x: rawPos.x,
+        y: rawPos.y,
+        color: strokeColor,
+        fontSize,
+      }
+      onAddShape?.(shape)
+      onDrawEnd?.()
+      return
+    }
+
+    isDrawing.current = true
+    snapLock.current = null
+
+    document.body.classList.add('is-drawing')
+
     const { pos, lock } = calcRulerSnap(rawPos, ruler, null)
-    
     snapLock.current = lock
     lastPos.current = pos
     currentStrokePoints.current = [{ x: pos.x, y: pos.y }]
     updateFakeCursor(pos, lock !== null)
 
-    // 윈도우 레벨 이벤트 연결로 드래그 끊김 방지
     const onWindowMove = (me) => handleMove(me)
     const onWindowUp = () => {
       if (isDrawing.current) {
@@ -157,7 +187,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             id: 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
             type: 'stroke',
             color: strokeColor,
-            width: strokeWidth,
+            width: highlightMode ? hlWidth : strokeWidth,
+            alpha: highlightMode ? hlAlpha : 1,
             points: [...currentStrokePoints.current],
           }
           onAddShape?.(shape)
@@ -177,7 +208,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     window.addEventListener('mouseup', onWindowUp)
     window.addEventListener('touchmove', onWindowMove, { passive: false })
     window.addEventListener('touchend', onWindowUp)
-  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth])
+  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -204,8 +235,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     return () => ro.disconnect()
   }, [canvasRef])
 
+  const isStampMode = activeTool === 'pen' && !!stampMode
+
   return (
-    <div 
+    <div
       className="absolute inset-0 w-full h-full"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => { if (!isDrawing.current) setIsHovering(false) }}
@@ -214,15 +247,15 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       onMouseDown={startDraw}
       onTouchStart={startDraw}
       style={{
-        cursor: activeTool === 'pen' ? 'none' : (activeTool === 'pointer' ? 'grab' : 'default'),
+        cursor: activeTool === 'pen' ? 'none' : 'default',
         touchAction: 'none',
       }}
     >
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
-      
+
       {activeTool === 'pen' && isHovering && lastMousePos.current.x > -100 && (
-        <div 
-          ref={fakeCursorRef} 
+        <div
+          ref={fakeCursorRef}
           className="absolute top-0 left-0 pointer-events-none drop-shadow-md"
           style={{
             zIndex: 9999,
@@ -230,10 +263,20 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             transform: `translate(${lastMousePos.current.x - 2}px, ${lastMousePos.current.y - 22}px)`,
           }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="#1e40af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-            <line ref={fakePencilLineRef} x1="18" y1="6" x2="6" y2="18" stroke="#ef4444" strokeWidth="2" style={{ opacity: 0, transition: 'opacity 0.15s' }} />
-          </svg>
+          {isStampMode ? (
+            <div style={{ fontSize: 36, lineHeight: 1, userSelect: 'none', opacity: 0.7 }}>
+              {stampMode}
+            </div>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+              fill={highlightMode ? 'rgba(250,204,21,0.6)' : 'white'}
+              stroke={highlightMode ? '#ca8a04' : '#1e40af'}
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+              <line ref={fakePencilLineRef} x1="18" y1="6" x2="6" y2="18" stroke="#ef4444" strokeWidth="2" style={{ opacity: 0, transition: 'opacity 0.15s' }} />
+            </svg>
+          )}
         </div>
       )}
     </div>
