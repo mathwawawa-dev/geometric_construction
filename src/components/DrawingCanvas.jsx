@@ -1,10 +1,7 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 
 const RULER_THICKNESS = 60
 const SNAP_DIST = 20
-
-// 연필 모양 커서 (Tip이 x=2, y=22 위치)
-const PENCIL_CURSOR = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>') 2 22, crosshair`
 
 function calcRulerSnap(pos, ruler, currentLock) {
   if (!ruler || !ruler.visible) return { pos, lock: null }
@@ -67,24 +64,63 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const isDrawing = useRef(false)
   const snapLock = useRef(null)
   const lastPos = useRef({ x: 0, y: 0 })
+  const fakeCursorRef = useRef(null)
+  const fakeRulerIconRef = useRef(null)
+  const [isHovering, setIsHovering] = useState(false)
 
   const getPos = (e, canvas) => {
     const rect = canvas.getBoundingClientRect()
     const scaleX = canvas.width / rect.width
     const scaleY = canvas.height / rect.height
     let clientX, clientY
-    if (e.touches) {
+    if (e.touches && e.touches.length > 0) {
       clientX = e.touches[0].clientX
       clientY = e.touches[0].clientY
     } else {
-      clientX = e.clientX
-      clientY = e.clientY
+      clientX = e.clientX || 0
+      clientY = e.clientY || 0
     }
     return {
       x: (clientX - rect.left) * scaleX,
       y: (clientY - rect.top) * scaleY,
     }
   }
+
+  const updateFakeCursor = useCallback((pos, snapped) => {
+    if (fakeCursorRef.current) {
+      fakeCursorRef.current.style.transform = `translate(${pos.x - 2}px, ${pos.y - 22}px)`
+    }
+    if (fakeRulerIconRef.current) {
+      fakeRulerIconRef.current.style.display = snapped ? 'block' : 'none'
+    }
+  }, [])
+
+  const handleMove = useCallback((e) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const rawPos = getPos(e, canvas)
+    
+    if (isDrawing.current && activeTool === 'pen') {
+      e.preventDefault()
+      const ctx = canvas.getContext('2d')
+      const { pos, lock } = calcRulerSnap(rawPos, ruler, snapLock.current)
+
+      ctx.beginPath()
+      ctx.moveTo(lastPos.current.x, lastPos.current.y)
+      ctx.lineTo(pos.x, pos.y)
+      ctx.strokeStyle = strokeColor
+      ctx.lineWidth = strokeWidth
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      ctx.stroke()
+
+      lastPos.current = pos
+      updateFakeCursor(pos, lock !== null)
+    } else if (activeTool === 'pen') {
+      const { pos, lock } = calcRulerSnap(rawPos, ruler, null)
+      updateFakeCursor(pos, lock !== null)
+    }
+  }, [activeTool, strokeColor, strokeWidth, ruler, updateFakeCursor])
 
   const startDraw = useCallback((e) => {
     if (activeTool !== 'pen') return
@@ -98,34 +134,24 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     
     snapLock.current = lock
     lastPos.current = pos
+    updateFakeCursor(pos, lock !== null)
     onDrawStart?.()
-  }, [activeTool, canvasRef, onDrawStart, ruler])
 
-  const draw = useCallback((e) => {
-    if (!isDrawing.current || activeTool !== 'pen') return
-    e.preventDefault()
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    
-    const rawPos = getPos(e, canvas)
-    const { pos } = calcRulerSnap(rawPos, ruler, snapLock.current)
-
-    ctx.beginPath()
-    ctx.moveTo(lastPos.current.x, lastPos.current.y)
-    ctx.lineTo(pos.x, pos.y)
-    ctx.strokeStyle = strokeColor
-    ctx.lineWidth = strokeWidth
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
-    ctx.stroke()
-
-    lastPos.current = pos
-  }, [activeTool, canvasRef, strokeColor, strokeWidth, ruler])
-
-  const endDraw = useCallback(() => {
-    isDrawing.current = false
-    snapLock.current = null
-  }, [])
+    // 윈도우 레벨 이벤트 연결로 드래그 끊김 방지
+    const onWindowMove = (me) => handleMove(me)
+    const onWindowUp = () => {
+      isDrawing.current = false
+      snapLock.current = null
+      window.removeEventListener('mousemove', onWindowMove)
+      window.removeEventListener('mouseup', onWindowUp)
+      window.removeEventListener('touchmove', onWindowMove)
+      window.removeEventListener('touchend', onWindowUp)
+    }
+    window.addEventListener('mousemove', onWindowMove)
+    window.addEventListener('mouseup', onWindowUp)
+    window.addEventListener('touchmove', onWindowMove, { passive: false })
+    window.addEventListener('touchend', onWindowUp)
+  }, [activeTool, canvasRef, onDrawStart, ruler, handleMove, updateFakeCursor])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -146,17 +172,38 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   }, [canvasRef])
 
   return (
-    <canvas
-      ref={canvasRef}
+    <div 
       className="absolute inset-0 w-full h-full"
-      style={{ cursor: activeTool === 'pen' ? PENCIL_CURSOR : 'default', touchAction: 'none' }}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => { if (!isDrawing.current) setIsHovering(false) }}
+      onMouseMove={handleMove}
+      onTouchMove={handleMove}
       onMouseDown={startDraw}
-      onMouseMove={draw}
-      onMouseUp={endDraw}
-      onMouseLeave={endDraw}
       onTouchStart={startDraw}
-      onTouchMove={draw}
-      onTouchEnd={endDraw}
-    />
+      style={{ cursor: activeTool === 'pen' ? 'none' : 'default', touchAction: 'none' }}
+    >
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+      
+      {activeTool === 'pen' && (isHovering || isDrawing.current) && (
+        <div 
+          ref={fakeCursorRef} 
+          className="absolute top-0 left-0 pointer-events-none drop-shadow-md"
+          style={{ zIndex: 9999, willChange: 'transform' }}
+        >
+          {/* 연필 아이콘 (tip이 2, 22에 위치) */}
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="#1e40af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+          </svg>
+          {/* 스냅 표시 아이콘 (우측 상단) */}
+          <div 
+            ref={fakeRulerIconRef}
+            className="absolute bg-sky-100 border border-sky-400 rounded px-1 shadow-sm flex items-center justify-center transition-opacity"
+            style={{ top: '-12px', left: '16px', display: 'none', transform: 'rotate(-15deg)' }}
+          >
+            <span className="text-[12px] leading-none">📏</span>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
