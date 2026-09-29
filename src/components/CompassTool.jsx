@@ -149,6 +149,13 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           pencilX: pinX + Math.cos(newAngle) * radius,
           pencilY: pinY + Math.sin(newAngle) * radius,
         })
+      } else if (dragging.current === 'clamp') {
+        // 클램프 드래그 → arc 없이 반지름만 조절
+        const newPencilPos = snapToDrawing(snapPointToRuler(rawP, ruler), canvasRef)
+        const newRadius = dist(pinX, pinY, newPencilPos.x, newPencilPos.y)
+        if (newRadius > 2) {
+          setCompass({ pencilX: newPencilPos.x, pencilY: newPencilPos.y })
+        }
       } else if (dragging.current === 'pencil') {
         // 연필 드래그 → 반지름 방향 이동 + arc 그리기
         const newPencilPos = snapToDrawing(snapPointToRuler(rawP, ruler), canvasRef)
@@ -239,30 +246,37 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           <line x1="70" y1="-10" x2={legLength} y2="0" stroke="#cbd5e1" strokeWidth="10" strokeLinecap="round" />
           <line x1="70" y1="-10" x2={legLength} y2="0" stroke="#e2e8f0" strokeWidth="4" strokeLinecap="round" />
 
-          {/* 연필 어셈블리 (−9도 기울어져 꽂힘) */}
+          {/* 연필 어셈블리 (−9도 기울어져 꽂힘, 길이 2/3로 축소) */}
           <g transform="rotate(-9)" style={{ pointerEvents: 'none' }}>
-            {/* 흑연 끝: 사진처럼 육각형을 얇게 깎은 형태 */}
+            {/* 흑연 끝 */}
             <polygon points="0,0 10,-2 10,2" fill="#1c1917" />
-            {/* 나무 부분 */}
+            {/* 나무 부분: 흑연 끝에 바로 맞닿게 */}
             <polygon points="10,-2 10,2 30,-4.5 30,4.5" fill="#c8a96e" />
-            {/* 나무 결 */}
-            <line x1="12" y1="-1" x2="28" y2="-3.5" stroke="#b8936e" strokeWidth="0.8" />
-            <line x1="12" y1="1" x2="28" y2="3.5" stroke="#b8936e" strokeWidth="0.8" />
-            {/* 노란 몸통 */}
-            <rect x="30" y="-4.5" width="220" height="9" fill="#f5c518" />
-            <rect x="30" y="-4.5" width="220" height="3" fill="#f7d060" opacity="0.5" />
-            {/* 금속 페룰 */}
-            <rect x="250" y="-4.5" width="14" height="9" fill="#9ca3af" />
-            <line x1="252" y1="-4.5" x2="252" y2="4.5" stroke="#6b7280" strokeWidth="1" />
-            <line x1="257" y1="-4.5" x2="257" y2="4.5" stroke="#6b7280" strokeWidth="1" />
-            {/* 지우개 */}
-            <rect x="264" y="-4.5" width="12" height="9" rx="2" fill="#f9a8a8" />
-            {/* 네이비 클램프 */}
+            {/* 나무 결: 삼각형 안쪽에만 */}
+            <line x1="11" y1="-1.5" x2="29" y2="-4" stroke="#b8936e" strokeWidth="0.7" />
+            <line x1="11" y1="1.5" x2="29" y2="4" stroke="#b8936e" strokeWidth="0.7" />
+            {/* 노란 몸통 (220 → 147) */}
+            <rect x="30" y="-4.5" width="147" height="9" fill="#f5c518" />
+            <rect x="30" y="-4.5" width="147" height="3" fill="#f7d060" opacity="0.5" />
+            {/* 금속 페룰 (x: 250→177) */}
+            <rect x="177" y="-4.5" width="14" height="9" fill="#9ca3af" />
+            <line x1="179" y1="-4.5" x2="179" y2="4.5" stroke="#6b7280" strokeWidth="1" />
+            <line x1="184" y1="-4.5" x2="184" y2="4.5" stroke="#6b7280" strokeWidth="1" />
+            {/* 지우개 (x: 264→191) */}
+            <rect x="191" y="-4.5" width="12" height="9" rx="2" fill="#f9a8a8" />
+            {/* 네이비 클램프 (고정) */}
             <rect x="58" y="-9" width="22" height="18" rx="3" fill="#1e293b" />
             <rect x="64" y="-13" width="10" height="5" rx="1.5" fill="#94a3b8" stroke="#64748b" strokeWidth="0.8" />
-            {/* 연필 클릭 핸들 */}
+
+            {/* 연필 몸통 클릭 핸들 (arc 그리기) — 클램프 제외 */}
             <g style={{ pointerEvents: 'all', cursor: 'crosshair' }} onMouseDown={onPointerDown('pencil')} onTouchStart={onPointerDown('pencil')}>
-              <rect x="0" y="-14" width="275" height="28" fill="transparent" />
+              <rect x="0" y="-12" width="55" height="24" fill="transparent" />
+              <rect x="82" y="-12" width="122" height="24" fill="transparent" />
+            </g>
+
+            {/* 클램프 클릭 핸들 (반지름만 조절, arc 없음) */}
+            <g style={{ pointerEvents: 'all', cursor: 'ew-resize' }} onMouseDown={onPointerDown('clamp')} onTouchStart={onPointerDown('clamp')}>
+              <rect x="55" y="-12" width="30" height="24" fill="transparent" />
             </g>
           </g>
         </g>
