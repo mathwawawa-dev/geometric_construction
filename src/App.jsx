@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.31_20260930_050500_개선'
+const VERSION = 'v0.1.32_20260930_050800_개선'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -60,12 +60,13 @@ export default function App() {
     return () => clearTimeout(timer)
   }, [saveSnapshot])
 
-  // 도형 이동 및 삭제 핸들러
-  const handleMoveSelected = useCallback((dx, dy) => {
-    if (selectedIds.length === 0) return
-    moveShapes(selectedIds, dx, dy)
+  // 도형 이동 및 삭제 핸들러 (원터치 즉시 드래그 이동 완벽 지원)
+  const handleMoveSelected = useCallback((ids, dx, dy) => {
+    const targetIds = (Array.isArray(ids) && ids.length > 0) ? ids : (typeof ids === 'number' ? selectedIds : ids)
+    if (!targetIds || targetIds.length === 0) return
+    moveShapes(targetIds, dx, dy)
     if (canvasRef.current) {
-      const set = new Set(selectedIds)
+      const set = new Set(targetIds)
       const updated = stateRef.current.shapes.map(s => set.has(s.id) ? moveShape(s, dx, dy) : s)
       renderShapes(canvasRef.current.getContext('2d'), updated)
     }

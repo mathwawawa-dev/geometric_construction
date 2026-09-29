@@ -12,6 +12,7 @@ export default function SelectionLayer({
 }) {
   const [marquee, setMarquee] = useState(null)
   const isDraggingShapes = useRef(false)
+  const activeDragIds = useRef([])
   const dragStartPos = useRef({ x: 0, y: 0 })
   const lastPos = useRef({ x: 0, y: 0 })
   const svgRef = useRef(null)
@@ -55,43 +56,42 @@ export default function SelectionLayer({
     dragStartPos.current = pos
     lastPos.current = pos
 
-    // 1. 이미 선택된 도형 위를 클릭했는지 확인 (이동 시작)
+    // 1. 이미 선택된 도형 위를 클릭했는지 확인 (선택된 것들 즉시 이동)
     const clickedSelected = shapes.find(
       (s) => selectedIds.includes(s.id) && isPointNearShape(pos.x, pos.y, s)
     )
 
     if (clickedSelected) {
       isDraggingShapes.current = true
+      activeDragIds.current = selectedIds
     } else {
-      // 2. 다른 도형을 클릭했는지 확인 (단일 선택 또는 Shift 다중 선택)
+      // 2. 다른 도형을 클릭했는지 확인 (선택과 동시에 원터치 드래그 이동 시작!)
       const hit = [...shapes].reverse().find((s) => isPointNearShape(pos.x, pos.y, s))
       if (hit) {
-        if (e.shiftKey) {
-          const next = selectedIds.includes(hit.id)
-            ? selectedIds.filter((id) => id !== hit.id)
-            : [...selectedIds, hit.id]
-          setSelectedIds(next)
-        } else {
-          setSelectedIds([hit.id])
-        }
+        const nextIds = e.shiftKey
+          ? (selectedIds.includes(hit.id) ? selectedIds.filter((id) => id !== hit.id) : [...selectedIds, hit.id])
+          : [hit.id]
+        setSelectedIds(nextIds)
+        activeDragIds.current = nextIds
         isDraggingShapes.current = true
       } else {
         // 3. 빈 공간 클릭 -> 영역 드래그 선택 (블록 지정) 시작
         if (!e.shiftKey) {
           setSelectedIds([])
         }
+        activeDragIds.current = []
         setMarquee({ x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y })
       }
     }
 
     const onPointerMove = (me) => {
       const curPos = getSVGPos(me)
-      if (isDraggingShapes.current) {
+      if (isDraggingShapes.current && activeDragIds.current.length > 0) {
         const dx = curPos.x - lastPos.current.x
         const dy = curPos.y - lastPos.current.y
         lastPos.current = curPos
         if (dx !== 0 || dy !== 0) {
-          onMoveShapes(dx, dy)
+          onMoveShapes(activeDragIds.current, dx, dy)
         }
       } else if (setMarquee) {
         setMarquee((prev) => (prev ? { ...prev, x2: curPos.x, y2: curPos.y } : null))
@@ -106,6 +106,7 @@ export default function SelectionLayer({
 
       if (isDraggingShapes.current) {
         isDraggingShapes.current = false
+        activeDragIds.current = []
         const endPos = getSVGPos(ue)
         const moved = Math.hypot(endPos.x - dragStartPos.current.x, endPos.y - dragStartPos.current.y) > 2
         if (moved) {
