@@ -24,10 +24,9 @@ function snapPointToRuler(p, ruler) {
   const localY = tx * sin + ty * cos
   const halfThick = 120 / 2 // RULER_THICKNESS
   
-  // 자의 길이 범위를 약간 벗어난 곳까지는 스냅 허용
   if (localX < -length/2 - 20 || localX > length/2 + 20) return p
   
-  const snapDist = 15 // 컴퍼스 툴 스냅 반경
+  const snapDist = 15
   
   if (Math.abs(localY - (-halfThick)) < snapDist) {
     const unCos = Math.cos(angle)
@@ -58,17 +57,15 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
   const { pinX, pinY, pencilX, pencilY, radiusInput } = compass
   const radius = dist(pinX, pinY, pencilX, pencilY)
 
-  // 1. 다리 길이 및 힌지(손잡이) 높이 계산
+  // 다리 길이 및 힌지 높이 계산
   const midX = (pinX + pencilX) / 2
   const midY = (pinY + pencilY) / 2
   const dx = pencilX - pinX
   const dy = pencilY - pinY
   const halfDist = radius / 2
 
-  // 고정된 다리 길이
-  const legLength = Math.max(260, halfDist + 50)
-  
-  // 높이 계산
+  // 비율이 길고 슬림한 디자인을 위해 다리 길이를 280으로 증가
+  const legLength = Math.max(280, halfDist + 50)
   const compassHeight = Math.sqrt(legLength ** 2 - halfDist ** 2)
   
   const length = Math.hypot(dx, dy) || 1
@@ -78,18 +75,8 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
   const hingeX = midX + nx * compassHeight
   const hingeY = midY + ny * compassHeight
 
-  // 다리 각도 계산
   const leftLegAngleDeg = Math.atan2(hingeY - pinY, hingeX - pinX) * (180 / Math.PI)
   const rightLegAngleDeg = Math.atan2(hingeY - pencilY, hingeX - pencilX) * (180 / Math.PI)
-
-  // 스핀들 (수평 나사) 좌표
-  const barX1 = pinX + (hingeX - pinX) * 0.45
-  const barY1 = pinY + (hingeY - pinY) * 0.45
-  const barX2 = pencilX + (hingeX - pencilX) * 0.45
-  const barY2 = pencilY + (hingeY - pencilY) * 0.45
-  const barMidX = (barX1 + barX2) / 2
-  const barMidY = (barY1 + barY2) / 2
-  const barAngleDeg = Math.atan2(barY2 - barY1, barX2 - barX1) * (180 / Math.PI)
 
   const getSVGPos = (e) => {
     const svg = svgRef.current
@@ -184,59 +171,64 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         className="absolute inset-0 w-full h-full tool-overlay"
         style={{ touchAction: 'none', pointerEvents: 'none' }}
       >
-        {/* 1. 스핀들 (가운데 수평 나사선) */}
-        <line x1={barX1} y1={barY1} x2={barX2} y2={barY2} stroke="#64748b" strokeWidth="3" />
-        <g transform={`translate(${barMidX}, ${barMidY}) rotate(${barAngleDeg})`}>
-          <rect x="-3" y="-12" width="6" height="24" rx="1.5" fill="#cbd5e1" stroke="#475569" strokeWidth="1" />
-        </g>
+        <defs>
+          <mask id="hinge-hole">
+            <rect x="-1000" y="-1000" width="2000" height="2000" fill="white" />
+            <rect x={hingeX - 8} y={hingeY - 5} width="16" height="10" rx="3" fill="black" />
+          </mask>
+        </defs>
 
-        {/* 2. 왼쪽 다리 (침핀) */}
+        {/* 1. 왼쪽 다리 (침핀) */}
         <g transform={`translate(${pinX}, ${pinY}) rotate(${leftLegAngleDeg})`} style={{ pointerEvents: 'none' }}>
           {/* 바늘 */}
           <polygon points="0,0 20,-1.5 20,1.5" fill="#94a3b8" />
-          {/* 은색 다리 본체 */}
-          <line x1="20" y1="0" x2={legLength} y2="0" stroke="#cbd5e1" strokeWidth="12" strokeLinecap="round" />
-          {/* 입체감을 위한 내부 라인 */}
-          <line x1="20" y1="0" x2={legLength} y2="0" stroke="#94a3b8" strokeWidth="6" strokeLinecap="round" />
+          {/* 네이비색 플라스틱 홀더 */}
+          <rect x="20" y="-6" width="24" height="12" rx="3" fill="#1e293b" />
+          {/* 은색 금속 다리 본체 */}
+          <line x1="40" y1="0" x2={legLength} y2="0" stroke="#cbd5e1" strokeWidth="10" strokeLinecap="round" />
+          <line x1="40" y1="0" x2={legLength} y2="0" stroke="#94a3b8" strokeWidth="4" strokeLinecap="round" />
           
-          {/* 조절 클램프 (여기를 잡고 핀 이동) */}
-          <g 
-            style={{ pointerEvents: 'all', cursor: 'move' }} 
-            onMouseDown={onPointerDown('pin')} 
-            onTouchStart={onPointerDown('pin')}
-          >
-            {/* 안쪽 넉넉한 투명 영역으로 클릭 판정 확대 */}
-            <rect x="0" y="-15" width="40" height="30" fill="transparent" />
-            <rect x="15" y="-7" width="12" height="14" rx="2" fill="#cbd5e1" stroke="#475569" strokeWidth="1" />
-            <circle cx="21" cy="9" r="4" fill="#64748b" stroke="white" strokeWidth="1" />
+          {/* 조절용 투명 핸들 (여기를 잡고 핀 이동) */}
+          <g style={{ pointerEvents: 'all', cursor: 'move' }} onMouseDown={onPointerDown('pin')} onTouchStart={onPointerDown('pin')}>
+            <rect x="0" y="-20" width="60" height="40" fill="transparent" />
           </g>
         </g>
 
-        {/* 3. 오른쪽 다리 (연필) */}
+        {/* 2. 오른쪽 다리 (긴 연필 장착) */}
         <g transform={`translate(${pencilX}, ${pencilY}) rotate(${rightLegAngleDeg})`} style={{ pointerEvents: 'none' }}>
-          {/* 짧은 연필 (다리에 장착된 형태) */}
-          <polygon points="0,0 8,-2.5 8,2.5" fill="#333" /> {/* 흑연 */}
-          <polygon points="8,-2.5 8,2.5 20,-4 20,4" fill="#deb887" /> {/* 나무 */}
-          <rect x="20" y="-4" width="55" height="8" fill="#334155" /> {/* 어두운 몸통 */}
-          <rect x="75" y="-4" width="10" height="8" fill="#94a3b8" /> {/* 은색 밴드 */}
           
-          {/* 은색 다리 본체 (연필 몸통 위를 덮음) */}
-          <line x1="35" y1="0" x2={legLength} y2="0" stroke="#cbd5e1" strokeWidth="12" strokeLinecap="round" />
-          <line x1="35" y1="0" x2={legLength} y2="0" stroke="#94a3b8" strokeWidth="6" strokeLinecap="round" />
+          {/* 은색 금속 다리 본체 (힌지에서 클램프 위치까지) */}
+          {/* 연필 그룹이 -9도 회전되어 있으므로 클램프 위치(x=70)의 Y좌표 오프셋은 대략 -11 */}
+          <line x1="70" y1="-11" x2={legLength} y2="0" stroke="#cbd5e1" strokeWidth="10" strokeLinecap="round" />
+          <line x1="70" y1="-11" x2={legLength} y2="0" stroke="#94a3b8" strokeWidth="4" strokeLinecap="round" />
           
-          {/* 조절 클램프 (여기를 잡고 연필 이동) */}
-          <g 
-            style={{ pointerEvents: 'all', cursor: 'move' }} 
-            onMouseDown={onPointerDown('pencil')} 
-            onTouchStart={onPointerDown('pencil')}
-          >
-            <rect x="15" y="-15" width="40" height="30" fill="transparent" />
-            <rect x="30" y="-8" width="14" height="16" rx="2" fill="#cbd5e1" stroke="#475569" strokeWidth="1.5" />
-            <circle cx="37" cy="10" r="4.5" fill="#64748b" stroke="white" strokeWidth="1" />
+          {/* 연필 & 클램프 어셈블리 (힌지를 빗겨가도록 -9도 회전) */}
+          <g transform="rotate(-9)">
+            {/* 긴 연필 */}
+            <polygon points="0,0 12,-3 12,3" fill="#333" /> {/* 흑연 */}
+            <polygon points="12,-3 12,3 35,-5 35,5" fill="#deb887" /> {/* 나무 */}
+            <rect x="35" y="-5" width="260" height="10" fill="#fbbf24" /> {/* 노란 몸통 */}
+            
+            {/* 육각 디테일 라인 */}
+            <line x1="35" y1="-1.5" x2="295" y2="-1.5" stroke="#f59e0b" strokeWidth="1" />
+            <line x1="35" y1="1.5" x2="295" y2="1.5" stroke="#f59e0b" strokeWidth="1" />
+            
+            <rect x="295" y="-5" width="15" height="10" fill="#cbd5e1" /> {/* 은색 페룰 */}
+            <rect x="310" y="-5" width="12" height="10" rx="2" fill="#f87171" /> {/* 지우개 */}
+            
+            {/* 연필을 꽉 잡아주는 네이비색 클램프 */}
+            <rect x="60" y="-10" width="20" height="20" rx="4" fill="#1e293b" />
+            {/* 은색 조임 나사 */}
+            <rect x="66" y="-14" width="8" height="4" rx="1" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1" />
+            
+            {/* 조절용 투명 핸들 (연필 전체 길이 덮음) */}
+            <g style={{ pointerEvents: 'all', cursor: 'move' }} onMouseDown={onPointerDown('pencil')} onTouchStart={onPointerDown('pencil')}>
+              <rect x="15" y="-15" width="310" height="30" fill="transparent" />
+            </g>
           </g>
         </g>
 
-        {/* 4. 꼭대기 손잡이 및 중앙 힌지 */}
+        {/* 3. 꼭대기 손잡이 및 중앙 힌지 */}
         <g 
           style={{ pointerEvents: 'all', cursor: 'grab' }}
           onMouseDown={onPointerDown('whole')}
@@ -245,26 +237,18 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           {/* 넓은 클릭 판정 영역 */}
           <circle cx={hingeX} cy={hingeY} r="35" fill="transparent" />
           
-          {/* 튀어나온 윗부분 손잡이 */}
+          {/* 튀어나온 윗부분 손잡이 (다크 네이비) */}
           <line
             x1={hingeX} y1={hingeY}
-            x2={hingeX + nx * 45} y2={hingeY + ny * 45}
-            stroke="#cbd5e1" strokeWidth="12" strokeLinecap="round"
-          />
-          <line
-            x1={hingeX} y1={hingeY}
-            x2={hingeX + nx * 42} y2={hingeY + ny * 42}
-            stroke="#64748b" strokeWidth="4" strokeLinecap="round" strokeDasharray="4 2"
+            x2={hingeX + nx * 28} y2={hingeY + ny * 28}
+            stroke="#1e293b" strokeWidth="12" strokeLinecap="round"
           />
           
-          {/* 중앙 O링 힌지 */}
-          <circle cx={hingeX} cy={hingeY} r="14" fill="transparent" stroke="#cbd5e1" strokeWidth="8" />
-          <circle cx={hingeX} cy={hingeY} r="14" fill="transparent" stroke="#94a3b8" strokeWidth="2" />
-          {/* 중앙 심 */}
-          <circle cx={hingeX} cy={hingeY} r="4" fill="#475569" />
+          {/* 중앙 힌지 (네이비색, 중앙에 직사각형 타공 마스크 적용) */}
+          <circle cx={hingeX} cy={hingeY} r="18" fill="#1e293b" mask="url(#hinge-hole)" />
         </g>
 
-        {/* 5. 반경 미리보기 원 (점선) */}
+        {/* 4. 반경 미리보기 원 (점선) */}
         <circle
           cx={pinX} cy={pinY} r={radius}
           fill="none" stroke="#93c5fd" strokeWidth="1.5" strokeDasharray="6 4"
@@ -302,8 +286,8 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           원 그리기
         </button>
         <p className="text-[11px] text-gray-400 leading-tight mt-1">
-          ⚙️ 다리 나사: 이동/반경<br />
-          ⚙️ 상단 손잡이: 전체 이동<br />
+          ⚙️ 연필/바늘: 클릭 후 이동<br />
+          ⚙️ 상단 힌지: 전체 이동<br />
           (자 근처에서 찰칵 스냅됨)
         </p>
       </div>
