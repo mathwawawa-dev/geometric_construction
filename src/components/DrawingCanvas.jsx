@@ -333,13 +333,35 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     return () => ro.disconnect()
   }, [canvasRef])
 
+  useEffect(() => {
+    if (activeTool === 'pen') {
+      setIsHovering(true)
+      if (fakeCursorRef.current && lastMousePos.current.x > -100) {
+        fakeCursorRef.current.style.display = 'block'
+      }
+    }
+  }, [activeTool])
+
   const isStampMode = activeTool === 'pen' && !!stampMode
 
   return (
     <div
       className="absolute inset-0 w-full h-full"
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => { if (!isDrawing.current) setIsHovering(false) }}
+      onMouseEnter={(e) => {
+        setIsHovering(true)
+        const canvas = canvasRef.current
+        if (canvas) {
+          const p = getPos(e, canvas)
+          lastMousePos.current = p
+        }
+        if (fakeCursorRef.current) fakeCursorRef.current.style.display = 'block'
+      }}
+      onMouseLeave={() => {
+        if (!isDrawing.current) {
+          setIsHovering(false)
+          if (fakeCursorRef.current) fakeCursorRef.current.style.display = 'none'
+        }
+      }}
       onMouseMove={handleMove}
       onTouchMove={handleMove}
       onMouseDown={startDraw}
@@ -352,14 +374,17 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
       <canvas ref={draftCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
 
-      {activeTool === 'pen' && isHovering && lastMousePos.current.x > -100 && (
+      {activeTool === 'pen' && isHovering && (
         <div
           ref={fakeCursorRef}
           className="absolute top-0 left-0 pointer-events-none drop-shadow-md"
           style={{
             zIndex: 9999,
             willChange: 'transform',
-            transform: `translate(${lastMousePos.current.x - 2}px, ${lastMousePos.current.y - 22}px)`,
+            transform: lastMousePos.current.x > -100
+              ? `translate(${lastMousePos.current.x - 2}px, ${lastMousePos.current.y - 22}px)`
+              : 'none',
+            display: lastMousePos.current.x > -100 ? 'block' : 'none',
           }}
         >
           {isStampMode ? (

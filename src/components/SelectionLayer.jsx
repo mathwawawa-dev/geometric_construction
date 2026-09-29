@@ -141,7 +141,7 @@ export default function SelectionLayer({
       className="absolute inset-0 w-full h-full"
       style={{
         pointerEvents: active ? 'all' : 'none',
-        cursor: active ? (isDraggingShapes.current ? 'grabbing' : 'default') : 'none',
+        cursor: active ? (isDraggingShapes.current ? 'grabbing' : 'default') : 'inherit',
         zIndex: 15,
       }}
       onMouseDown={handlePointerDown}

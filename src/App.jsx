@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.43_20260930_062800_Shift직선_컴퍼스원언두버그수정'
+const VERSION = 'v0.1.44_20260930_063100_S토글펜포인터표시버그수정'
 
 export default function App() {
   const canvasRef = useRef(null)
