@@ -162,27 +162,20 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const SUPERSCALE = 3 // 3배 픽셀 밀도 → CSS zoom 3배까지 선명 유지
     const resize = () => {
       const parent = canvas.parentElement
       if (!parent) return
       const ctx = canvas.getContext('2d')
-      const logW = parent.clientWidth
-      const logH = parent.clientHeight
-      const targetW = logW * SUPERSCALE
-      const targetH = logH * SUPERSCALE
-      if (canvas.width === targetW && canvas.height === targetH) return
-      // 기존 그림 보존 (임시 캔버스로 복사 후 스케일)
       const tmp = document.createElement('canvas')
       tmp.width = canvas.width
       tmp.height = canvas.height
       if (canvas.width > 0 && canvas.height > 0) {
         tmp.getContext('2d').drawImage(canvas, 0, 0)
       }
-      canvas.width = targetW
-      canvas.height = targetH
+      canvas.width = parent.clientWidth
+      canvas.height = parent.clientHeight
       if (tmp.width > 0 && tmp.height > 0) {
-        ctx.drawImage(tmp, 0, 0, targetW, targetH)
+        ctx.drawImage(tmp, 0, 0)
       }
     }
     resize()
