@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.48_20261001_084100_스탬프미리보기크기실제와동일'
+const VERSION = 'v0.1.49_20261001_084900_실행취소이중저장버그수정'
 
 export default function App() {
   const canvasRef = useRef(null)

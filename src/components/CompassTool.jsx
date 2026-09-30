@@ -329,7 +329,6 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
   const drawFullCircle = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    onDraw?.()
     const ctx = canvas.getContext('2d')
     ctx.beginPath()
     ctx.arc(pinX, pinY, radius, 0, Math.PI * 2)
@@ -347,8 +346,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       width: strokeWidth,
     }
     onAddShape?.(shape)
-    onInteractionEnd?.()
-  }, [canvasRef, pinX, pinY, radius, strokeColor, strokeWidth, onDraw, onInteractionEnd, onAddShape])
+  }, [canvasRef, pinX, pinY, radius, strokeColor, strokeWidth, onAddShape])
 
   // 레퍼런스 이미지와 100% 동일한 강체 기하구조:
   // 연필 각도: 다리-힌지 기준 24도 기울어짐 (업라이트 상태에서 연필이 완벽한 수직 -90도를 이룸)

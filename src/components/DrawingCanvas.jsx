@@ -252,7 +252,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         fontSize,
       }
       onAddShape?.(shape)
-      onDrawEnd?.()
     }
     setTextEditor(null)
   }, [textEditor, strokeColor, onAddShape, onDrawEnd, canvasRef])
@@ -307,7 +306,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         fontSize,
       }
       onAddShape?.(shape)
-      onDrawEnd?.()
       return
     }
 
@@ -361,8 +359,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             points: [...currentStrokePoints.current],
           }
           onAddShape?.(shape)
+        } else {
+          onDrawEnd?.()
         }
-        onDrawEnd?.()
       }
       isDrawing.current = false
       isShiftDrawing.current = false
