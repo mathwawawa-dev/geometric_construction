@@ -103,13 +103,16 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const updateFakeCursor = useCallback((pos, snapped) => {
     lastMousePos.current = pos
     if (fakeCursorRef.current) {
-      fakeCursorRef.current.style.transform = `translate(${pos.x - 2}px, ${pos.y - 22}px)`
+      const isStamp = !!stampMode
+      const tx = isStamp ? pos.x - 20 : pos.x - 2
+      const ty = isStamp ? pos.y - 20 : pos.y - 22
+      fakeCursorRef.current.style.transform = `translate(${tx}px, ${ty}px)`
       fakeCursorRef.current.style.display = 'block'
     }
     if (fakePencilLineRef.current) {
       fakePencilLineRef.current.style.opacity = snapped ? '1' : '0'
     }
-  }, [])
+  }, [stampMode])
 
   // 드래프트 캔버스에 현재 스트로크 단일 경로로 렌더링 (동그라미 겹침 방지)
   const renderCurrentStroke = useCallback(() => {
@@ -503,9 +506,14 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           style={{
             zIndex: 9999,
             willChange: 'transform',
-            transform: lastMousePos.current.x > -100
-              ? `translate(${lastMousePos.current.x - 2}px, ${lastMousePos.current.y - 22}px)`
-              : 'none',
+            transform: (() => {
+              if (lastMousePos.current.x <= -100) return 'none'
+              if (isStampMode) {
+                // 스탬프: 문자 중앙이 포인터에 오도록 (fontSize 41 → 절반 ~20.5)
+                return `translate(${lastMousePos.current.x - 20}px, ${lastMousePos.current.y - 20}px)`
+              }
+              return `translate(${lastMousePos.current.x - 2}px, ${lastMousePos.current.y - 22}px)`
+            })(),
             display: lastMousePos.current.x > -100 ? 'block' : 'none',
           }}
         >

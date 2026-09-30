@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.46_20260930_122600_텍스트즉시표시_텍스트수정_스냅토글'
+const VERSION = 'v0.1.47_20261001_083900_하단힌트이동_스탬프포인터정렬'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -375,16 +375,12 @@ export default function App() {
               />
             )}
           </div>
-
-          {/* 줌 레벨 및 단축키 안내 */}
-          <div className="absolute bottom-14 left-2 text-[11px] text-gray-400 bg-white/70 px-2 py-0.5 rounded pointer-events-none">
-            {Math.round(zoom * 100)}% | S: 선택 | P: 펜 | T: 텍스트 | Del: 삭제 | 우클릭+드래그: 화면 이동 | 휠: 줌
-          </div>
         </div>
       </div>
 
-      <footer className="px-4 py-1 bg-gray-50 border-t border-gray-200 text-[11px] text-gray-400">
-        {VERSION}
+      <footer className="px-4 py-1 bg-gray-50 border-t border-gray-200 text-[11px] text-gray-400 flex items-center justify-between">
+        <span>{VERSION}</span>
+        <span>{Math.round(zoom * 100)}% | S: 선택 | P: 펜 | T: 텍스트 | Del: 삭제 | 우클릭+드래그: 화면 이동 | 휠: 줌</span>
       </footer>
     </div>
   )
