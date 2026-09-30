@@ -61,7 +61,7 @@ function snapToPointCenters(pos, shapes, snapRadius = 20) {
   return center ? { pos: center, snappedPoint: true } : { pos, snappedPoint: false }
 }
 
-export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, highlightMode, stampMode, shapes }) {
+export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, highlightMode, stampMode, shapes, snapEnabled = true }) {
   const draftCanvasRef = useRef(null)
   const isDrawing = useRef(false)
   const snapLock = useRef(null)
@@ -154,13 +154,19 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
     if (isDrawing.current && activeTool === 'pen' && !stampMode) {
       e.preventDefault()
-      const { pos: rulerSnapped, lock } = calcRulerSnap(rawPos, ruler, snapLock.current)
-      let finalPos = rulerSnapped
+      let finalPos = rawPos
+      let lock = null
       let isPointSnapped = false
-      if (!lock) {
-        const pointRes = snapToPointCenters(rulerSnapped, shapes)
-        finalPos = pointRes.pos
-        isPointSnapped = pointRes.snappedPoint
+
+      if (snapEnabled) {
+        const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, snapLock.current)
+        lock = rLock
+        finalPos = rulerSnapped
+        if (!lock) {
+          const pointRes = snapToPointCenters(rulerSnapped, shapes)
+          finalPos = pointRes.pos
+          isPointSnapped = pointRes.snappedPoint
+        }
       }
 
       // Shift 키를 누른 상태이거나 Shift로 시작한 직선 드로잉인 경우 (첫 시작 방향 각도 유지)
@@ -197,22 +203,42 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       renderCurrentStroke()
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     } else if (activeTool === 'pen') {
-      const { pos: rulerSnapped, lock } = calcRulerSnap(rawPos, ruler, null)
-      let finalPos = rulerSnapped
+      let finalPos = rawPos
+      let lock = null
       let isPointSnapped = false
-      if (!lock) {
-        const pointRes = snapToPointCenters(rulerSnapped, shapes)
-        finalPos = pointRes.pos
-        isPointSnapped = pointRes.snappedPoint
+
+      if (snapEnabled) {
+        const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
+        lock = rLock
+        finalPos = rulerSnapped
+        if (!lock) {
+          const pointRes = snapToPointCenters(rulerSnapped, shapes)
+          finalPos = pointRes.pos
+          isPointSnapped = pointRes.snappedPoint
+        }
       }
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     }
-  }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, shapes])
+  }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, shapes, snapEnabled])
 
   const commitText = useCallback(() => {
     if (!textEditor) return
     const text = textEditor.text.trim()
     if (text) {
+      const fontSize = 26
+      // 캔버스에 즉시 렌더링 (엔터 치자마자 즉시 보이도록 보장)
+      const canvas = canvasRef.current
+      if (canvas) {
+        const ctx = canvas.getContext('2d')
+        ctx.save()
+        ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif`
+        ctx.fillStyle = strokeColor
+        ctx.textAlign = 'left'
+        ctx.textBaseline = 'top'
+        ctx.fillText(text, textEditor.x, textEditor.y)
+        ctx.restore()
+      }
+
       const shape = {
         id: 't_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
         type: 'text',
@@ -220,13 +246,13 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         x: textEditor.x,
         y: textEditor.y,
         color: strokeColor,
-        fontSize: 26,
+        fontSize,
       }
       onAddShape?.(shape)
       onDrawEnd?.()
     }
     setTextEditor(null)
-  }, [textEditor, strokeColor, onAddShape, onDrawEnd])
+  }, [textEditor, strokeColor, onAddShape, onDrawEnd, canvasRef])
 
   useEffect(() => {
     if (textEditor) {
@@ -287,13 +313,19 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
     document.body.classList.add('is-drawing')
 
-    const { pos: rulerSnapped, lock } = calcRulerSnap(rawPos, ruler, null)
-    let finalPos = rulerSnapped
+    let finalPos = rawPos
+    let lock = null
     let isPointSnapped = false
-    if (!lock) {
-      const pointRes = snapToPointCenters(rulerSnapped, shapes)
-      finalPos = pointRes.pos
-      isPointSnapped = pointRes.snappedPoint
+
+    if (snapEnabled) {
+      const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
+      lock = rLock
+      finalPos = rulerSnapped
+      if (!lock) {
+        const pointRes = snapToPointCenters(rulerSnapped, shapes)
+        finalPos = pointRes.pos
+        isPointSnapped = pointRes.snappedPoint
+      }
     }
 
     snapLock.current = lock
@@ -344,7 +376,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     window.addEventListener('mouseup', onWindowUp)
     window.addEventListener('touchmove', onWindowMove, { passive: false })
     window.addEventListener('touchend', onWindowUp)
-  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode, renderCurrentStroke, shapes, textEditor, commitText])
+  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode, renderCurrentStroke, shapes, textEditor, commitText, snapEnabled])
 
   useEffect(() => {
     const canvas = canvasRef.current

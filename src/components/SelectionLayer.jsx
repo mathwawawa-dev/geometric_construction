@@ -9,13 +9,16 @@ export default function SelectionLayer({
   onMoveShapes,
   onFinishMove,
   onDeleteSelected,
+  onUpdateShape,
 }) {
   const [marquee, setMarquee] = useState(null)
+  const [editingText, setEditingText] = useState(null)
   const isDraggingShapes = useRef(false)
   const activeDragIds = useRef([])
   const dragStartPos = useRef({ x: 0, y: 0 })
   const lastPos = useRef({ x: 0, y: 0 })
   const svgRef = useRef(null)
+  const editInputRef = useRef(null)
 
   const getSVGPos = useCallback((e) => {
     const svg = svgRef.current
@@ -49,8 +52,39 @@ export default function SelectionLayer({
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [active, selectedIds, onDeleteSelected, setSelectedIds])
 
+  const commitEditText = () => {
+    if (!editingText) return
+    const newText = editingText.text.trim()
+    if (newText) {
+      onUpdateShape?.(editingText.id, { text: newText })
+    }
+    setEditingText(null)
+  }
+
+  const handleDoubleClick = (e) => {
+    if (!active) return
+    e.stopPropagation()
+    const pos = getSVGPos(e)
+    const hitText = [...shapes].reverse().find(s => s.type === 'text' && isPointNearShape(pos.x, pos.y, s, 10))
+    if (hitText) {
+      setEditingText({
+        id: hitText.id,
+        text: hitText.text,
+        x: hitText.x,
+        y: hitText.y,
+        fontSize: hitText.fontSize || 26,
+        color: hitText.color || '#1e40af',
+      })
+      setTimeout(() => editInputRef.current?.focus(), 15)
+    }
+  }
+
   const handlePointerDown = (e) => {
     if (!active) return
+    // 이미 편집 중이면 커밋 후 종료
+    if (editingText) {
+      commitEditText()
+    }
     e.stopPropagation()
     const pos = getSVGPos(e)
     dragStartPos.current = pos
@@ -98,33 +132,29 @@ export default function SelectionLayer({
       }
     }
 
-    const onPointerUp = (ue) => {
-      window.removeEventListener('mousemove', onPointerMove)
-      window.removeEventListener('mouseup', onPointerUp)
-      window.removeEventListener('touchmove', onPointerMove)
-      window.removeEventListener('touchend', onPointerUp)
-
+    const onPointerUp = () => {
       if (isDraggingShapes.current) {
         isDraggingShapes.current = false
         activeDragIds.current = []
-        const endPos = getSVGPos(ue)
-        const moved = Math.hypot(endPos.x - dragStartPos.current.x, endPos.y - dragStartPos.current.y) > 2
-        if (moved) {
-          onFinishMove()
-        }
+        onFinishMove?.()
       }
 
-      setMarquee((m) => {
-        if (m) {
-          const w = Math.abs(m.x2 - m.x1)
-          const h = Math.abs(m.y2 - m.y1)
-          if (w > 3 || h > 3) {
-            const inBox = shapes.filter((s) => isShapeInRect(s, m)).map((s) => s.id)
-            setSelectedIds((prev) => (e.shiftKey ? Array.from(new Set([...prev, ...inBox])) : inBox))
+      setMarquee((currentMarquee) => {
+        if (currentMarquee) {
+          const w = Math.abs(currentMarquee.x2 - currentMarquee.x1)
+          const h = Math.abs(currentMarquee.y2 - currentMarquee.y1)
+          if (w > 4 || h > 4) {
+            const newlySelected = shapes.filter((s) => isShapeInRect(s, currentMarquee)).map((s) => s.id)
+            setSelectedIds(newlySelected)
           }
         }
         return null
       })
+
+      window.removeEventListener('mousemove', onPointerMove)
+      window.removeEventListener('mouseup', onPointerUp)
+      window.removeEventListener('touchmove', onPointerMove)
+      window.removeEventListener('touchend', onPointerUp)
     }
 
     window.addEventListener('mousemove', onPointerMove)
@@ -133,65 +163,113 @@ export default function SelectionLayer({
     window.addEventListener('touchend', onPointerUp)
   }
 
-  if (!active && selectedIds.length === 0) return null
+  if (!active && selectedIds.length === 0 && !editingText) return null
 
   return (
-    <svg
-      ref={svgRef}
-      className="absolute inset-0 w-full h-full"
-      style={{
-        pointerEvents: active ? 'all' : 'none',
-        cursor: active ? (isDraggingShapes.current ? 'grabbing' : 'default') : 'inherit',
-        zIndex: 15,
-      }}
-      onMouseDown={handlePointerDown}
-      onTouchStart={handlePointerDown}
-    >
-      {/* 1. 선택된 도형들의 경계 상자 및 코너 핸들 렌더링 */}
-      {shapes
-        .filter((s) => selectedIds.includes(s.id))
-        .map((s) => {
-          const b = getShapeBounds(s)
-          const w = Math.max(12, b.maxX - b.minX)
-          const h = Math.max(12, b.maxY - b.minY)
-          const x = b.minX
-          const y = b.minY
-          return (
-            <g key={s.id} className="pointer-events-none">
-              {/* 반투명 선택 박스 */}
-              <rect
-                x={x}
-                y={y}
-                width={w}
-                height={h}
-                fill="rgba(59, 130, 246, 0.08)"
-                stroke="#2563eb"
-                strokeWidth="1.5"
-                strokeDasharray="4 3"
-              />
-              {/* 4개 코너 핸들 */}
-              <rect x={x - 3.5} y={y - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
-              <rect x={x + w - 3.5} y={y - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
-              <rect x={x - 3.5} y={y + h - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
-              <rect x={x + w - 3.5} y={y + h - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
-            </g>
-          )
-        })}
+    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 15 }}>
+      <svg
+        ref={svgRef}
+        className="absolute inset-0 w-full h-full"
+        style={{
+          pointerEvents: active ? 'all' : 'none',
+          cursor: active ? (isDraggingShapes.current ? 'grabbing' : 'default') : 'inherit',
+        }}
+        onMouseDown={handlePointerDown}
+        onTouchStart={handlePointerDown}
+        onDoubleClick={handleDoubleClick}
+      >
+        {/* 1. 선택된 도형들의 경계 상자 및 코너 핸들 렌더링 */}
+        {shapes
+          .filter((s) => selectedIds.includes(s.id))
+          .map((s) => {
+            const b = getShapeBounds(s)
+            const w = Math.max(12, b.maxX - b.minX)
+            const h = Math.max(12, b.maxY - b.minY)
+            const x = b.minX
+            const y = b.minY
+            return (
+              <g key={s.id} className="pointer-events-none">
+                {/* 반투명 선택 박스 */}
+                <rect
+                  x={x}
+                  y={y}
+                  width={w}
+                  height={h}
+                  fill="rgba(59, 130, 246, 0.08)"
+                  stroke="#2563eb"
+                  strokeWidth="1.5"
+                  strokeDasharray="4 3"
+                />
+                {/* 4개 코너 핸들 */}
+                <rect x={x - 3.5} y={y - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
+                <rect x={x + w - 3.5} y={y - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
+                <rect x={x - 3.5} y={y + h - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
+                <rect x={x + w - 3.5} y={y + h - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
+              </g>
+            )
+          })}
 
-      {/* 2. 블록 지정 드래그 영역 (마키 박스) */}
-      {marquee && (
-        <rect
-          x={Math.min(marquee.x1, marquee.x2)}
-          y={Math.min(marquee.y1, marquee.y2)}
-          width={Math.abs(marquee.x2 - marquee.x1)}
-          height={Math.abs(marquee.y2 - marquee.y1)}
-          fill="rgba(37, 99, 235, 0.12)"
-          stroke="#2563eb"
-          strokeWidth="1.5"
-          strokeDasharray="4 3"
-          className="pointer-events-none"
-        />
+        {/* 2. 블록 지정 드래그 영역 (마키 박스) */}
+        {marquee && (
+          <rect
+            x={Math.min(marquee.x1, marquee.x2)}
+            y={Math.min(marquee.y1, marquee.y2)}
+            width={Math.abs(marquee.x2 - marquee.x1)}
+            height={Math.abs(marquee.y2 - marquee.y1)}
+            fill="rgba(37, 99, 235, 0.12)"
+            stroke="#2563eb"
+            strokeWidth="1.5"
+            strokeDasharray="4 3"
+            className="pointer-events-none"
+          />
+        )}
+      </svg>
+
+      {/* 3. 텍스트 개체 더블클릭 수정 인라인 인풋 */}
+      {editingText && (
+        <div
+          style={{
+            position: 'absolute',
+            left: editingText.x,
+            top: editingText.y,
+            zIndex: 1000,
+            pointerEvents: 'all',
+          }}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <input
+            ref={editInputRef}
+            type="text"
+            value={editingText.text}
+            onChange={(e) => setEditingText(prev => prev ? { ...prev, text: e.target.value } : null)}
+            onKeyDown={(e) => {
+              e.stopPropagation()
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                commitEditText()
+              } else if (e.key === 'Escape') {
+                e.preventDefault()
+                setEditingText(null)
+              }
+            }}
+            onBlur={commitEditText}
+            style={{
+              fontSize: editingText.fontSize,
+              fontWeight: 'bold',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif',
+              color: editingText.color,
+              background: 'rgba(255, 255, 255, 0.98)',
+              border: '2px solid #2563eb',
+              borderRadius: 4,
+              padding: '2px 8px',
+              outline: 'none',
+              minWidth: 120,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.22)',
+            }}
+          />
+        </div>
       )}
-    </svg>
+    </div>
   )
 }

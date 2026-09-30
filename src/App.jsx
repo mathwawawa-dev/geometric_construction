@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.45_20260930_121200_텍스트도구추가_단축키T'
+const VERSION = 'v0.1.46_20260930_122600_텍스트즉시표시_텍스트수정_스냅토글'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -22,7 +22,7 @@ export default function App() {
     setColor, setWidth,
     setCompass, setRuler, setProtractor,
     setBackground,
-    addShape, setShapes, deleteShapes, moveShapes,
+    addShape, setShapes, deleteShapes, updateShape, moveShapes,
   } = useAppState()
   const stateRef = useRef(state)
   useEffect(() => { stateRef.current = state }, [state])
@@ -33,6 +33,9 @@ export default function App() {
   // 형광펜 / 넘버스탬프 모드
   const [highlightMode, setHighlightMode] = useState(false)
   const [stampMode, setStampMode] = useState(null)
+
+  // 자석(스냅) ON/OFF 상태 (기본값 ON)
+  const [snapEnabled, setSnapEnabled] = useState(true)
 
 
   const getStateRef = useCallback(() => ({
@@ -97,6 +100,15 @@ export default function App() {
     addShape(shape)
     setTimeout(() => saveSnapshot(), 0)
   }, [addShape, saveSnapshot])
+
+  const handleUpdateShape = useCallback((id, payload) => {
+    updateShape(id, payload)
+    if (canvasRef.current) {
+      const updated = stateRef.current.shapes.map(s => s.id === id ? { ...s, ...payload } : s)
+      renderShapes(canvasRef.current.getContext('2d'), updated)
+    }
+    setTimeout(() => saveSnapshot(), 0)
+  }, [updateShape, canvasRef, saveSnapshot])
 
   // 줌/팬 상태
   const [zoom, setZoom] = useState(1)
@@ -263,6 +275,8 @@ export default function App() {
         onSave={handleSave}
         highlightMode={highlightMode}
         setHighlightMode={setHighlightMode}
+        snapEnabled={snapEnabled}
+        setSnapEnabled={setSnapEnabled}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -316,6 +330,7 @@ export default function App() {
               highlightMode={highlightMode}
               stampMode={stampMode}
               shapes={state.shapes}
+              snapEnabled={snapEnabled}
             />
             <SelectionLayer
               active={state.drawMode === 'select'}
@@ -325,6 +340,7 @@ export default function App() {
               onMoveShapes={handleMoveSelected}
               onFinishMove={handleFinishMove}
               onDeleteSelected={handleDeleteSelected}
+              onUpdateShape={handleUpdateShape}
             />
             {state.compass.visible && (
               <CompassTool

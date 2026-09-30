@@ -80,6 +80,11 @@ function reducer(state, action) {
       const set = new Set(action.ids)
       return { ...state, shapes: state.shapes.filter(s => !set.has(s.id)) }
     }
+    case 'UPDATE_SHAPE':
+      return {
+        ...state,
+        shapes: state.shapes.map(s => s.id === action.id ? { ...s, ...action.payload } : s)
+      }
     case 'MOVE_SHAPES': {
       const set = new Set(action.ids)
       return {
@@ -106,6 +111,7 @@ export function useAppState() {
   const addShape      = useCallback((shape) => dispatch({ type: 'ADD_SHAPE', shape }), [])
   const setShapes     = useCallback((shapes) => dispatch({ type: 'SET_SHAPES', shapes }), [])
   const deleteShapes  = useCallback((ids) => dispatch({ type: 'DELETE_SHAPES', ids }), [])
+  const updateShape   = useCallback((id, payload) => dispatch({ type: 'UPDATE_SHAPE', id, payload }), [])
   const moveShapes    = useCallback((ids, dx, dy) => dispatch({ type: 'MOVE_SHAPES', ids, dx, dy }), [])
 
   return {
@@ -121,6 +127,7 @@ export function useAppState() {
     addShape,
     setShapes,
     deleteShapes,
+    updateShape,
     moveShapes,
   }
 }
