@@ -104,8 +104,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     lastMousePos.current = pos
     if (fakeCursorRef.current) {
       const isStamp = !!stampMode
-      const tx = isStamp ? pos.x - 20 : pos.x - 2
-      const ty = isStamp ? pos.y - 20 : pos.y - 22
+      const tx = isStamp ? pos.x - 27 : pos.x - 2
+      const ty = isStamp ? pos.y - 27 : pos.y - 22
       fakeCursorRef.current.style.transform = `translate(${tx}px, ${ty}px)`
       fakeCursorRef.current.style.display = 'block'
     }
@@ -509,8 +509,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             transform: (() => {
               if (lastMousePos.current.x <= -100) return 'none'
               if (isStampMode) {
-                // 스탬프: 문자 중앙이 포인터에 오도록 (fontSize 41 → 절반 ~20.5)
-                return `translate(${lastMousePos.current.x - 20}px, ${lastMousePos.current.y - 20}px)`
+                // 스탬프: 문자 중앙이 포인터에 오도록 (fontSize 53 → 절반 ~26.5)
+                return `translate(${lastMousePos.current.x - 27}px, ${lastMousePos.current.y - 27}px)`
               }
               return `translate(${lastMousePos.current.x - 2}px, ${lastMousePos.current.y - 22}px)`
             })(),
@@ -518,7 +518,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           }}
         >
           {isStampMode ? (
-            <div style={{ fontSize: 41, lineHeight: 1, userSelect: 'none', opacity: 0.75 }}>
+            <div style={{ fontSize: 53, lineHeight: 1, userSelect: 'none', opacity: 0.75 }}>
               {stampMode}
             </div>
           ) : (
