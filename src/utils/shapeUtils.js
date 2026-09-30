@@ -41,6 +41,12 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
         bestDist = d
         bestPoint = { x: s.cx, y: s.cy }
       }
+    } else if (s.type === 'text') {
+      const d = Math.hypot(p.x - s.x, p.y - s.y)
+      if (d <= snapThreshold && d < bestDist) {
+        bestDist = d
+        bestPoint = { x: s.x, y: s.y }
+      }
     } else if (s.points && s.points.length > 1) {
       const pStart = s.points[0]
       const pEnd = s.points[s.points.length - 1]
@@ -106,6 +112,21 @@ export function getShapeBounds(shape) {
     const half = (shape.fontSize || 53) * 0.6
     return { minX: shape.x - half, maxX: shape.x + half, minY: shape.y - half, maxY: shape.y + half }
   }
+  if (shape.type === 'text') {
+    const fs = shape.fontSize || 26
+    let approxW = 0
+    for (const ch of (shape.text || '')) {
+      approxW += ch.charCodeAt(0) > 255 ? fs : fs * 0.58
+    }
+    approxW = Math.max(approxW, fs)
+    const h = fs * 1.25
+    return {
+      minX: shape.x - 2,
+      maxX: shape.x + approxW + 4,
+      minY: shape.y - 2,
+      maxY: shape.y + h + 2,
+    }
+  }
   if (shape.points && shape.points.length > 0) {
     if (shape.points.length === 1) {
       const p = shape.points[0]
@@ -156,6 +177,11 @@ export function isPointNearShape(px, py, shape, threshold = 8) {
     const half = (shape.fontSize || 53) * 0.6
     return Math.abs(px - shape.x) < half && Math.abs(py - shape.y) < half
   }
+  if (shape.type === 'text') {
+    const b = getShapeBounds(shape)
+    return px >= b.minX - threshold && px <= b.maxX + threshold &&
+           py >= b.minY - threshold && py <= b.maxY + threshold
+  }
   if (shape.type === 'stroke' || shape.type === 'arc') {
     const pts = shape.points
     if (!pts || pts.length === 0) return false
@@ -204,7 +230,13 @@ export function renderShapes(ctx, shapes) {
     ctx.save()
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
-    if (s.type === 'stamp') {
+    if (s.type === 'text') {
+      ctx.font = `bold ${s.fontSize || 26}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif`
+      ctx.fillStyle = s.color || '#1e40af'
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'top'
+      ctx.fillText(s.text, s.x, s.y)
+    } else if (s.type === 'stamp') {
       ctx.font = `bold ${s.fontSize || 53}px serif`
       ctx.fillStyle = s.color || '#000000'
       ctx.textAlign = 'center'

@@ -3,6 +3,7 @@ import { useRef } from 'react'
 // 드로잉 모드 버튼 (캔버스 인터랙션)
 const drawModes = [
   { id: 'pen',    icon: '✏️', label: '펜 (P)' },
+  { id: 'text',   icon: '🔤', label: '텍스트 (T)' },
   { id: 'select', icon: '↖️', label: '선택 (S)' },
 ]
 

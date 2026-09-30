@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.44_20260930_063100_S토글펜포인터표시버그수정'
+const VERSION = 'v0.1.45_20260930_121200_텍스트도구추가_단축키T'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -120,6 +120,13 @@ export default function App() {
       if (e.key === 'p' || e.key === 'P') {
         e.preventDefault()
         setDrawMode('pen')
+        setStampMode(null)
+      }
+      // T 키: 텍스트 모드
+      if (e.key === 't' || e.key === 'T') {
+        e.preventDefault()
+        setDrawMode('text')
+        setStampMode(null)
       }
       // Delete / Backspace 키: 선택된 개체 삭제
       if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -131,7 +138,7 @@ export default function App() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [undo, redo, setDrawMode, state.drawMode, selectedIds, handleDeleteSelected])
+  }, [undo, redo, setDrawMode, state.drawMode, selectedIds, handleDeleteSelected, setStampMode])
 
   // 마우스 휠 줌 (포인터 위치 기준)
   useEffect(() => {
@@ -355,7 +362,7 @@ export default function App() {
 
           {/* 줌 레벨 및 단축키 안내 */}
           <div className="absolute bottom-14 left-2 text-[11px] text-gray-400 bg-white/70 px-2 py-0.5 rounded pointer-events-none">
-            {Math.round(zoom * 100)}% | S: 선택 | P: 펜 | Del: 삭제 | 우클릭+드래그: 화면 이동 | 휠: 줌
+            {Math.round(zoom * 100)}% | S: 선택 | P: 펜 | T: 텍스트 | Del: 삭제 | 우클릭+드래그: 화면 이동 | 휠: 줌
           </div>
         </div>
       </div>

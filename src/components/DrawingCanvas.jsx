@@ -74,6 +74,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const startPoint = useRef({ x: 0, y: 0 })
   const initialAngle = useRef(null)
 
+  // 텍스트 도구 상태
+  const [textEditor, setTextEditor] = useState(null)
+  const textInputRef = useRef(null)
+
   // 형광펜 굵기/투명도
   const hlWidth = Math.max(strokeWidth * 6, 20)
   const hlAlpha = 0.35
@@ -205,7 +209,46 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     }
   }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, shapes])
 
+  const commitText = useCallback(() => {
+    if (!textEditor) return
+    const text = textEditor.text.trim()
+    if (text) {
+      const shape = {
+        id: 't_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        type: 'text',
+        text,
+        x: textEditor.x,
+        y: textEditor.y,
+        color: strokeColor,
+        fontSize: 26,
+      }
+      onAddShape?.(shape)
+      onDrawEnd?.()
+    }
+    setTextEditor(null)
+  }, [textEditor, strokeColor, onAddShape, onDrawEnd])
+
+  useEffect(() => {
+    if (textEditor) {
+      setTimeout(() => textInputRef.current?.focus(), 15)
+    }
+  }, [textEditor])
+
   const startDraw = useCallback((e) => {
+    // 텍스트 도구일 때 클릭으로 텍스트 입력창 열기
+    if (activeTool === 'text') {
+      if (e.button !== undefined && e.button !== 0) return
+      e.preventDefault()
+      if (textEditor) {
+        commitText()
+      }
+      const canvas = canvasRef.current
+      if (!canvas) return
+      const rawPos = getPos(e, canvas)
+      setTextEditor({ x: rawPos.x, y: rawPos.y, text: '' })
+      return
+    }
+
     if (activeTool !== 'pen') return
     // 우클릭(button=2) / 중간클릭(button=1) 은 드로잉 시작하지 않음 (화면 이동 전용)
     if (e.button !== undefined && e.button !== 0) return
@@ -301,7 +344,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     window.addEventListener('mouseup', onWindowUp)
     window.addEventListener('touchmove', onWindowMove, { passive: false })
     window.addEventListener('touchend', onWindowUp)
-  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode, renderCurrentStroke, shapes])
+  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode, renderCurrentStroke, shapes, textEditor, commitText])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -367,12 +410,59 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       onMouseDown={startDraw}
       onTouchStart={startDraw}
       style={{
-        cursor: activeTool === 'pen' ? 'none' : 'default',
+        cursor: activeTool === 'pen' ? 'none' : (activeTool === 'text' ? 'text' : 'default'),
         touchAction: 'none',
       }}
     >
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
       <canvas ref={draftCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+
+      {/* 텍스트 입력 에디터 */}
+      {textEditor && (
+        <div
+          style={{
+            position: 'absolute',
+            left: textEditor.x,
+            top: textEditor.y,
+            zIndex: 1000,
+            pointerEvents: 'all',
+          }}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <input
+            ref={textInputRef}
+            type="text"
+            value={textEditor.text}
+            placeholder="텍스트 입력 (Enter 완료, Esc 취소)"
+            onChange={(e) => setTextEditor(prev => prev ? { ...prev, text: e.target.value } : null)}
+            onKeyDown={(e) => {
+              e.stopPropagation()
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                commitText()
+              } else if (e.key === 'Escape') {
+                e.preventDefault()
+                setTextEditor(null)
+              }
+            }}
+            onBlur={commitText}
+            style={{
+              fontSize: 26,
+              fontWeight: 'bold',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif',
+              color: strokeColor,
+              background: 'rgba(255, 255, 255, 0.95)',
+              border: '2px dashed #2563eb',
+              borderRadius: 4,
+              padding: '4px 8px',
+              outline: 'none',
+              minWidth: 140,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
+            }}
+          />
+        </div>
+      )}
 
       {activeTool === 'pen' && isHovering && (
         <div
