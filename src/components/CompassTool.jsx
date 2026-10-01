@@ -130,6 +130,14 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     dragging.current = part
     const pos = getSVGPos(e)
 
+    // 컴퍼스 드래그 중 마우스가 빠르게 이동해 히트박스를 벗어나도 원래 커서 유지
+    let cursor = 'default'
+    if (part === 'whole') cursor = 'grabbing'
+    else if (part === 'pin_top') cursor = 'move'
+    else if (part === 'pin_bottom' || part === 'pencil' || part === 'clamp') cursor = 'ew-resize'
+    else if (part === 'leg') cursor = 'crosshair'
+    document.body.style.cursor = cursor
+
     if (part === 'pin_top') {
       // 전체 이동: 클릭 지점과 핀 사이 오프셋 보존
       dragOffset.current = { dx: pos.x - pinX, dy: pos.y - pinY }
@@ -301,6 +309,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       }
       dragging.current = null
       prevAngleRef.current = null
+      document.body.style.cursor = ''
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
       window.removeEventListener('touchmove', onMove)
