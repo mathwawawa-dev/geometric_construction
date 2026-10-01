@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 import { snapToShapesCenter } from '../utils/shapeUtils'
 
 function dist(x1, y1, x2, y2) {
