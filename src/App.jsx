@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.81_20261001_231200_도형복사붙여넣기기능추가'
+const VERSION = 'v0.1.82_20261001_234400_붙여넣기오류수정'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -142,10 +142,10 @@ export default function App() {
         if (clipboardRef.current.length > 0) {
           e.preventDefault()
           const newShapes = clipboardRef.current.map(s => {
-            const newId = s.type.charAt(0) + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
+            const newId = (s.type || 's').charAt(0) + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
             const offset = 20
             const ns = { ...s, id: newId }
-            if (ns.type === 'path' || ns.type === 'eraser') {
+            if (ns.type === 'path' || ns.type === 'stroke' || ns.type === 'eraser') {
               ns.points = ns.points.map(p => ({ x: p.x + offset, y: p.y + offset }))
             } else if (ns.type === 'line' || ns.type === 'arrow') {
               ns.x1 += offset; ns.y1 += offset; ns.x2 += offset; ns.y2 += offset
@@ -156,18 +156,19 @@ export default function App() {
               }
             } else if (ns.type === 'rect' || ns.type === 'text') {
               ns.x += offset; ns.y += offset
+            } else if (ns.type === 'stamp') {
+              ns.x += offset; ns.y += offset
             }
             return ns
           })
           
-          setShapes(prev => {
-            const updated = [...prev, ...newShapes]
-            stateRef.current.shapes = updated
-            if (canvasRef.current) {
-              renderShapes(canvasRef.current.getContext('2d'), updated)
-            }
-            return updated
-          })
+          const updated = [...stateRef.current.shapes, ...newShapes]
+          setShapes(updated)
+          stateRef.current.shapes = updated
+          if (canvasRef.current) {
+            renderShapes(canvasRef.current.getContext('2d'), updated)
+          }
+
           setDrawMode('select')
           setSelectedIds(newShapes.map(s => s.id))
           setTimeout(() => saveSnapshot(), 0)
