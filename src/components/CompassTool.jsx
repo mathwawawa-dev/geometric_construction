@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useState, useEffect } from 'react'
 import { snapToShapesCenter } from '../utils/shapeUtils'
 
 function dist(x1, y1, x2, y2) {
@@ -92,6 +92,14 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
   const dragOffset = useRef({})
   const prevAngleRef = useRef(null)
   const legArcPoints = useRef([])
+  // 드래그 중 실제 컴포넌트 위치에 커서 고정
+  const [dragCursor, setDragCursor] = useState(null) // { x, y, type } | null
+
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = ''
+    }
+  }, [])
 
   const { pinX, pinY, pencilX, pencilY, radiusInput, hingeSide = 1 } = compass
   const radius = dist(pinX, pinY, pencilX, pencilY)
@@ -129,6 +137,10 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     e.preventDefault()
     dragging.current = part
     const pos = getSVGPos(e)
+    // whole/pencil/clamp/leg 드래그 중에는 OS 커서 숨기기
+    if (part === 'whole' || part === 'pencil' || part === 'clamp' || part === 'leg') {
+      document.body.style.cursor = 'none'
+    }
 
     if (part === 'pin_top') {
       // 전체 이동: 클릭 지점과 핀 사이 오프셋 보존
@@ -143,12 +155,13 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         angleOffset: curPinAngle - clickAngle,
         distOffset: curDistFromPencil - clickDist,
       }
-    } else if (part === 'whole') {
+    if (part === 'whole') {
       // 힌지: 절대 각도 기준 회전 (진동 없음)
       dragOffset.current = {
         initMouseAngle: Math.atan2(pos.y - pinY, pos.x - pinX),
         initPencilAngle: Math.atan2(pencilY - pinY, pencilX - pinX),
       }
+      setDragCursor({ x: hingeX, y: hingeY, type: 'whole' })
     } else if (part === 'pencil' || part === 'clamp') {
       // 연필/클램프: 반지름 및 각도 조절 (클릭한 위치가 마우스 포인터에 100% 밀착하여 튕김/멀어짐 원천 차단)
       const curPencilAngle = Math.atan2(pencilY - pinY, pencilX - pinX)
@@ -159,10 +172,12 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         angleOffset: curPencilAngle - clickAngle,
         distOffset: curDistFromPin - clickDist,
       }
+      setDragCursor({ x: pencilX, y: pencilY, type: 'pencil' })
     } else if (part === 'leg') {
       // 은색 다리 드래그: 회전 및 원 호 그리기 (반지름 고정, 클릭 각도 오프셋 보존하여 튐 방지)
       const curPencilAngle = Math.atan2(pencilY - pinY, pencilX - pinX)
       const clickAngle = Math.atan2(pos.y - pinY, pos.x - pinX)
+      const clickDist = Math.hypot(pos.x - pinX, pos.y - pinY)
       dragOffset.current = {
         angleOffset: curPencilAngle - clickAngle,
         fixedRadius: radius,
@@ -171,7 +186,10 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         totalAngleTraveled: 0,
         minAccumulated: 0,
         maxAccumulated: 0,
+        clickDist,
       }
+      setDragCursor({ x: pos.x, y: pos.y, type: 'leg' })
+    }
       prevAngleRef.current = curPencilAngle
       legArcPoints.current = [{ x: pencilX, y: pencilY }]
     }
@@ -202,12 +220,21 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           pinY: snappedPin.y,
         })
       } else if (dragging.current === 'whole') {
+        // 힌지 회전: 커서를 힌지 위치에 고정
         const curMouseAngle = Math.atan2(rawP.y - pinY, rawP.x - pinX)
         const newPencilAngle = dragOffset.current.initPencilAngle + (curMouseAngle - dragOffset.current.initMouseAngle)
-        setCompass({
-          pencilX: pinX + Math.cos(newPencilAngle) * radius,
-          pencilY: pinY + Math.sin(newPencilAngle) * radius,
-        })
+        const newPencilX = pinX + Math.cos(newPencilAngle) * radius
+        const newPencilY = pinY + Math.sin(newPencilAngle) * radius
+        // 새 힌지 위치 계산
+        const newDxMain = newPencilX - pinX
+        const newDyMain = newPencilY - pinY
+        const newSpan = Math.hypot(newDxMain, newDyMain) || 1
+        const newNx = (newDyMain / newSpan) * hingeSide
+        const newNy = (-newDxMain / newSpan) * hingeSide
+        const newHingeX = (pinX + newPencilX) / 2 + newNx * compassHeight
+        const newHingeY = (pinY + newPencilY) / 2 + newNy * compassHeight
+        setCompass({ pencilX: newPencilX, pencilY: newPencilY })
+        setDragCursor({ x: newHingeX, y: newHingeY, type: 'whole' })
 
       } else if (dragging.current === 'pencil' || dragging.current === 'clamp') {
         // 연필 조작 시 마우스 포인터와 클릭 위치 1:1 완벽 동기화 + 점 중심 스냅 지원
@@ -220,10 +247,8 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           y: pinY + Math.sin(newPencilAngle) * newRadius,
         }
         const snappedPencil = snapEnabled ? snapToDrawing(snapPointToRuler(candidatePencil, ruler), canvasRef, shapes) : candidatePencil
-        setCompass({
-          pencilX: snappedPencil.x,
-          pencilY: snappedPencil.y,
-        })
+        setCompass({ pencilX: snappedPencil.x, pencilY: snappedPencil.y })
+        setDragCursor({ x: snappedPencil.x, y: snappedPencil.y, type: 'pencil' })
 
       } else if (dragging.current === 'leg') {
         // 은색 다리 조작 시: 반지름 고정된 채 연필 끝에서 잉크가 흘러나오듯 호의 일부만 점진적으로 그림
@@ -247,10 +272,12 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         }
         prevAngleRef.current = curAngle
         legArcPoints.current.push({ x: newPx, y: newPy })
-        setCompass({
-          pencilX: newPx,
-          pencilY: newPy,
-        })
+        setCompass({ pencilX: newPx, pencilY: newPy })
+
+        // 은색 다리 상의 실제 잡은 위치 (회전 각도 curMouseAngle, 고정 반지름 clickDist)
+        const curLegX = pinX + Math.cos(curMouseAngle) * (dragOffset.current.clickDist || curRadius)
+        const curLegY = pinY + Math.sin(curMouseAngle) * (dragOffset.current.clickDist || curRadius)
+        setDragCursor({ x: curLegX, y: curLegY, type: 'leg' })
       }
     }
 
@@ -300,6 +327,8 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       }
       dragging.current = null
       prevAngleRef.current = null
+      document.body.style.cursor = ''
+      setDragCursor(null)
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
       window.removeEventListener('touchmove', onMove)
@@ -471,6 +500,64 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         {/* 바늘 위치 표시 점 */}
         <circle cx={pinX} cy={pinY} r="3" fill="#dc2626" style={{ pointerEvents: 'none' }} />
       </svg>
+
+      {/* 드래그 중 실제 컴포넌트 위치에 고정되는 가짜 커서 */}
+      {dragCursor && (
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none',
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              left: dragCursor.x - 12,
+              top: dragCursor.y - 12,
+              width: 24,
+              height: 24,
+              pointerEvents: 'none',
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))',
+            }}
+          >
+            {dragCursor.type === 'whole' ? (
+              /* 힌지 회전 시 주먹 쥔 손 커서 */
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/>
+                <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/>
+                <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/>
+                <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
+              </svg>
+            ) : dragCursor.type === 'pencil' ? (
+              /* 연필 조작/회전 시 ew-resize 화살표 커서 */
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m18 8 4 4-4 4M6 8l-4 4 4 4M2 12h20" stroke="white" strokeWidth="4" />
+                <path d="m18 8 4 4-4 4M6 8l-4 4 4 4M2 12h20" stroke="#1e40af" strokeWidth="2" />
+              </svg>
+            ) : (
+              /* 은색 다리 드래그(호 그리기) 시 crosshair 커서 */
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" strokeLinecap="round">
+                <circle cx="12" cy="12" r="6" stroke="white" strokeWidth="3" />
+                <circle cx="12" cy="12" r="6" stroke="#1e40af" strokeWidth="1.5" />
+                <line x1="12" y1="1" x2="12" y2="7" stroke="white" strokeWidth="3" />
+                <line x1="12" y1="1" x2="12" y2="7" stroke="#1e40af" strokeWidth="1.5" />
+                <line x1="12" y1="17" x2="12" y2="23" stroke="white" strokeWidth="3" />
+                <line x1="12" y1="17" x2="12" y2="23" stroke="#1e40af" strokeWidth="1.5" />
+                <line x1="1" y1="12" x2="7" y2="12" stroke="white" strokeWidth="3" />
+                <line x1="1" y1="12" x2="7" y2="12" stroke="#1e40af" strokeWidth="1.5" />
+                <line x1="17" y1="12" x2="23" y2="12" stroke="white" strokeWidth="3" />
+                <line x1="17" y1="12" x2="23" y2="12" stroke="#1e40af" strokeWidth="1.5" />
+                <circle cx="12" cy="12" r="1.5" fill="#1e40af" />
+              </svg>
+            )}
+          </div>
+        </div>
+      )}
 
       <div
         className="absolute bottom-4 right-4 bg-white rounded-xl shadow-lg border border-gray-200 p-3 flex flex-col gap-2 min-w-[160px]"

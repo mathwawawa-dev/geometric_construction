@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.57_20261001_204900_직선그리기중커서스냅위치고정'
+const VERSION = 'v0.1.58_20261001_210000_컴퍼스회전조작별커서괴리감해소'
 
 export default function App() {
   const canvasRef = useRef(null)
