@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.84_20261001_235800_빨강프리셋색상변경'
+const VERSION = 'v0.1.85_20261002_000500_컴퍼스연필클램프렌더링순서변경'
 
 export default function App() {
   const canvasRef = useRef(null)

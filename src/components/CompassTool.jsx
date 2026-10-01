@@ -436,10 +436,6 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
             <circle cx={clampPos} cy={-clampLengthSigned} r="6" fill="#1e293b" />
             <circle cx={clampPos} cy={-clampLengthSigned} r="3" fill="#64748b" />
 
-            {/* 클램프 칼라 (연필을 감싸고 있는 검정 홀더) */}
-            <rect x={clampPos - 5} y="-6.5" width="10" height="13" rx="2" fill="#1e293b" />
-            <rect x={clampPos - 3} y="-8" width="6" height="3" rx="1" fill="#475569" />
-
             {/* 연필 본체 (끝점이 정확히 0, 0에 위치!) */}
             {/* 1. 흑연 촉 (0,0 ~ 8,0) */}
             <polygon points="0,0 8,-2.5 8,2.5" fill="#1c1917" />
@@ -456,6 +452,10 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
             <line x1="58" y1="-4.5" x2="58" y2="4.5" stroke="#6b7280" strokeWidth="0.8" />
             {/* 5. 분홍색 지우개 (61 ~ 68) */}
             <rect x="61" y="-4" width="7" height="8" rx="2" fill="#f9a8a8" />
+
+            {/* 클램프 칼라 (연필을 덮어 씌우도록 연필 뒤에 렌더링) */}
+            <rect x={clampPos - 5} y="-6.5" width="10" height="13" rx="2" fill="#1e293b" />
+            <rect x={clampPos - 3} y="-8" width="6" height="3" rx="1" fill="#475569" />
 
             {/* 연필 드래그 히트 영역 (반지름 조절) */}
             <g style={{ pointerEvents: 'all', cursor: 'ew-resize' }} onMouseDown={onPointerDown('pencil')} onTouchStart={onPointerDown('pencil')}>
