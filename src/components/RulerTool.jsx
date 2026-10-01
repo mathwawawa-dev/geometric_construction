@@ -153,12 +153,12 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
             strokeWidth="1.5"
             style={{ pointerEvents: 'none' }}
           />
-          {/* 실제 드래그 가능한 투명 영역 (가운데 60px) */}
+          {/* 실제 드래그 가능한 투명 영역 (자 전체 두께) */}
           <rect
             x={cx - length / 2 + 15}
-            y={cy - 30}
+            y={cy - RULER_THICKNESS / 2}
             width={Math.max(0, length - 30)}
-            height={60}
+            height={RULER_THICKNESS}
             fill="transparent"
             style={{ pointerEvents: 'all', cursor: 'grab' }}
             onMouseDown={onPointerDown('whole')}

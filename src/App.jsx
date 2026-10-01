@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.55_20261001_201000_M단축키_Ctrl임시스냅_자내부커서손모양'
+const VERSION = 'v0.1.56_20261001_203600_자내부드래그영역확장'
 
 export default function App() {
   const canvasRef = useRef(null)
