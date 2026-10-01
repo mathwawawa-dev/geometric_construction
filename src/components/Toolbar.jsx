@@ -62,13 +62,26 @@ export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, 
       <button
         onClick={() => setHighlightMode(!highlightMode)}
         title="형광펜 (반투명 굵은 선)"
-        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
           highlightMode
             ? 'bg-yellow-200 text-yellow-900 border-yellow-400 shadow-inner'
             : 'bg-gray-100 hover:bg-yellow-100 text-gray-700 border-gray-200'
         }`}
       >
-        <span>🖊</span> 형광펜
+        <svg
+          width="18" height="18" viewBox="0 0 24 24" fill="none"
+          style={{ filter: highlightMode ? 'none' : 'grayscale(100%) opacity(45%)' }}
+        >
+          {/* 형광펜 몸통 */}
+          <rect x="5" y="3" width="14" height="13" rx="3" fill={highlightMode ? '#facc15' : '#d1d5db'} />
+          {/* 형광펜 캡 끝 */}
+          <rect x="8" y="1" width="8" height="4" rx="1.5" fill={highlightMode ? '#eab308' : '#9ca3af'} />
+          {/* 형광펜 촉 (사다리꼴) */}
+          <polygon points="7,16 17,16 14,22 10,22" fill={highlightMode ? '#fde047' : '#e5e7eb'} />
+          {/* 하이라이트 반사 */}
+          <rect x="8" y="5" width="3" height="8" rx="1.5" fill="white" opacity="0.4" />
+        </svg>
+        형광펜
       </button>
 
       {/* 자석 (스냅) ON/OFF */}
