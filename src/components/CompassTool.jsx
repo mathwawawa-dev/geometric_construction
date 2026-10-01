@@ -92,6 +92,9 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
   const dragOffset = useRef({})
   const prevAngleRef = useRef(null)
   const legArcPoints = useRef([])
+  // stale closure 방지: onMove 내에서 항상 최신 snapEnabled 읽기
+  const snapEnabledRef = useRef(snapEnabled)
+  useEffect(() => { snapEnabledRef.current = snapEnabled }, [snapEnabled])
 
   const { pinX, pinY, pencilX, pencilY, radiusInput, hingeSide = 1 } = compass
   const radius = dist(pinX, pinY, pencilX, pencilY)
@@ -192,7 +195,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         const targetPinX = rawP.x - dragOffset.current.dx
         const targetPinY = rawP.y - dragOffset.current.dy
         const candidate = { x: targetPinX, y: targetPinY }
-        const snapped = snapEnabled ? snapToDrawing(snapPointToRuler(candidate, ruler), canvasRef, shapes) : candidate
+        const snapped = snapEnabledRef.current ? snapToDrawing(snapPointToRuler(candidate, ruler), canvasRef, shapes) : candidate
         const pdx = pencilX - pinX, pdy = pencilY - pinY
         setCompass({ pinX: snapped.x, pinY: snapped.y, pencilX: snapped.x + pdx, pencilY: snapped.y + pdy })
       } else if (dragging.current === 'pin_bottom') {
@@ -204,7 +207,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           x: pencilX + Math.cos(newPinAngle) * newRadius,
           y: pencilY + Math.sin(newPinAngle) * newRadius,
         }
-        const snappedPin = snapEnabled ? snapToDrawing(snapPointToRuler(candidatePin, ruler), canvasRef, shapes) : candidatePin
+        const snappedPin = snapEnabledRef.current ? snapToDrawing(snapPointToRuler(candidatePin, ruler), canvasRef, shapes) : candidatePin
         setCompass({
           pinX: snappedPin.x,
           pinY: snappedPin.y,
@@ -227,7 +230,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           x: pinX + Math.cos(newPencilAngle) * newRadius,
           y: pinY + Math.sin(newPencilAngle) * newRadius,
         }
-        const snappedPencil = snapEnabled ? snapToDrawing(snapPointToRuler(candidatePencil, ruler), canvasRef, shapes) : candidatePencil
+        const snappedPencil = snapEnabledRef.current ? snapToDrawing(snapPointToRuler(candidatePencil, ruler), canvasRef, shapes) : candidatePencil
         setCompass({
           pencilX: snappedPencil.x,
           pencilY: snappedPencil.y,

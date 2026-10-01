@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.75_20261001_223100_컴퍼스패널스냅버튼가시성수정'
+const VERSION = 'v0.1.76_20261001_223900_컴퍼스스냅staleClosureFix'
 
 export default function App() {
   const canvasRef = useRef(null)
