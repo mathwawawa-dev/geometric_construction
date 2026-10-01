@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.77_20261001_230000_useEffect누락Import수정'
+const VERSION = 'v0.1.78_20261001_230600_컴퍼스스냅상단바추가'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -284,6 +284,8 @@ export default function App() {
         setHighlightMode={setHighlightMode}
         snapEnabled={snapEnabled}
         setSnapEnabled={setSnapEnabled}
+        compassSnapEnabled={compassSnapEnabled}
+        setCompassSnapEnabled={setCompassSnapEnabled}
       />
 
       <div className="flex flex-1 overflow-hidden">

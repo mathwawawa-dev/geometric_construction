@@ -11,7 +11,7 @@ const COLOR_PRESETS = [
   { color: '#ec4899', label: '핑크', bg: '#ec4899' },
 ]
 
-export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, onUndo, onRedo, onClear, onSave, highlightMode, setHighlightMode, snapEnabled, setSnapEnabled }) {
+export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, onUndo, onRedo, onClear, onSave, highlightMode, setHighlightMode, snapEnabled, setSnapEnabled, compassSnapEnabled, setCompassSnapEnabled }) {
   return (
     <header className="flex items-center gap-3 px-4 py-2 bg-white border-b border-gray-200 shrink-0 flex-wrap">
       <h1 className="text-lg font-bold text-gray-800 mr-2">작도보드</h1>
@@ -98,6 +98,21 @@ export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, 
         <span>스냅 (M)</span>
       </button>
 
+      {/* 컴퍼스 전용 스냅 ON/OFF */}
+      {setCompassSnapEnabled && (
+        <button
+          onClick={() => setCompassSnapEnabled(!compassSnapEnabled)}
+          title={compassSnapEnabled ? "컴퍼스 스냅 켜짐" : "컴퍼스 스냅 꺼짐"}
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+            compassSnapEnabled
+              ? 'bg-blue-100 text-blue-900 border-blue-400 shadow-sm'
+              : 'bg-gray-100 hover:bg-gray-200 text-gray-500 border-gray-200'
+          }`}
+        >
+          <span style={{ filter: compassSnapEnabled ? 'none' : 'grayscale(100%) opacity(50%)' }}>🧲🧭</span>
+          <span>컴퍼스 스냅</span>
+        </button>
+      )}
       <div className="w-px h-6 bg-gray-300" />
 
       {/* 굵기 */}
