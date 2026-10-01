@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.61_20261001_212100_컴퍼스조작시가짜펜숨김'
+const VERSION = 'v0.1.62_20261001_212600_가짜펜커서숨김롤백'
 
 export default function App() {
   const canvasRef = useRef(null)
