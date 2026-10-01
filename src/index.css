@@ -2,3 +2,8 @@
 
 body.is-drawing .tool-overlay * { pointer-events: none !important; cursor: none !important; }
 
+body.is-compass-dragging #fake-pen-cursor { display: none !important; }
+body.is-compass-dragging-whole * { cursor: grabbing !important; }
+body.is-compass-dragging-pin * { cursor: move !important; }
+body.is-compass-dragging-resize * { cursor: ew-resize !important; }
+body.is-compass-dragging-leg * { cursor: crosshair !important; }

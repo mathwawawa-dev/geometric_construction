@@ -568,6 +568,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
       {activeTool === 'pen' && isHovering && !isInsideRuler && (
         <div
+          id="fake-pen-cursor"
           ref={fakeCursorRef}
           className="absolute top-0 left-0 pointer-events-none drop-shadow-md"
           style={{
