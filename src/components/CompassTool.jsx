@@ -483,7 +483,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
 
       <div
         className="absolute bottom-4 right-4 bg-white rounded-xl shadow-lg border border-gray-200 p-3 flex flex-col gap-2 min-w-[160px]"
-        style={{ zIndex: 20 }}
+        style={{ zIndex: 9000 }}
       >
         <p className="text-xs font-bold text-gray-600 mb-1">🧭 컴퍼스</p>
         <label className="text-xs text-gray-500">반경 (px)</label>
@@ -497,20 +497,18 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         <button onClick={drawFullCircle} className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-1.5 rounded-lg font-semibold transition-colors">
           원 그리기 (전체)
         </button>
-        {setSnapEnabled && (
-          <button
-            onClick={() => setSnapEnabled(!snapEnabled)}
-            title={snapEnabled ? '스냅 켜짐 (클릭하여 끄기)' : '스냅 꺼짐 (클릭하여 켜기)'}
-            className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
-              snapEnabled
-                ? 'bg-blue-100 text-blue-900 border-blue-400 shadow-sm'
-                : 'bg-gray-100 text-gray-500 border-gray-200'
-            }`}
-          >
-            <span style={{ filter: snapEnabled ? 'none' : 'grayscale(100%) opacity(50%)' }}>🧲</span>
-            스냅 {snapEnabled ? 'ON' : 'OFF'}
-          </button>
-        )}
+        <button
+          onClick={() => setSnapEnabled?.(!snapEnabled)}
+          title={snapEnabled ? '스냅 켜짐 (클릭하여 끄기)' : '스냅 꺼짐 (클릭하여 켜기)'}
+          className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+            snapEnabled
+              ? 'bg-blue-100 text-blue-900 border-blue-400 shadow-sm'
+              : 'bg-gray-100 text-gray-500 border-gray-200'
+          }`}
+        >
+          <span style={{ filter: snapEnabled ? 'none' : 'grayscale(100%) opacity(50%)' }}>🧲</span>
+          스냅 {snapEnabled ? 'ON' : 'OFF'}
+        </button>
         <p className="text-[11px] text-gray-400 leading-tight mt-1">
           📌 침핀다리 전체: 이동<br />
           ↔️ 연필/클램프: 반지름 조절<br />
