@@ -77,7 +77,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
     <svg
       ref={svgRef}
       className="absolute inset-0 w-full h-full tool-overlay"
-      style={{ touchAction: 'none', pointerEvents: 'none' }}
+      style={{ touchAction: 'none', pointerEvents: 'none', zIndex: 20 }}
     >
       {/* 각도기 몸통 그룹 */}
       <g

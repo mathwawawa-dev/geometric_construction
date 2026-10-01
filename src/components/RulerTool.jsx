@@ -98,7 +98,7 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
       <svg
         ref={svgRef}
         className="absolute inset-0 w-full h-full tool-overlay"
-        style={{ touchAction: 'none', pointerEvents: 'none' }}
+        style={{ touchAction: 'none', pointerEvents: 'none', zIndex: 20 }}
       >
         <g transform={`rotate(${angle}, ${cx}, ${cy})`}>
           {/* 눈에 보이는 자 배경 (마우스 이벤트 무시) */}

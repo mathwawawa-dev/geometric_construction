@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.51_20261001_134500_컴퍼스왕복그리기실행취소버그수정'
+const VERSION = 'v0.1.52_20261001_154600_자내부그리기방지_및_선택모드도구이동'
 
 export default function App() {
   const canvasRef = useRef(null)

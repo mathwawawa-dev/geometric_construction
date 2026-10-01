@@ -374,7 +374,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       <svg
         ref={svgRef}
         className="absolute inset-0 w-full h-full tool-overlay"
-        style={{ touchAction: 'none', pointerEvents: 'none' }}
+        style={{ touchAction: 'none', pointerEvents: 'none', zIndex: 20 }}
       >
         {/* 왼쪽 다리 (침핀 쪽) */}
         <g transform={`translate(${pinX}, ${pinY}) rotate(${leftLegAngleDeg})`} style={{ pointerEvents: 'none' }}>

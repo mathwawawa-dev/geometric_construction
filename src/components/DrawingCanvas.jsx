@@ -55,6 +55,34 @@ function calcRulerSnap(pos, ruler, currentLock) {
   return { pos, lock: null }
 }
 
+function isPointInsideRuler(pos, ruler) {
+  if (!ruler || !ruler.visible) return false
+  const { x1, y1, x2, y2 } = ruler
+  const cx = (x1 + x2) / 2
+  const cy = (y1 + y2) / 2
+  const dx = x2 - x1
+  const dy = y2 - y1
+  const length = Math.hypot(dx, dy)
+  if (length === 0) return false
+
+  const angle = Math.atan2(dy, dx)
+  const cos = Math.cos(-angle)
+  const sin = Math.sin(-angle)
+
+  const tx = pos.x - cx
+  const ty = pos.y - cy
+  const localX = tx * cos - ty * sin
+  const localY = tx * sin + ty * cos
+
+  const halfThick = RULER_THICKNESS / 2
+
+  // 자의 실물 범위 (약간의 여유값 -1 고려)
+  if (localX >= -length / 2 && localX <= length / 2 && localY > -halfThick + 1 && localY < halfThick - 1) {
+    return true
+  }
+  return false
+}
+
 // 점의 중심 및 직선/곡선의 '두께 중심축(위-아래 정중앙)' 자석 스냅 함수
 function snapToPointCenters(pos, shapes, snapRadius = 20) {
   const center = snapToShapesCenter(pos, shapes, snapRadius)
@@ -172,6 +200,11 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
 
+      if (isPointInsideRuler(finalPos, ruler)) {
+        updateFakeCursor(finalPos, false)
+        return
+      }
+
       // Shift 키를 누른 상태이거나 Shift로 시작한 직선 드로잉인 경우 (첫 시작 방향 각도 유지)
       const isShift = e.shiftKey || isShiftDrawing.current
       if (isShift && !lock) {
@@ -285,8 +318,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     const canvas = canvasRef.current
     const rawPos = getPos(e, canvas)
 
-    // 넘버스탬프 클릭 (기존 48에서 5만큼 키운 53px)
+    // 넘버스탬프 클릭
     if (stampMode) {
+      if (isPointInsideRuler(rawPos, ruler)) return
       const ctx = canvas.getContext('2d')
       const fontSize = 53
       ctx.save()
@@ -327,6 +361,12 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         finalPos = pointRes.pos
         isPointSnapped = pointRes.snappedPoint
       }
+    }
+
+    if (isPointInsideRuler(finalPos, ruler)) {
+      isDrawing.current = false
+      document.body.classList.remove('is-drawing')
+      return
     }
 
     snapLock.current = lock
