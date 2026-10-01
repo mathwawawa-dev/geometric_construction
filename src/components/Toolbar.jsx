@@ -81,19 +81,16 @@ export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, 
             : 'bg-gray-100 hover:bg-gray-200 text-gray-500 border-gray-200'
         }`}
       >
-        <span className="text-sm">🧲</span>
+        <div className="relative flex items-center justify-center w-5 h-5">
+          <span className="text-sm">🧲</span>
+          {!snapEnabled && (
+            <svg className="absolute inset-0 w-full h-full drop-shadow-sm" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="none" stroke="#ef4444" strokeWidth="2.5" />
+              <line x1="6" y1="6" x2="18" y2="18" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+          )}
+        </div>
         <span>스냅 (M)</span>
-        {snapEnabled ? (
-          <svg width="24" height="14" viewBox="0 0 24 14" fill="none" className="ml-1">
-            <rect width="24" height="14" rx="7" fill="#3b82f6" />
-            <circle cx="17" cy="7" r="5" fill="white" style={{ transition: 'cx 0.2s' }} />
-          </svg>
-        ) : (
-          <svg width="24" height="14" viewBox="0 0 24 14" fill="none" className="ml-1">
-            <rect width="24" height="14" rx="7" fill="#9ca3af" />
-            <circle cx="7" cy="7" r="5" fill="white" style={{ transition: 'cx 0.2s' }} />
-          </svg>
-        )}
       </button>
 
       <div className="w-px h-6 bg-gray-300" />

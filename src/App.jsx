@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.70_20261001_221500_스냅버튼UI개선'
+const VERSION = 'v0.1.71_20261001_221700_스냅버튼금연표시아이콘'
 
 export default function App() {
   const canvasRef = useRef(null)
