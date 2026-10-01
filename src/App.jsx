@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.80_20261001_231000_실행취소재실행버튼개선'
+const VERSION = 'v0.1.81_20261001_231200_도형복사붙여넣기기능추가'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -118,13 +118,62 @@ export default function App() {
   const isPanning = useRef(false)
   const panStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 })
 
-  // 키보드 단축키 (S: 선택, P: 펜, T: 텍스트, M: 스냅토글, Delete/Backspace: 삭제)
+  const clipboardRef = useRef([])
+
+  // 키보드 단축키 (S: 선택, P: 펜, T: 텍스트, M: 스냅토글, Delete/Backspace: 삭제, Ctrl+C/V: 복사/붙여넣기)
   useEffect(() => {
     const handler = (e) => {
       // 입력 필드 포커스 시 단축키 무시
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
       if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo() }
       if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redo() }
+      
+      // Ctrl + C: 복사
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
+        if (selectedIds.length > 0) {
+          e.preventDefault()
+          const copied = stateRef.current.shapes.filter(s => selectedIds.includes(s.id))
+          clipboardRef.current = JSON.parse(JSON.stringify(copied))
+        }
+      }
+      
+      // Ctrl + V: 붙여넣기
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V')) {
+        if (clipboardRef.current.length > 0) {
+          e.preventDefault()
+          const newShapes = clipboardRef.current.map(s => {
+            const newId = s.type.charAt(0) + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
+            const offset = 20
+            const ns = { ...s, id: newId }
+            if (ns.type === 'path' || ns.type === 'eraser') {
+              ns.points = ns.points.map(p => ({ x: p.x + offset, y: p.y + offset }))
+            } else if (ns.type === 'line' || ns.type === 'arrow') {
+              ns.x1 += offset; ns.y1 += offset; ns.x2 += offset; ns.y2 += offset
+            } else if (ns.type === 'circle' || ns.type === 'arc') {
+              ns.cx += offset; ns.cy += offset
+              if (ns.type === 'arc' && ns.points) {
+                ns.points = ns.points.map(p => ({ x: p.x + offset, y: p.y + offset }))
+              }
+            } else if (ns.type === 'rect' || ns.type === 'text') {
+              ns.x += offset; ns.y += offset
+            }
+            return ns
+          })
+          
+          setShapes(prev => {
+            const updated = [...prev, ...newShapes]
+            stateRef.current.shapes = updated
+            if (canvasRef.current) {
+              renderShapes(canvasRef.current.getContext('2d'), updated)
+            }
+            return updated
+          })
+          setDrawMode('select')
+          setSelectedIds(newShapes.map(s => s.id))
+          setTimeout(() => saveSnapshot(), 0)
+        }
+      }
+
       // S 키: 선택(Select) 모드 토글
       if (e.key === 's' || e.key === 'S') {
         e.preventDefault()
@@ -157,7 +206,7 @@ export default function App() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [undo, redo, setDrawMode, state.drawMode, selectedIds, handleDeleteSelected, setStampMode])
+  }, [undo, redo, setDrawMode, state.drawMode, selectedIds, handleDeleteSelected, setStampMode, saveSnapshot])
 
   // 마우스 휠 줌 (포인터 위치 기준)
   useEffect(() => {
