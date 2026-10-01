@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.85_20261002_000500_컴퍼스연필클램프렌더링순서변경'
+const VERSION = 'v0.1.86_20261002_001600_선분도구추가'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -190,6 +190,12 @@ export default function App() {
       if (e.key === 't' || e.key === 'T') {
         e.preventDefault()
         setDrawMode('text')
+        setStampMode(null)
+      }
+      // L 키: 선분 모드
+      if (e.key === 'l' || e.key === 'L') {
+        e.preventDefault()
+        setDrawMode('line')
         setStampMode(null)
       }
       // M 키: 자석(스냅) ON/OFF 토글

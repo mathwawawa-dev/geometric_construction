@@ -123,6 +123,17 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const [textEditor, setTextEditor] = useState(null)
   const textInputRef = useRef(null)
 
+  // 선분 도구 상태
+  const [lineStart, setLineStart] = useState(null)
+
+  useEffect(() => {
+    setLineStart(null)
+    const draftCanvas = draftCanvasRef.current
+    if (draftCanvas) {
+      draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
+    }
+  }, [activeTool])
+
   // 형광펜 굵기/투명도
   const hlWidth = Math.max(strokeWidth * 6, 20)
   const hlAlpha = 0.35
@@ -130,7 +141,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const getPos = (e, canvas) => {
     const rect = canvas.getBoundingClientRect()
     let clientX, clientY
-    if (e.touches && e.touches.length > 0) {
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX
+      clientY = e.changedTouches[0].clientY
+    } else if (e.touches && e.touches.length > 0) {
       clientX = e.touches[0].clientX
       clientY = e.touches[0].clientY
     } else {
@@ -278,8 +292,52 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
+    } else if (activeTool === 'line') {
+      let finalPos = rawPos
+      let lock = null
+      let isPointSnapped = false
+
+      const isSnapActive = snapEnabled || ctrlHeld.current
+      if (isSnapActive) {
+        const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
+        lock = rLock
+        finalPos = rulerSnapped
+        if (!lock) {
+          const pointRes = snapToPointCenters(rulerSnapped, shapes)
+          finalPos = pointRes.pos
+          isPointSnapped = pointRes.snappedPoint
+        }
+      }
+
+      if (lineStart) {
+        const draftCanvas = draftCanvasRef.current
+        if (draftCanvas) {
+          const ctx = draftCanvas.getContext('2d')
+          ctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height)
+          ctx.save()
+          ctx.globalAlpha = 1
+          ctx.strokeStyle = strokeColor
+          ctx.fillStyle = strokeColor
+          ctx.lineWidth = strokeWidth
+          ctx.lineCap = 'round'
+          ctx.lineJoin = 'round'
+          ctx.beginPath()
+          ctx.moveTo(lineStart.x, lineStart.y)
+          ctx.lineTo(finalPos.x, finalPos.y)
+          ctx.stroke()
+          const pointR = Math.max(strokeWidth * 0.8, 4)
+          ctx.beginPath()
+          ctx.arc(lineStart.x, lineStart.y, pointR, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.beginPath()
+          ctx.arc(finalPos.x, finalPos.y, pointR, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.restore()
+        }
+      }
+      updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     }
-  }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, shapes, snapEnabled, setIsInsideRuler])
+  }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, shapes, snapEnabled, setIsInsideRuler, lineStart, strokeColor, strokeWidth])
 
   const commitText = useCallback(() => {
     if (!textEditor) return
@@ -331,6 +389,96 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       if (!canvas) return
       const rawPos = getPos(e, canvas)
       setTextEditor({ x: rawPos.x, y: rawPos.y, text: '' })
+      return
+    }
+
+    if (activeTool === 'line') {
+      if (e.button !== undefined && e.button !== 0) return
+      e.preventDefault()
+      
+      const canvas = canvasRef.current
+      if (!canvas) return
+      const rawPos = getPos(e, canvas)
+      
+      let finalPos = rawPos
+      if (snapEnabled || ctrlHeld.current) {
+        const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
+        finalPos = rulerSnapped
+        if (!rLock) {
+          const pointRes = snapToPointCenters(rulerSnapped, shapes)
+          finalPos = pointRes.pos
+        }
+      }
+
+      if (lineStart) {
+        // 두 번째 클릭 시 선분 완성
+        const shape = {
+          id: 'seg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+          type: 'segment',
+          x1: lineStart.x,
+          y1: lineStart.y,
+          x2: finalPos.x,
+          y2: finalPos.y,
+          color: strokeColor,
+          width: strokeWidth,
+        }
+        onAddShape?.(shape)
+        setLineStart(null)
+        const draftCanvas = draftCanvasRef.current
+        if (draftCanvas) {
+          draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
+        }
+      } else {
+        // 첫 번째 클릭 시 시작
+        setLineStart({ x: finalPos.x, y: finalPos.y })
+        isDrawing.current = true
+        startPoint.current = { x: finalPos.x, y: finalPos.y }
+        
+        const onWindowUpLine = (me) => {
+          if (!isDrawing.current) return
+          isDrawing.current = false
+          
+          const mainCanvas = canvasRef.current
+          if (!mainCanvas) return
+          const upPos = getPos(me, mainCanvas)
+          
+          let finalUpPos = upPos
+          if (snapEnabled || ctrlHeld.current) {
+            const { pos: rSnap, lock: rL } = calcRulerSnap(upPos, ruler, null)
+            finalUpPos = rSnap
+            if (!rL) {
+              const pr = snapToPointCenters(rSnap, shapes)
+              finalUpPos = pr.pos
+            }
+          }
+          
+          const d = Math.hypot(finalUpPos.x - startPoint.current.x, finalUpPos.y - startPoint.current.y)
+          if (d > 5) {
+            // 드래그로 그렸음
+            const shape = {
+              id: 'seg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+              type: 'segment',
+              x1: startPoint.current.x,
+              y1: startPoint.current.y,
+              x2: finalUpPos.x,
+              y2: finalUpPos.y,
+              color: strokeColor,
+              width: strokeWidth,
+            }
+            onAddShape?.(shape)
+            setLineStart(null)
+            const draftCanvas = draftCanvasRef.current
+            if (draftCanvas) {
+              draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
+            }
+          }
+          window.removeEventListener('mouseup', onWindowUpLine)
+          window.removeEventListener('touchend', onWindowUpLine)
+        }
+        
+        window.addEventListener('mouseup', onWindowUpLine)
+        window.addEventListener('touchend', onWindowUpLine)
+      }
       return
     }
 
@@ -477,7 +625,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   }, [canvasRef])
 
   useEffect(() => {
-    if (activeTool === 'pen') {
+    if (activeTool === 'pen' || activeTool === 'line') {
       setIsHovering(true)
       if (fakeCursorRef.current && lastMousePos.current.x > -100) {
         fakeCursorRef.current.style.display = 'block'
@@ -500,7 +648,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (fakeCursorRef.current) fakeCursorRef.current.style.display = 'block'
       }}
       onMouseLeave={() => {
-        if (!isDrawing.current) {
+        if (!isDrawing.current && !lineStart) {
           setIsHovering(false)
           if (fakeCursorRef.current) fakeCursorRef.current.style.display = 'none'
         }
@@ -510,7 +658,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       onMouseDown={startDraw}
       onTouchStart={startDraw}
       style={{
-        cursor: activeTool === 'pen'
+        cursor: (activeTool === 'pen' || activeTool === 'line')
           ? (isInsideRuler ? 'grab' : 'none')
           : (activeTool === 'text' ? 'text' : 'default'),
         touchAction: 'none',
@@ -566,7 +714,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         </div>
       )}
 
-      {activeTool === 'pen' && isHovering && !isInsideRuler && (
+      {(activeTool === 'pen' || activeTool === 'line') && isHovering && !isInsideRuler && (
         <div
           id="fake-pen-cursor"
           ref={fakeCursorRef}

@@ -4,6 +4,7 @@ import { useRef } from 'react'
 const drawModes = [
   { id: 'pen',    icon: '✏️', label: '펜 (P)' },
   { id: 'text',   icon: '🔤', label: '텍스트 (T)' },
+  { id: 'line',   icon: '➖', label: '선분 (L)' },
   { id: 'select', icon: '↖️', label: '선택 (S)' },
 ]
 

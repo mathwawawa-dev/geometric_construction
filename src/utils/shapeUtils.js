@@ -127,6 +127,15 @@ export function getShapeBounds(shape) {
       maxY: shape.y + h + 2,
     }
   }
+  if (shape.type === 'segment') {
+    const pad = Math.max((shape.width || 3) * 0.8, 4) + 2
+    return {
+      minX: Math.min(shape.x1, shape.x2) - pad,
+      maxX: Math.max(shape.x1, shape.x2) + pad,
+      minY: Math.min(shape.y1, shape.y2) - pad,
+      maxY: Math.max(shape.y1, shape.y2) + pad,
+    }
+  }
   if (shape.points && shape.points.length > 0) {
     if (shape.points.length === 1) {
       const p = shape.points[0]
@@ -182,6 +191,10 @@ export function isPointNearShape(px, py, shape, threshold = 8) {
     return px >= b.minX - threshold && px <= b.maxX + threshold &&
            py >= b.minY - threshold && py <= b.maxY + threshold
   }
+  if (shape.type === 'segment') {
+    const d = distToSegment(px, py, shape.x1, shape.y1, shape.x2, shape.y2)
+    return d <= tolerance
+  }
   if (shape.type === 'stroke' || shape.type === 'arc') {
     const pts = shape.points
     if (!pts || pts.length === 0) return false
@@ -216,6 +229,10 @@ export function moveShape(shape, dx, dy) {
   if (shape.cy !== undefined) updated.cy = shape.cy + dy
   if (shape.x !== undefined) updated.x = shape.x + dx
   if (shape.y !== undefined) updated.y = shape.y + dy
+  if (shape.x1 !== undefined) updated.x1 = shape.x1 + dx
+  if (shape.y1 !== undefined) updated.y1 = shape.y1 + dy
+  if (shape.x2 !== undefined) updated.x2 = shape.x2 + dx
+  if (shape.y2 !== undefined) updated.y2 = shape.y2 + dy
   if (shape.points) {
     updated.points = shape.points.map(p => ({ x: p.x + dx, y: p.y + dy }))
   }
@@ -249,6 +266,23 @@ export function renderShapes(ctx, shapes) {
       ctx.beginPath()
       ctx.arc(s.cx, s.cy, s.r, 0, Math.PI * 2)
       ctx.stroke()
+    } else if (s.type === 'segment') {
+      ctx.globalAlpha = s.alpha ?? 1
+      ctx.strokeStyle = s.color || '#1e40af'
+      ctx.fillStyle = s.color || '#1e40af'
+      ctx.lineWidth = s.width || 3
+      ctx.beginPath()
+      ctx.moveTo(s.x1, s.y1)
+      ctx.lineTo(s.x2, s.y2)
+      ctx.stroke()
+      
+      const pointR = Math.max(ctx.lineWidth * 0.8, 4)
+      ctx.beginPath()
+      ctx.arc(s.x1, s.y1, pointR, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.beginPath()
+      ctx.arc(s.x2, s.y2, pointR, 0, Math.PI * 2)
+      ctx.fill()
     } else if (s.type === 'arc') {
       ctx.globalAlpha = s.alpha ?? 1
       ctx.strokeStyle = s.color || '#1e40af'
