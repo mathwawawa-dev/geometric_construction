@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.58_20261001_210000_컴퍼스회전조작별커서괴리감해소'
+const VERSION = 'v0.1.59_20261001_211100_스냅버튼단축키M표시'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -387,7 +387,7 @@ export default function App() {
 
       <footer className="px-4 py-1 bg-gray-50 border-t border-gray-200 text-[11px] text-gray-400 flex items-center justify-between">
         <span>{VERSION}</span>
-        <span>{Math.round(zoom * 100)}% | S: 선택 | P: 펜 | T: 텍스트 | Del: 삭제 | 우클릭+드래그: 화면 이동 | 휠: 줌</span>
+        <span>{Math.round(zoom * 100)}% | S: 선택 | P: 펜 | T: 텍스트 | M: 스냅 | Del: 삭제 | 우클릭+드래그: 화면 이동 | 휠: 줌</span>
       </footer>
     </div>
   )
