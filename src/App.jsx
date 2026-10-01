@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.78_20261001_230600_컴퍼스스냅상단바추가'
+const VERSION = 'v0.1.79_20261001_230900_상단바버튼정렬크기조정'
 
 export default function App() {
   const canvasRef = useRef(null)

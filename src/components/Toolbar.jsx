@@ -58,61 +58,63 @@ export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, 
 
       <div className="w-px h-6 bg-gray-300" />
 
-      {/* 형광펜 */}
-      <button
-        onClick={() => setHighlightMode(!highlightMode)}
-        title="형광펜 (반투명 굵은 선)"
-        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
-          highlightMode
-            ? 'bg-yellow-200 text-yellow-900 border-yellow-400 shadow-inner'
-            : 'bg-gray-100 hover:bg-yellow-100 text-gray-700 border-gray-200'
-        }`}
-      >
-        <svg
-          width="18" height="18" viewBox="0 0 24 24" fill="none"
-          style={{ filter: highlightMode ? 'none' : 'grayscale(100%) opacity(45%)' }}
-        >
-          {/* 형광펜 몸통 */}
-          <rect x="5" y="3" width="14" height="13" rx="3" fill={highlightMode ? '#facc15' : '#d1d5db'} />
-          {/* 형광펜 캡 끝 */}
-          <rect x="8" y="1" width="8" height="4" rx="1.5" fill={highlightMode ? '#eab308' : '#9ca3af'} />
-          {/* 형광펜 촉 (사다리꼴) */}
-          <polygon points="7,16 17,16 14,22 10,22" fill={highlightMode ? '#fde047' : '#e5e7eb'} />
-          {/* 하이라이트 반사 */}
-          <rect x="8" y="5" width="3" height="8" rx="1.5" fill="white" opacity="0.4" />
-        </svg>
-        형광펜
-      </button>
-
-      {/* 자석 (스냅) ON/OFF */}
-      <button
-        onClick={() => setSnapEnabled(!snapEnabled)}
-        title={snapEnabled ? "자석 스냅 켜짐 (단축키: M)" : "자석 스냅 꺼짐 (단축키: M)"}
-        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
-          snapEnabled
-            ? 'bg-blue-100 text-blue-900 border-blue-400 shadow-sm'
-            : 'bg-gray-100 hover:bg-gray-200 text-gray-500 border-gray-200'
-        }`}
-      >
-        <span className="text-sm" style={{ filter: snapEnabled ? 'none' : 'grayscale(100%) opacity(50%)' }}>🧲</span>
-        <span>스냅 (M)</span>
-      </button>
-
-      {/* 컴퍼스 전용 스냅 ON/OFF */}
-      {setCompassSnapEnabled && (
+      <div className="flex items-center gap-1">
+        {/* 형광펜 */}
         <button
-          onClick={() => setCompassSnapEnabled(!compassSnapEnabled)}
-          title={compassSnapEnabled ? "컴퍼스 스냅 켜짐" : "컴퍼스 스냅 꺼짐"}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
-            compassSnapEnabled
+          onClick={() => setHighlightMode(!highlightMode)}
+          title="형광펜 (반투명 굵은 선)"
+          className={`flex items-center justify-center h-8 gap-1.5 px-2.5 rounded-lg text-xs font-medium transition-colors border ${
+            highlightMode
+              ? 'bg-yellow-200 text-yellow-900 border-yellow-400 shadow-inner'
+              : 'bg-gray-100 hover:bg-yellow-100 text-gray-700 border-gray-200'
+          }`}
+        >
+          <svg
+            width="16" height="16" viewBox="0 0 24 24" fill="none"
+            style={{ filter: highlightMode ? 'none' : 'grayscale(100%) opacity(45%)' }}
+          >
+            {/* 형광펜 몸통 */}
+            <rect x="5" y="3" width="14" height="13" rx="3" fill={highlightMode ? '#facc15' : '#d1d5db'} />
+            {/* 형광펜 캡 끝 */}
+            <rect x="8" y="1" width="8" height="4" rx="1.5" fill={highlightMode ? '#eab308' : '#9ca3af'} />
+            {/* 형광펜 촉 (사다리꼴) */}
+            <polygon points="7,16 17,16 14,22 10,22" fill={highlightMode ? '#fde047' : '#e5e7eb'} />
+            {/* 하이라이트 반사 */}
+            <rect x="8" y="5" width="3" height="8" rx="1.5" fill="white" opacity="0.4" />
+          </svg>
+          형광펜
+        </button>
+
+        {/* 자석 (스냅) ON/OFF */}
+        <button
+          onClick={() => setSnapEnabled(!snapEnabled)}
+          title={snapEnabled ? "자석 스냅 켜짐 (단축키: M)" : "자석 스냅 꺼짐 (단축키: M)"}
+          className={`flex items-center justify-center h-8 gap-1.5 px-2.5 rounded-lg text-xs font-semibold transition-all border ${
+            snapEnabled
               ? 'bg-blue-100 text-blue-900 border-blue-400 shadow-sm'
               : 'bg-gray-100 hover:bg-gray-200 text-gray-500 border-gray-200'
           }`}
         >
-          <span style={{ filter: compassSnapEnabled ? 'none' : 'grayscale(100%) opacity(50%)' }}>🧲🧭</span>
-          <span>컴퍼스 스냅</span>
+          <span className="text-[14px] leading-none flex items-center" style={{ filter: snapEnabled ? 'none' : 'grayscale(100%) opacity(50%)' }}>🧲</span>
+          <span>스냅 (M)</span>
         </button>
-      )}
+
+        {/* 컴퍼스 전용 스냅 ON/OFF */}
+        {setCompassSnapEnabled && (
+          <button
+            onClick={() => setCompassSnapEnabled(!compassSnapEnabled)}
+            title={compassSnapEnabled ? "컴퍼스 스냅 켜짐" : "컴퍼스 스냅 꺼짐"}
+            className={`flex items-center justify-center h-8 gap-1.5 px-2.5 rounded-lg text-xs font-semibold transition-all border ${
+              compassSnapEnabled
+                ? 'bg-blue-100 text-blue-900 border-blue-400 shadow-sm'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-500 border-gray-200'
+            }`}
+          >
+            <span className="text-[14px] leading-none flex items-center" style={{ filter: compassSnapEnabled ? 'none' : 'grayscale(100%) opacity(50%)' }}>🧲🧭</span>
+            <span>컴퍼스 스냅</span>
+          </button>
+        )}
+      </div>
       <div className="w-px h-6 bg-gray-300" />
 
       {/* 굵기 */}
