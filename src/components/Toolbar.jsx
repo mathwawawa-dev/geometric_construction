@@ -74,16 +74,15 @@ export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, 
       {/* 자석 (스냅) ON/OFF */}
       <button
         onClick={() => setSnapEnabled(!snapEnabled)}
-        title={snapEnabled ? "자석 스냅 켜짐 (단축키: M)" : "자석 스냅 꺼짐 (단축키: M)"}
-        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+        title={snapEnabled ? "자석 스냅 켜짐 (클릭하여 끄기)" : "자석 스냅 꺼짐 (클릭하여 켜기)"}
+        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
           snapEnabled
             ? 'bg-blue-100 text-blue-900 border-blue-400 shadow-sm'
-            : 'bg-gray-100 hover:bg-gray-200 text-gray-500 border-gray-200'
+            : 'bg-gray-100 hover:bg-gray-200 text-gray-400 border-gray-200'
         }`}
       >
         <span className="text-sm">🧲</span>
         <span>스냅 {snapEnabled ? 'ON' : 'OFF'}</span>
-        <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-black/10 text-gray-700">M</span>
       </button>
 
       <div className="w-px h-6 bg-gray-300" />

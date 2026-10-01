@@ -64,18 +64,8 @@ function reducer(state, action) {
       return { ...state, strokeColor: action.color }
     case 'SET_WIDTH':
       return { ...state, strokeWidth: action.width }
-    case 'SET_COMPASS': {
-      const p = action.payload || {}
-      if (
-        (p.pinX !== undefined && isNaN(p.pinX)) ||
-        (p.pinY !== undefined && isNaN(p.pinY)) ||
-        (p.pencilX !== undefined && isNaN(p.pencilX)) ||
-        (p.pencilY !== undefined && isNaN(p.pencilY))
-      ) {
-        return state
-      }
-      return { ...state, compass: { ...state.compass, ...p } }
-    }
+    case 'SET_COMPASS':
+      return { ...state, compass: { ...state.compass, ...action.payload } }
     case 'SET_RULER':
       return { ...state, ruler: { ...state.ruler, ...action.payload } }
     case 'SET_PROTRACTOR':

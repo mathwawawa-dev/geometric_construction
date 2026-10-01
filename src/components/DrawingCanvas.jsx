@@ -92,7 +92,7 @@ function snapToPointCenters(pos, shapes, snapRadius = 20) {
   return center ? { pos: center, snappedPoint: true } : { pos, snappedPoint: false }
 }
 
-export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, highlightMode, stampMode, shapes, snapEnabled = true, updateFakeCursorRef }) {
+export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, highlightMode, stampMode, shapes, snapEnabled = true }) {
   const draftCanvasRef = useRef(null)
   const isDrawing = useRef(false)
   const snapLock = useRef(null)
@@ -106,8 +106,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const startPoint = useRef({ x: 0, y: 0 })
   const initialAngle = useRef(null)
   const ctrlHeld = useRef(false)  // Ctrl 누른 동안 임시 스냅 ON
-  const isCursorOverridden = useRef(false)
-
 
   // Ctrl 키 상태 추적
   useEffect(() => {
@@ -147,33 +145,19 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     }
   }
 
-  const updateFakeCursor = useCallback((pos, snapped, hide = false) => {
+  const updateFakeCursor = useCallback((pos, snapped) => {
     lastMousePos.current = pos
     if (fakeCursorRef.current) {
       const isStamp = !!stampMode
       const tx = isStamp ? pos.x - 27 : pos.x - 2
       const ty = isStamp ? pos.y - 27 : pos.y - 22
       fakeCursorRef.current.style.transform = `translate(${tx}px, ${ty}px)`
-      fakeCursorRef.current.style.display = hide ? 'none' : 'block'
+      fakeCursorRef.current.style.display = 'block'
     }
     if (fakePencilLineRef.current) {
       fakePencilLineRef.current.style.opacity = snapped ? '1' : '0'
     }
   }, [stampMode])
-
-  useEffect(() => {
-    if (updateFakeCursorRef) {
-      updateFakeCursorRef.current = (pos) => {
-        isCursorOverridden.current = !!pos
-        if (pos) {
-          updateFakeCursor(pos, false)
-        } else {
-          // override 해제 시 안 보이게 처리 (마우스 이동 시 다시 계산됨)
-          if (fakeCursorRef.current) fakeCursorRef.current.style.display = 'none'
-        }
-      }
-    }
-  }, [updateFakeCursorRef, updateFakeCursor])
 
   // 드래프트 캔버스에 현재 스트로크 단일 경로로 렌더링 (동그라미 겹침 방지)
   const renderCurrentStroke = useCallback(() => {
@@ -278,8 +262,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       renderCurrentStroke()
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     } else if (activeTool === 'pen') {
-      if (isCursorOverridden.current) return
-
       let finalPos = rawPos
       let lock = null
       let isPointSnapped = false
@@ -295,8 +277,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           isPointSnapped = pointRes.snappedPoint
         }
       }
-      const hideCursor = isPointInsideRuler(rawPos, ruler)
-      updateFakeCursor(finalPos, lock !== null || isPointSnapped, hideCursor)
+      updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     }
   }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, shapes, snapEnabled, setIsInsideRuler])
 
@@ -585,7 +566,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         </div>
       )}
 
-      {activeTool === 'pen' && (
+      {activeTool === 'pen' && isHovering && !isInsideRuler && (
         <div
           ref={fakeCursorRef}
           className="absolute top-0 left-0 pointer-events-none drop-shadow-md"
@@ -600,7 +581,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
               }
               return `translate(${lastMousePos.current.x - 2}px, ${lastMousePos.current.y - 22}px)`
             })(),
-            display: 'none', // 초기값 (JS에서 업데이트)
+            display: lastMousePos.current.x > -100 ? 'block' : 'none',
           }}
         >
           {isStampMode ? (
