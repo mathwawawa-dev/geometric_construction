@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.73_20261001_222100_형광펜SVG아이콘변경'
+const VERSION = 'v0.1.74_20261001_222700_컴퍼스전용스냅독립분리'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -36,6 +36,8 @@ export default function App() {
 
   // 자석(스냅) ON/OFF 상태 (기본값 OFF - 컴퍼스는 별도 ON 유지)
   const [snapEnabled, setSnapEnabled] = useState(false)
+  // 컴퍼스 전용 스냅 (기본값 ON, 전역 스냅과 독립적)
+  const [compassSnapEnabled, setCompassSnapEnabled] = useState(true)
 
 
   const getStateRef = useCallback(() => ({
@@ -360,7 +362,8 @@ export default function App() {
                 onAddShape={handleAddShape}
                 ruler={state.ruler}
                 shapes={state.shapes}
-                snapEnabled={snapEnabled}
+                snapEnabled={compassSnapEnabled}
+                setSnapEnabled={setCompassSnapEnabled}
               />
             )}
             {state.ruler.visible && (

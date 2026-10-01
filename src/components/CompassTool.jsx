@@ -85,7 +85,7 @@ function drawArcSegment(canvas, pinX, pinY, fromAngle, toAngle, r, strokeColor, 
   ctx.stroke()
 }
 
-export default function CompassTool({ compass, setCompass, canvasRef, strokeColor, strokeWidth, onDraw, ruler, onInteractionEnd, onAddShape, shapes, snapEnabled = true }) {
+export default function CompassTool({ compass, setCompass, canvasRef, strokeColor, strokeWidth, onDraw, ruler, onInteractionEnd, onAddShape, shapes, snapEnabled = true, setSnapEnabled }) {
   const svgRef = useRef(null)
   const dragging = useRef(null)
   // dragOffset: 모든 드래그 파트에서 점프 방지용 공용 저장소
@@ -497,6 +497,20 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         <button onClick={drawFullCircle} className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-1.5 rounded-lg font-semibold transition-colors">
           원 그리기 (전체)
         </button>
+        {setSnapEnabled && (
+          <button
+            onClick={() => setSnapEnabled(!snapEnabled)}
+            title={snapEnabled ? '스냅 켜짐 (클릭하여 끄기)' : '스냅 꺼짐 (클릭하여 켜기)'}
+            className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+              snapEnabled
+                ? 'bg-blue-100 text-blue-900 border-blue-400 shadow-sm'
+                : 'bg-gray-100 text-gray-500 border-gray-200'
+            }`}
+          >
+            <span style={{ filter: snapEnabled ? 'none' : 'grayscale(100%) opacity(50%)' }}>🧲</span>
+            스냅 {snapEnabled ? 'ON' : 'OFF'}
+          </button>
+        )}
         <p className="text-[11px] text-gray-400 leading-tight mt-1">
           📌 침핀다리 전체: 이동<br />
           ↔️ 연필/클램프: 반지름 조절<br />
