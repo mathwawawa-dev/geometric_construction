@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.59_20261001_211100_스냅버튼단축키M표시'
+const VERSION = 'v0.1.60_20261001_211400_컴퍼스클릭시사라짐버그수정'
 
 export default function App() {
   const canvasRef = useRef(null)

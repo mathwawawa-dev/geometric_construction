@@ -101,7 +101,15 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     }
   }, [])
 
-  const { pinX, pinY, pencilX, pencilY, radiusInput, hingeSide = 1 } = compass
+  const rawPinX = compass.pinX
+  const rawPinY = compass.pinY
+  const rawPencilX = compass.pencilX
+  const rawPencilY = compass.pencilY
+  const pinX = (typeof rawPinX === 'number' && !isNaN(rawPinX)) ? rawPinX : 400
+  const pinY = (typeof rawPinY === 'number' && !isNaN(rawPinY)) ? rawPinY : 380
+  const pencilX = (typeof rawPencilX === 'number' && !isNaN(rawPencilX)) ? rawPencilX : 550
+  const pencilY = (typeof rawPencilY === 'number' && !isNaN(rawPencilY)) ? rawPencilY : 380
+  const { radiusInput, hingeSide = 1 } = compass
   const radius = dist(pinX, pinY, pencilX, pencilY)
 
   // 힌지 위치: 수직 방향 (dy/span, -dx/span) * hingeSide (더블클릭 교체 시 힌지 위치 불변 유지)
@@ -155,7 +163,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         angleOffset: curPinAngle - clickAngle,
         distOffset: curDistFromPencil - clickDist,
       }
-    if (part === 'whole') {
+    } else if (part === 'whole') {
       // 힌지: 절대 각도 기준 회전 (진동 없음)
       dragOffset.current = {
         initMouseAngle: Math.atan2(pos.y - pinY, pos.x - pinX),
@@ -189,7 +197,6 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         clickDist,
       }
       setDragCursor({ x: pos.x, y: pos.y, type: 'leg' })
-    }
       prevAngleRef.current = curPencilAngle
       legArcPoints.current = [{ x: pencilX, y: pencilY }]
     }
