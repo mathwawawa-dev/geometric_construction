@@ -178,6 +178,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
 
     const onMove = (me) => {
       me.preventDefault()
+      if (!dragOffset.current) return
       const rawP = getSVGPos(me)
 
       if (dragging.current === 'pin_top') {
