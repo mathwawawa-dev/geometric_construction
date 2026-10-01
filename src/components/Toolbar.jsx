@@ -82,8 +82,18 @@ export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, 
         }`}
       >
         <span className="text-sm">🧲</span>
-        <span>스냅 {snapEnabled ? 'ON' : 'OFF'}</span>
-        <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-black/10 text-gray-700">M</span>
+        <span>스냅 (M)</span>
+        {snapEnabled ? (
+          <svg width="24" height="14" viewBox="0 0 24 14" fill="none" className="ml-1">
+            <rect width="24" height="14" rx="7" fill="#3b82f6" />
+            <circle cx="17" cy="7" r="5" fill="white" style={{ transition: 'cx 0.2s' }} />
+          </svg>
+        ) : (
+          <svg width="24" height="14" viewBox="0 0 24 14" fill="none" className="ml-1">
+            <rect width="24" height="14" rx="7" fill="#9ca3af" />
+            <circle cx="7" cy="7" r="5" fill="white" style={{ transition: 'cx 0.2s' }} />
+          </svg>
+        )}
       </button>
 
       <div className="w-px h-6 bg-gray-300" />
