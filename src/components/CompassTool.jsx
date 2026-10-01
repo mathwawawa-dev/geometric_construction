@@ -98,6 +98,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
   useEffect(() => {
     return () => {
       document.body.style.cursor = ''
+      document.body.classList.remove('is-tool-dragging')
     }
   }, [])
 
@@ -145,6 +146,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     e.preventDefault()
     dragging.current = part
     const pos = getSVGPos(e)
+    document.body.classList.add('is-tool-dragging')
     // whole/pencil/clamp/leg 드래그 중에는 OS 커서 숨기기
     if (part === 'whole' || part === 'pencil' || part === 'clamp' || part === 'leg') {
       document.body.style.cursor = 'none'
@@ -335,6 +337,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       dragging.current = null
       prevAngleRef.current = null
       document.body.style.cursor = ''
+      document.body.classList.remove('is-tool-dragging')
       setDragCursor(null)
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)

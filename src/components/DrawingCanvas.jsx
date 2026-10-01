@@ -569,7 +569,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       {activeTool === 'pen' && isHovering && !isInsideRuler && (
         <div
           ref={fakeCursorRef}
-          className="absolute top-0 left-0 pointer-events-none drop-shadow-md"
+          className="fake-cursor-wrapper absolute top-0 left-0 pointer-events-none drop-shadow-md"
           style={{
             zIndex: 9999,
             willChange: 'transform',

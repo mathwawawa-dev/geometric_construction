@@ -2,3 +2,5 @@
 
 body.is-drawing .tool-overlay * { pointer-events: none !important; cursor: none !important; }
 
+
+body.is-tool-dragging .fake-cursor-wrapper { display: none !important; }

@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.60_20261001_211400_컴퍼스클릭시사라짐버그수정'
+const VERSION = 'v0.1.61_20261001_212100_컴퍼스조작시가짜펜숨김'
 
 export default function App() {
   const canvasRef = useRef(null)

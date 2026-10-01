@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 
 const HANDLE_R = 6
 const RULER_THICKNESS = 120 // 자의 두께 (2배 증가)
@@ -7,6 +7,10 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
   const svgRef = useRef(null)
   const dragging = useRef(null)
   const dragOffset = useRef({ dx: 0, dy: 0 })
+
+  useEffect(() => {
+    return () => document.body.classList.remove('is-tool-dragging')
+  }, [])
 
   const { x1, y1, x2, y2 } = ruler
 
@@ -32,6 +36,7 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
     e.stopPropagation()
     e.preventDefault()
     dragging.current = part
+    document.body.classList.add('is-tool-dragging')
     const pos = getSVGPos(e)
 
     const angleRad = Math.atan2(y2 - y1, x2 - x1)
@@ -108,6 +113,7 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
     const onUp = () => {
       if (dragging.current) onInteractionEnd?.()
       dragging.current = null
+      document.body.classList.remove('is-tool-dragging')
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
       window.removeEventListener('touchmove', onMove)
