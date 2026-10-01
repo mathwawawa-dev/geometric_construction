@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.50_20261001_133000_컴퍼스실행취소오류수정'
+const VERSION = 'v0.1.51_20261001_134500_컴퍼스왕복그리기실행취소버그수정'
 
 export default function App() {
   const canvasRef = useRef(null)

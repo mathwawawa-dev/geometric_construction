@@ -169,6 +169,8 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         startAngle: curPencilAngle,
         lastAngle: curPencilAngle,
         totalAngleTraveled: 0,
+        minAccumulated: 0,
+        maxAccumulated: 0,
       }
       prevAngleRef.current = curPencilAngle
       legArcPoints.current = [{ x: pencilX, y: pencilY }]
@@ -235,7 +237,10 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           let diff = curAngle - prev
           while (diff < -Math.PI) diff += 2 * Math.PI
           while (diff > Math.PI) diff -= 2 * Math.PI
-          dragOffset.current.totalAngleTraveled = (dragOffset.current.totalAngleTraveled || 0) + diff
+          const newTotal = (dragOffset.current.totalAngleTraveled || 0) + diff
+          dragOffset.current.totalAngleTraveled = newTotal
+          dragOffset.current.minAccumulated = Math.min(dragOffset.current.minAccumulated || 0, newTotal)
+          dragOffset.current.maxAccumulated = Math.max(dragOffset.current.maxAccumulated || 0, newTotal)
           dragOffset.current.lastAngle = curAngle
           drawArcSegment(canvasRef.current, pinX, pinY, prev, curAngle, curRadius, strokeColor, strokeWidth)
         }
@@ -251,7 +256,9 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
     const onUp = () => {
       let shapeAdded = false
       if (dragging.current === 'leg' && legArcPoints.current.length > 1) {
-        const totalTraveled = Math.abs(dragOffset.current.totalAngleTraveled || 0)
+        const minAcc = dragOffset.current.minAccumulated || 0
+        const maxAcc = dragOffset.current.maxAccumulated || 0
+        const totalTraveled = maxAcc - minAcc
         const curRadius = dragOffset.current.fixedRadius || radius
         // 거의 한 바퀴(350도 이상) 돌았으면 완벽한 원으로 등록
         if (totalTraveled >= Math.PI * 1.94) {
@@ -274,9 +281,9 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
             cx: pinX,
             cy: pinY,
             r: curRadius,
-            fromAngle: dragOffset.current.startAngle,
-            toAngle: dragOffset.current.lastAngle,
-            ccw: (dragOffset.current.totalAngleTraveled || 0) < 0,
+            fromAngle: dragOffset.current.startAngle + minAcc,
+            toAngle: dragOffset.current.startAngle + maxAcc,
+            ccw: false,
             points: [...legArcPoints.current],
             color: strokeColor,
             width: strokeWidth,
