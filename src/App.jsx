@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.52_20261001_154600_자내부그리기방지_및_선택모드도구이동'
+const VERSION = 'v0.1.53_20261001_155300_자조절버튼_최상단위치변경'
 
 export default function App() {
   const canvasRef = useRef(null)

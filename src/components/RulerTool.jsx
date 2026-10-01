@@ -34,8 +34,22 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
     dragging.current = part
     const pos = getSVGPos(e)
 
+    const angleRad = Math.atan2(y2 - y1, x2 - x1)
+    const H1_orig = {
+      x: x1 + (RULER_THICKNESS / 2) * Math.sin(angleRad),
+      y: y1 - (RULER_THICKNESS / 2) * Math.cos(angleRad)
+    }
+    const H2_orig = {
+      x: x2 + (RULER_THICKNESS / 2) * Math.sin(angleRad),
+      y: y2 - (RULER_THICKNESS / 2) * Math.cos(angleRad)
+    }
+
     if (part === 'whole') {
       dragOffset.current = { dx: pos.x - cx, dy: pos.y - cy }
+    } else if (part === 'p1') {
+      dragOffset.current = { dx: pos.x - H1_orig.x, dy: pos.y - H1_orig.y, H2: H2_orig }
+    } else if (part === 'p2') {
+      dragOffset.current = { dx: pos.x - H2_orig.x, dy: pos.y - H2_orig.y, H1: H1_orig }
     }
 
     const onMove = (me) => {
@@ -44,19 +58,45 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
       const isShift = me.shiftKey
 
       if (dragging.current === 'p1') {
-        let currentAngle = Math.atan2(p.y - y2, p.x - x2)
+        const targetX = p.x - dragOffset.current.dx
+        const targetY = p.y - dragOffset.current.dy
+        const H2 = dragOffset.current.H2
+
+        let currentAngle = Math.atan2(H2.y - targetY, H2.x - targetX)
         if (isShift) {
           currentAngle = Math.round((currentAngle * 180 / Math.PI) / 5) * 5 * (Math.PI / 180)
         }
-        const dist = Math.hypot(p.x - x2, p.y - y2)
-        setRuler({ x1: x2 + dist * Math.cos(currentAngle), y1: y2 + dist * Math.sin(currentAngle) })
+        const dist = Math.hypot(targetX - H2.x, targetY - H2.y)
+        const newH1 = {
+          x: H2.x - dist * Math.cos(currentAngle),
+          y: H2.y - dist * Math.sin(currentAngle)
+        }
+        const offsetX = - (RULER_THICKNESS / 2) * Math.sin(currentAngle)
+        const offsetY = (RULER_THICKNESS / 2) * Math.cos(currentAngle)
+        setRuler({
+          x1: newH1.x + offsetX, y1: newH1.y + offsetY,
+          x2: H2.x + offsetX, y2: H2.y + offsetY
+        })
       } else if (dragging.current === 'p2') {
-        let currentAngle = Math.atan2(p.y - y1, p.x - x1)
+        const targetX = p.x - dragOffset.current.dx
+        const targetY = p.y - dragOffset.current.dy
+        const H1 = dragOffset.current.H1
+
+        let currentAngle = Math.atan2(targetY - H1.y, targetX - H1.x)
         if (isShift) {
           currentAngle = Math.round((currentAngle * 180 / Math.PI) / 5) * 5 * (Math.PI / 180)
         }
-        const dist = Math.hypot(p.x - x1, p.y - y1)
-        setRuler({ x2: x1 + dist * Math.cos(currentAngle), y2: y1 + dist * Math.sin(currentAngle) })
+        const dist = Math.hypot(targetX - H1.x, targetY - H1.y)
+        const newH2 = {
+          x: H1.x + dist * Math.cos(currentAngle),
+          y: H1.y + dist * Math.sin(currentAngle)
+        }
+        const offsetX = - (RULER_THICKNESS / 2) * Math.sin(currentAngle)
+        const offsetY = (RULER_THICKNESS / 2) * Math.cos(currentAngle)
+        setRuler({
+          x1: H1.x + offsetX, y1: H1.y + offsetY,
+          x2: newH2.x + offsetX, y2: newH2.y + offsetY
+        })
       } else if (dragging.current === 'whole') {
         const dx = x2 - x1
         const dy = y2 - y1
@@ -124,23 +164,22 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
             onMouseDown={onPointerDown('whole')}
             onTouchStart={onPointerDown('whole')}
           />
+          {/* 양쪽 원 (상단 핸들) */}
+          <circle
+            cx={cx - length / 2} cy={cy - RULER_THICKNESS / 2} r={HANDLE_R}
+            fill="#0ea5e9" stroke="white" strokeWidth="2"
+            style={{ pointerEvents: 'all', cursor: 'nwse-resize' }}
+            onMouseDown={onPointerDown('p1')}
+            onTouchStart={onPointerDown('p1')}
+          />
+          <circle
+            cx={cx + length / 2} cy={cy - RULER_THICKNESS / 2} r={HANDLE_R}
+            fill="#0ea5e9" stroke="white" strokeWidth="2"
+            style={{ pointerEvents: 'all', cursor: 'nwse-resize' }}
+            onMouseDown={onPointerDown('p2')}
+            onTouchStart={onPointerDown('p2')}
+          />
         </g>
-        
-        {/* 양쪽 원 (핸들) */}
-        <circle
-          cx={x1} cy={y1} r={HANDLE_R}
-          fill="#0ea5e9" stroke="white" strokeWidth="2"
-          style={{ pointerEvents: 'all', cursor: 'nwse-resize' }}
-          onMouseDown={onPointerDown('p1')}
-          onTouchStart={onPointerDown('p1')}
-        />
-        <circle
-          cx={x2} cy={y2} r={HANDLE_R}
-          fill="#0ea5e9" stroke="white" strokeWidth="2"
-          style={{ pointerEvents: 'all', cursor: 'nwse-resize' }}
-          onMouseDown={onPointerDown('p2')}
-          onTouchStart={onPointerDown('p2')}
-        />
       </svg>
 
       {/* 자 컨트롤 패널 */}
