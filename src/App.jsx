@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.49_20261001_084900_실행취소이중저장버그수정'
+const VERSION = 'v0.1.50_20261001_133000_컴퍼스실행취소오류수정'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -287,6 +287,7 @@ export default function App() {
             const cx = 1500 - pan.x / zoom;
             const cy = 1000 - pan.y / zoom;
             toggleTool(tool, { x: cx, y: cy });
+            setTimeout(() => saveSnapshot(), 0);
           }}
           toolsVisible={toolsVisible}
           background={state.background}

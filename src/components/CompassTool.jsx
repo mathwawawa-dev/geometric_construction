@@ -314,7 +314,8 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       pencilY: pinY,
       hingeSide: -hingeSide,
     })
-  }, [pinX, pinY, pencilX, pencilY, hingeSide, setCompass])
+    onInteractionEnd?.()
+  }, [pinX, pinY, pencilX, pencilY, hingeSide, setCompass, onInteractionEnd])
 
   const handleRadiusInput = (e) => {
     const val = e.target.value
