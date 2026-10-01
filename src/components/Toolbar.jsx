@@ -17,16 +17,28 @@ export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, 
       <h1 className="text-lg font-bold text-gray-800 mr-2">작도보드</h1>
 
       {/* 실행 취소 / 재실행 */}
-      <button
-        onClick={onUndo}
-        title="실행 취소 (Ctrl+Z)"
-        className="w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center text-base transition-colors"
-      >↩</button>
-      <button
-        onClick={onRedo}
-        title="재실행 (Ctrl+Y)"
-        className="w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center text-base transition-colors"
-      >↪</button>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={onUndo}
+          title="실행 취소 (Ctrl+Z)"
+          className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center transition-colors"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 7v6h6" />
+            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+          </svg>
+        </button>
+        <button
+          onClick={onRedo}
+          title="재실행 (Ctrl+Y)"
+          className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center transition-colors"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 7v6h-6" />
+            <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7" />
+          </svg>
+        </button>
+      </div>
 
       <div className="w-px h-6 bg-gray-300" />
 

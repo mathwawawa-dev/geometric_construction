@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.79_20261001_230900_상단바버튼정렬크기조정'
+const VERSION = 'v0.1.80_20261001_231000_실행취소재실행버튼개선'
 
 export default function App() {
   const canvasRef = useRef(null)
