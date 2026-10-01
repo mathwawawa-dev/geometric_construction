@@ -101,9 +101,23 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const fakePencilLineRef = useRef(null)
   const lastMousePos = useRef({ x: -9999, y: -9999 })
   const [isHovering, setIsHovering] = useState(false)
+  const [isInsideRuler, setIsInsideRuler] = useState(false)
   const isShiftDrawing = useRef(false)
   const startPoint = useRef({ x: 0, y: 0 })
   const initialAngle = useRef(null)
+  const ctrlHeld = useRef(false)  // Ctrl 누른 동안 임시 스냅 ON
+
+  // Ctrl 키 상태 추적
+  useEffect(() => {
+    const onKeyDown = (e) => { if (e.key === 'Control') ctrlHeld.current = true }
+    const onKeyUp = (e) => { if (e.key === 'Control') ctrlHeld.current = false }
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+    }
+  }, [])
 
   // 텍스트 도구 상태
   const [textEditor, setTextEditor] = useState(null)
@@ -186,13 +200,17 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     const rawPos = getPos(e, canvas)
     lastMousePos.current = rawPos
 
+    // 자 내부 여부 실시간 업데이트 (커서 변경용)
+    setIsInsideRuler(activeTool === 'pen' && isPointInsideRuler(rawPos, ruler))
+
     if (isDrawing.current && activeTool === 'pen' && !stampMode) {
       e.preventDefault()
       let finalPos = rawPos
       let lock = null
       let isPointSnapped = false
 
-      if (snapEnabled) {
+      const isSnapActive = snapEnabled || ctrlHeld.current
+      if (isSnapActive) {
         const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, snapLock.current)
         lock = rLock
         finalPos = rulerSnapped
@@ -246,7 +264,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       let lock = null
       let isPointSnapped = false
 
-      if (snapEnabled) {
+      const isSnapActive = snapEnabled || ctrlHeld.current
+      if (isSnapActive) {
         const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
         lock = rLock
         finalPos = rulerSnapped
@@ -258,7 +277,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     }
-  }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, shapes, snapEnabled])
+  }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, shapes, snapEnabled, setIsInsideRuler])
 
   const commitText = useCallback(() => {
     if (!textEditor) return
@@ -355,7 +374,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     let lock = null
     let isPointSnapped = false
 
-    if (snapEnabled) {
+    if (snapEnabled || ctrlHeld.current) {
       const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
       lock = rLock
       finalPos = rulerSnapped
@@ -487,7 +506,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       onMouseDown={startDraw}
       onTouchStart={startDraw}
       style={{
-        cursor: activeTool === 'pen' ? 'none' : (activeTool === 'text' ? 'text' : 'default'),
+        cursor: activeTool === 'pen'
+          ? (isInsideRuler ? 'grab' : 'none')
+          : (activeTool === 'text' ? 'text' : 'default'),
         touchAction: 'none',
       }}
     >
@@ -541,7 +562,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         </div>
       )}
 
-      {activeTool === 'pen' && isHovering && (
+      {activeTool === 'pen' && isHovering && !isInsideRuler && (
         <div
           ref={fakeCursorRef}
           className="absolute top-0 left-0 pointer-events-none drop-shadow-md"

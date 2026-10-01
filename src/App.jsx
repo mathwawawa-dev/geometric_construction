@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.54_20261001_195800_스냅기본OFF_컴퍼스스냅수정_자범위스냅수정'
+const VERSION = 'v0.1.55_20261001_201000_M단축키_Ctrl임시스냅_자내부커서손모양'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -116,7 +116,7 @@ export default function App() {
   const isPanning = useRef(false)
   const panStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 })
 
-  // 키보드 단축키 (S: 선택, P: 펜, V: 이동, Delete/Backspace: 삭제)
+  // 키보드 단축키 (S: 선택, P: 펜, T: 텍스트, M: 스냅토글, Delete/Backspace: 삭제)
   useEffect(() => {
     const handler = (e) => {
       // 입력 필드 포커스 시 단축키 무시
@@ -139,6 +139,11 @@ export default function App() {
         e.preventDefault()
         setDrawMode('text')
         setStampMode(null)
+      }
+      // M 키: 자석(스냅) ON/OFF 토글
+      if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault()
+        setSnapEnabled(prev => !prev)
       }
       // Delete / Backspace 키: 선택된 개체 삭제
       if (e.key === 'Delete' || e.key === 'Backspace') {
