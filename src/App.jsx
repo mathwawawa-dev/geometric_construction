@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.63_20261001_213100_컴퍼스조작시가짜펜커서실제위치추적'
+const VERSION = 'v0.1.64_20261001_213700_컴퍼스커서그립위치추적'
 
 export default function App() {
   const canvasRef = useRef(null)

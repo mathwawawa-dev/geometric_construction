@@ -287,8 +287,8 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         const curLegX = pinX + Math.cos(curMouseAngle) * (dragOffset.current.clickDist || curRadius)
         const curLegY = pinY + Math.sin(curMouseAngle) * (dragOffset.current.clickDist || curRadius)
         setDragCursor({ x: curLegX, y: curLegY, type: 'leg' })
-        // 실제 잉크가 찍히는 연필 끝 위치로 가짜 펜 커서 이동
-        onCursorUpdate?.({ x: newPx, y: newPy })
+        // 실제로 클릭(그립)한 다리 위치로 가짜 펜 커서 이동
+        onCursorUpdate?.({ x: curLegX, y: curLegY })
       }
     }
 
