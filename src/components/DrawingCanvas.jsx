@@ -200,8 +200,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     const rawPos = getPos(e, canvas)
     lastMousePos.current = rawPos
 
-    // 자 내부 여부 실시간 업데이트 (커서 변경용)
-    setIsInsideRuler(activeTool === 'pen' && isPointInsideRuler(rawPos, ruler))
+    // 자 내부 여부 실시간 업데이트 (커서 변경용) - 그리는 중에는 업데이트하지 않음 (스냅 위치에 커서 고정)
+    if (!isDrawing.current) {
+      setIsInsideRuler(activeTool === 'pen' && isPointInsideRuler(rawPos, ruler))
+    }
 
     if (isDrawing.current && activeTool === 'pen' && !stampMode) {
       e.preventDefault()
@@ -431,6 +433,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       snapLock.current = null
       currentStrokePoints.current = []
       document.body.classList.remove('is-drawing')
+      // 그리기 종료 후 자 커서 상태 초기화
+      setIsInsideRuler(false)
       window.removeEventListener('mousemove', onWindowMove)
       window.removeEventListener('mouseup', onWindowUp)
       window.removeEventListener('touchmove', onWindowMove)
