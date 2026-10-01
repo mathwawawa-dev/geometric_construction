@@ -8,7 +8,8 @@ const COLOR_PRESETS = [
   { color: '#000000', label: '검정', bg: '#000000' },
   { color: '#dc2626', label: '빨강', bg: '#dc2626' },
   { color: '#2563eb', label: '파랑', bg: '#2563eb' },
-  { color: '#ec4899', label: '핑크', bg: '#ec4899' },
+  { color: '#F719C0', label: '핑크', bg: '#F719C0' },
+  { color: '#16a34a', label: '초록', bg: '#16a34a' },
 ]
 
 export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, onUndo, onRedo, onClear, onSave, highlightMode, setHighlightMode, snapEnabled, setSnapEnabled, compassSnapEnabled, setCompassSnapEnabled }) {

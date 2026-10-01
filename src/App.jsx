@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.82_20261001_234400_붙여넣기오류수정'
+const VERSION = 'v0.1.83_20261001_235600_색상프리셋추가및변경'
 
 export default function App() {
   const canvasRef = useRef(null)
