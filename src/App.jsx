@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.64_20261001_213700_컴퍼스커서그립위치추적'
+const VERSION = 'v0.1.65_20261001_214800_컴퍼스커서깜빡임해결'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -37,8 +37,8 @@ export default function App() {
   // 자석(스냅) ON/OFF 상태 (기본값 OFF - 컴퍼스는 별도 ON 유지)
   const [snapEnabled, setSnapEnabled] = useState(false)
 
-  // 컴퍼스 조작 시 DrawingCanvas 가짜 펜 커서를 실제 작도 위치로 이동
-  const [compassCursorOverride, setCompassCursorOverride] = useState(null)
+  // 컴퍼스 등 외부 도구가 DrawingCanvas의 가짜 펜 커서를 동기적으로 제어하기 위한 ref
+  const updateFakeCursorRef = useRef(null)
 
   const getStateRef = useCallback(() => ({
     tools: {
@@ -339,7 +339,7 @@ export default function App() {
               stampMode={stampMode}
               shapes={state.shapes}
               snapEnabled={snapEnabled}
-              cursorPosOverride={compassCursorOverride}
+              updateFakeCursorRef={updateFakeCursorRef}
             />
             <SelectionLayer
               active={state.drawMode === 'select'}
@@ -364,7 +364,7 @@ export default function App() {
                 ruler={state.ruler}
                 shapes={state.shapes}
                 snapEnabled={snapEnabled}
-                onCursorUpdate={setCompassCursorOverride}
+                updateFakeCursorRef={updateFakeCursorRef}
               />
             )}
             {state.ruler.visible && (
