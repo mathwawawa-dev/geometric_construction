@@ -22,7 +22,7 @@ function snapPointToRuler(p, ruler) {
   const localX = tx * cos - ty * sin
   const localY = tx * sin + ty * cos
   const halfThick = 60
-  if (localX < -length / 2 - 20 || localX > length / 2 + 20) return p
+  if (localX < -length / 2 || localX > length / 2) return p
   const snapDist = 15
   const unCos = Math.cos(angle)
   const unSin = Math.sin(angle)
@@ -85,7 +85,7 @@ function drawArcSegment(canvas, pinX, pinY, fromAngle, toAngle, r, strokeColor, 
   ctx.stroke()
 }
 
-export default function CompassTool({ compass, setCompass, canvasRef, strokeColor, strokeWidth, onDraw, ruler, onInteractionEnd, onAddShape, shapes }) {
+export default function CompassTool({ compass, setCompass, canvasRef, strokeColor, strokeWidth, onDraw, ruler, onInteractionEnd, onAddShape, shapes, snapEnabled = true }) {
   const svgRef = useRef(null)
   const dragging = useRef(null)
   // dragOffset: 모든 드래그 파트에서 점프 방지용 공용 저장소
@@ -183,7 +183,8 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       if (dragging.current === 'pin_top') {
         const targetPinX = rawP.x - dragOffset.current.dx
         const targetPinY = rawP.y - dragOffset.current.dy
-        const snapped = snapToDrawing(snapPointToRuler({ x: targetPinX, y: targetPinY }, ruler), canvasRef, shapes)
+        const candidate = { x: targetPinX, y: targetPinY }
+        const snapped = snapEnabled ? snapToDrawing(snapPointToRuler(candidate, ruler), canvasRef, shapes) : candidate
         const pdx = pencilX - pinX, pdy = pencilY - pinY
         setCompass({ pinX: snapped.x, pinY: snapped.y, pencilX: snapped.x + pdx, pencilY: snapped.y + pdy })
       } else if (dragging.current === 'pin_bottom') {
@@ -195,7 +196,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           x: pencilX + Math.cos(newPinAngle) * newRadius,
           y: pencilY + Math.sin(newPinAngle) * newRadius,
         }
-        const snappedPin = snapToDrawing(snapPointToRuler(candidatePin, ruler), canvasRef, shapes)
+        const snappedPin = snapEnabled ? snapToDrawing(snapPointToRuler(candidatePin, ruler), canvasRef, shapes) : candidatePin
         setCompass({
           pinX: snappedPin.x,
           pinY: snappedPin.y,
@@ -218,7 +219,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
           x: pinX + Math.cos(newPencilAngle) * newRadius,
           y: pinY + Math.sin(newPencilAngle) * newRadius,
         }
-        const snappedPencil = snapToDrawing(snapPointToRuler(candidatePencil, ruler), canvasRef, shapes)
+        const snappedPencil = snapEnabled ? snapToDrawing(snapPointToRuler(candidatePencil, ruler), canvasRef, shapes) : candidatePencil
         setCompass({
           pencilX: snappedPencil.x,
           pencilY: snappedPencil.y,

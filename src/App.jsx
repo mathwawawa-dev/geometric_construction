@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.53_20261001_155300_자조절버튼_최상단위치변경'
+const VERSION = 'v0.1.54_20261001_195800_스냅기본OFF_컴퍼스스냅수정_자범위스냅수정'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -34,8 +34,8 @@ export default function App() {
   const [highlightMode, setHighlightMode] = useState(false)
   const [stampMode, setStampMode] = useState(null)
 
-  // 자석(스냅) ON/OFF 상태 (기본값 ON)
-  const [snapEnabled, setSnapEnabled] = useState(true)
+  // 자석(스냅) ON/OFF 상태 (기본값 OFF - 컴퍼스는 별도 ON 유지)
+  const [snapEnabled, setSnapEnabled] = useState(false)
 
 
   const getStateRef = useCallback(() => ({
@@ -355,6 +355,7 @@ export default function App() {
                 onAddShape={handleAddShape}
                 ruler={state.ruler}
                 shapes={state.shapes}
+                snapEnabled={snapEnabled}
               />
             )}
             {state.ruler.visible && (

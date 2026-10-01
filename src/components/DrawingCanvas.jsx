@@ -34,12 +34,15 @@ function calcRulerSnap(pos, ruler, currentLock) {
     edge = currentLock.edge
     snappedY = edge === 'top' ? -halfThick : halfThick
   } else {
-    if (Math.abs(localY - (-halfThick)) < SNAP_DIST) {
-      snappedY = -halfThick
-      edge = 'top'
-    } else if (Math.abs(localY - halfThick) < SNAP_DIST) {
-      snappedY = halfThick
-      edge = 'bottom'
+    // localX가 자의 길이 범위 안에 있을 때만 스냅
+    if (localX >= -length / 2 && localX <= length / 2) {
+      if (Math.abs(localY - (-halfThick)) < SNAP_DIST) {
+        snappedY = -halfThick
+        edge = 'top'
+      } else if (Math.abs(localY - halfThick) < SNAP_DIST) {
+        snappedY = halfThick
+        edge = 'bottom'
+      }
     }
   }
 
