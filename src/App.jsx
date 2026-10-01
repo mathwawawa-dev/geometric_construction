@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.62_20261001_212600_가짜펜커서숨김롤백'
+const VERSION = 'v0.1.63_20261001_213100_컴퍼스조작시가짜펜커서실제위치추적'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -37,6 +37,8 @@ export default function App() {
   // 자석(스냅) ON/OFF 상태 (기본값 OFF - 컴퍼스는 별도 ON 유지)
   const [snapEnabled, setSnapEnabled] = useState(false)
 
+  // 컴퍼스 조작 시 DrawingCanvas 가짜 펜 커서를 실제 작도 위치로 이동
+  const [compassCursorOverride, setCompassCursorOverride] = useState(null)
 
   const getStateRef = useCallback(() => ({
     tools: {
@@ -337,6 +339,7 @@ export default function App() {
               stampMode={stampMode}
               shapes={state.shapes}
               snapEnabled={snapEnabled}
+              cursorPosOverride={compassCursorOverride}
             />
             <SelectionLayer
               active={state.drawMode === 'select'}
@@ -361,6 +364,7 @@ export default function App() {
                 ruler={state.ruler}
                 shapes={state.shapes}
                 snapEnabled={snapEnabled}
+                onCursorUpdate={setCompassCursorOverride}
               />
             )}
             {state.ruler.visible && (

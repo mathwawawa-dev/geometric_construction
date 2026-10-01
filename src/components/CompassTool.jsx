@@ -85,7 +85,7 @@ function drawArcSegment(canvas, pinX, pinY, fromAngle, toAngle, r, strokeColor, 
   ctx.stroke()
 }
 
-export default function CompassTool({ compass, setCompass, canvasRef, strokeColor, strokeWidth, onDraw, ruler, onInteractionEnd, onAddShape, shapes, snapEnabled = true }) {
+export default function CompassTool({ compass, setCompass, canvasRef, strokeColor, strokeWidth, onDraw, ruler, onInteractionEnd, onAddShape, shapes, snapEnabled = true, onCursorUpdate }) {
   const svgRef = useRef(null)
   const dragging = useRef(null)
   // dragOffset: 모든 드래그 파트에서 점프 방지용 공용 저장소
@@ -242,6 +242,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         const newHingeY = (pinY + newPencilY) / 2 + newNy * compassHeight
         setCompass({ pencilX: newPencilX, pencilY: newPencilY })
         setDragCursor({ x: newHingeX, y: newHingeY, type: 'whole' })
+        onCursorUpdate?.({ x: newHingeX, y: newHingeY })
 
       } else if (dragging.current === 'pencil' || dragging.current === 'clamp') {
         // 연필 조작 시 마우스 포인터와 클릭 위치 1:1 완벽 동기화 + 점 중심 스냅 지원
@@ -256,6 +257,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         const snappedPencil = snapEnabled ? snapToDrawing(snapPointToRuler(candidatePencil, ruler), canvasRef, shapes) : candidatePencil
         setCompass({ pencilX: snappedPencil.x, pencilY: snappedPencil.y })
         setDragCursor({ x: snappedPencil.x, y: snappedPencil.y, type: 'pencil' })
+        onCursorUpdate?.({ x: snappedPencil.x, y: snappedPencil.y })
 
       } else if (dragging.current === 'leg') {
         // 은색 다리 조작 시: 반지름 고정된 채 연필 끝에서 잉크가 흘러나오듯 호의 일부만 점진적으로 그림
@@ -285,6 +287,8 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
         const curLegX = pinX + Math.cos(curMouseAngle) * (dragOffset.current.clickDist || curRadius)
         const curLegY = pinY + Math.sin(curMouseAngle) * (dragOffset.current.clickDist || curRadius)
         setDragCursor({ x: curLegX, y: curLegY, type: 'leg' })
+        // 실제 잉크가 찍히는 연필 끝 위치로 가짜 펜 커서 이동
+        onCursorUpdate?.({ x: newPx, y: newPy })
       }
     }
 
@@ -336,6 +340,7 @@ export default function CompassTool({ compass, setCompass, canvasRef, strokeColo
       prevAngleRef.current = null
       document.body.style.cursor = ''
       setDragCursor(null)
+      onCursorUpdate?.(null)
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
       window.removeEventListener('touchmove', onMove)

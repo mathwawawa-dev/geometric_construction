@@ -92,7 +92,7 @@ function snapToPointCenters(pos, shapes, snapRadius = 20) {
   return center ? { pos: center, snappedPoint: true } : { pos, snappedPoint: false }
 }
 
-export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, highlightMode, stampMode, shapes, snapEnabled = true }) {
+export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, highlightMode, stampMode, shapes, snapEnabled = true, cursorPosOverride = null }) {
   const draftCanvasRef = useRef(null)
   const isDrawing = useRef(false)
   const snapLock = useRef(null)
@@ -106,6 +106,21 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const startPoint = useRef({ x: 0, y: 0 })
   const initialAngle = useRef(null)
   const ctrlHeld = useRef(false)  // Ctrl 누른 동안 임시 스냅 ON
+  const cursorOverrideRef = useRef(null)  // 컴퍼스 등 외부 도구가 커서 위치를 지정
+
+  // 외부 cursorPosOverride가 바뀔 때 즉시 가짜 펜 커서를 해당 위치로 이동
+  useEffect(() => {
+    cursorOverrideRef.current = cursorPosOverride
+    if (cursorPosOverride) {
+      setIsHovering(true)
+      if (fakeCursorRef.current) {
+        const tx = cursorPosOverride.x - 2
+        const ty = cursorPosOverride.y - 22
+        fakeCursorRef.current.style.transform = `translate(${tx}px, ${ty}px)`
+        fakeCursorRef.current.style.display = 'block'
+      }
+    }
+  }, [cursorPosOverride])
 
   // Ctrl 키 상태 추적
   useEffect(() => {
@@ -262,6 +277,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       renderCurrentStroke()
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     } else if (activeTool === 'pen') {
+      // 외부 도구(컴퍼스 등)가 커서 위치를 직접 제어 중이면 마우스 기반 업데이트 생략
+      if (cursorOverrideRef.current) return
+
       let finalPos = rawPos
       let lock = null
       let isPointSnapped = false
