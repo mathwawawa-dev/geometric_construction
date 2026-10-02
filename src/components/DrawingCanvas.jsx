@@ -425,6 +425,20 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }
 
       if (lineStart) {
+        // 두 번째 클릭 시 Shift 5도 스냅 적용
+        if (e.shiftKey) {
+          const dx = finalPos.x - lineStart.x
+          const dy = finalPos.y - lineStart.y
+          const dist = Math.hypot(dx, dy)
+          const rawAngle = Math.atan2(dy, dx)
+          const step = (5 * Math.PI) / 180
+          const snappedAngle = Math.round(rawAngle / step) * step
+          finalPos = {
+            x: lineStart.x + dist * Math.cos(snappedAngle),
+            y: lineStart.y + dist * Math.sin(snappedAngle),
+          }
+        }
+
         // 두 번째 클릭 시 선분 완성
         const shape = {
           id: 'seg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
