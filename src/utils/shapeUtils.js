@@ -47,6 +47,18 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
         bestDist = d
         bestPoint = { x: s.x, y: s.y }
       }
+    } else if (s.type === 'segment') {
+      // segment 끝점 우선 스냅
+      const dStart = Math.hypot(p.x - s.x1, p.y - s.y1)
+      const dEnd   = Math.hypot(p.x - s.x2, p.y - s.y2)
+      if (dStart <= snapThreshold && dStart < bestDist) {
+        bestDist = dStart
+        bestPoint = { x: s.x1, y: s.y1 }
+      }
+      if (dEnd <= snapThreshold && dEnd < bestDist) {
+        bestDist = dEnd
+        bestPoint = { x: s.x2, y: s.y2 }
+      }
     } else if (s.points && s.points.length > 1) {
       const pStart = s.points[0]
       const pEnd = s.points[s.points.length - 1]
@@ -79,6 +91,14 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
         const a = Math.atan2(p.y - s.cy, p.x - s.cx)
         bestDist = dToCircumference
         bestPoint = { x: s.cx + s.r * Math.cos(a), y: s.cy + s.r * Math.sin(a) }
+      }
+    } else if (s.type === 'segment') {
+      // segment 선분 위 정중앙 스냅
+      const closest = closestPointOnSegment(p.x, p.y, s.x1, s.y1, s.x2, s.y2)
+      const d = Math.hypot(p.x - closest.x, p.y - closest.y)
+      if (d <= totalThreshold && d < bestDist) {
+        bestDist = d
+        bestPoint = closest
       }
     } else if (s.points && s.points.length > 1) {
       for (let i = 0; i < s.points.length - 1; i++) {

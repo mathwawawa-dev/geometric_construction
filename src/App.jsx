@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.87_20261002_115300_선분그린후즉시표시'
+const VERSION = 'v0.1.88_20261002_161500_선분스냅기능추가'
 
 export default function App() {
   const canvasRef = useRef(null)
