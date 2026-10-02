@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.86_20261002_001600_선분도구추가'
+const VERSION = 'v0.1.87_20261002_115300_선분그린후즉시표시'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -100,8 +100,12 @@ export default function App() {
 
   const handleAddShape = useCallback((shape) => {
     addShape(shape)
+    if (canvasRef.current) {
+      const updated = [...stateRef.current.shapes, shape]
+      renderShapes(canvasRef.current.getContext('2d'), updated)
+    }
     setTimeout(() => saveSnapshot(), 0)
-  }, [addShape, saveSnapshot])
+  }, [addShape, saveSnapshot, canvasRef])
 
   const handleUpdateShape = useCallback((id, payload) => {
     updateShape(id, payload)
