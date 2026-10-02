@@ -309,6 +309,20 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
 
+      // Shift 누른 상태: 5도 단위 각도 스냅
+      if (lineStart && e.shiftKey) {
+        const dx = finalPos.x - lineStart.x
+        const dy = finalPos.y - lineStart.y
+        const dist = Math.hypot(dx, dy)
+        const rawAngle = Math.atan2(dy, dx)
+        const step = (5 * Math.PI) / 180
+        const snappedAngle = Math.round(rawAngle / step) * step
+        finalPos = {
+          x: lineStart.x + dist * Math.cos(snappedAngle),
+          y: lineStart.y + dist * Math.sin(snappedAngle),
+        }
+      }
+
       if (lineStart) {
         const draftCanvas = draftCanvasRef.current
         if (draftCanvas) {
@@ -449,6 +463,20 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             if (!rL) {
               const pr = snapToPointCenters(rSnap, shapes)
               finalUpPos = pr.pos
+            }
+          }
+
+          // Shift 드래그 시 5도 단위 스냅
+          if (me.shiftKey) {
+            const dx = finalUpPos.x - startPoint.current.x
+            const dy = finalUpPos.y - startPoint.current.y
+            const dist = Math.hypot(dx, dy)
+            const rawAngle = Math.atan2(dy, dx)
+            const step = (5 * Math.PI) / 180
+            const snappedAngle = Math.round(rawAngle / step) * step
+            finalUpPos = {
+              x: startPoint.current.x + dist * Math.cos(snappedAngle),
+              y: startPoint.current.y + dist * Math.sin(snappedAngle),
             }
           }
           

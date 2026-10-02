@@ -53,6 +53,7 @@ export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, 
                   <li><strong>클릭 두 번:</strong> 첫 번째 점 클릭 → 마우스 이동(미리보기) → 두 번째 점 클릭으로 완성.</li>
                   <li><strong>드래그:</strong> 클릭한 채 드래그하여 한 번에 선분 완성.</li>
                   <li>양 끝점에 동그란 점이 표시됩니다.</li>
+                  <li><kbd className="bg-gray-100 px-1 rounded">Shift</kbd> + 드래그/클릭: 5도 단위 각도로 고정하여 그립니다.</li>
                 </ul>
               </section>
 
