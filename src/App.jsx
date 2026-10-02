@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.88_20261002_161500_선분스냅기능추가'
+const VERSION = 'v0.1.89_20261002_162600_매뉴얼버튼추가'
 
 export default function App() {
   const canvasRef = useRef(null)
