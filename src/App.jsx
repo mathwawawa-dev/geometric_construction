@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.91_20261002_164100_선분두번째클릭Shift스냅수정'
+const VERSION = 'v0.1.92_20261005_145900_선분드래그완성후커서끝점고정'
 
 export default function App() {
   const canvasRef = useRef(null)

@@ -513,6 +513,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             if (draftCanvas) {
               draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
             }
+            // 선분 완성 직후 가짜 커서를 스냅된 끝점에 고정 (포인터 튐 방지)
+            updateFakeCursor(finalUpPos, false)
           }
           window.removeEventListener('mouseup', onWindowUpLine)
           window.removeEventListener('touchend', onWindowUpLine)
