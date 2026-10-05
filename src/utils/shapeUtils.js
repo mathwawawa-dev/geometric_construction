@@ -48,15 +48,19 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
         bestPoint = { x: s.x, y: s.y }
       }
     } else if (s.type === 'segment') {
-      // segment 끝점 우선 스냅 — bestDist를 0으로 고정해 2단계가 절대 이길 수 없게 함
+      // segment 끝점 우선 스냅
+      // 탐지 범위: pointR + snapThreshold (단순 점과 동일)
+      // bestDist = 0으로 고정 → 2단계가 절대 이길 수 없음
+      const pointR = Math.max((s.width || 3) * 0.8, 4)
+      const endpointRange = pointR + snapThreshold
       const dStart = Math.hypot(p.x - s.x1, p.y - s.y1)
       const dEnd   = Math.hypot(p.x - s.x2, p.y - s.y2)
-      if (dStart <= snapThreshold && dStart < bestDist) {
-        bestDist = 0   // ← 2단계 경쟁 원천 차단
+      if (dStart <= endpointRange && dStart < bestDist) {
+        bestDist = 0
         bestPoint = { x: s.x1, y: s.y1 }
       }
-      if (dEnd <= snapThreshold && dEnd < bestDist) {
-        bestDist = 0   // ← 2단계 경쟁 원천 차단
+      if (dEnd <= endpointRange && dEnd < bestDist) {
+        bestDist = 0
         bestPoint = { x: s.x2, y: s.y2 }
       }
     } else if (s.points && s.points.length > 1) {
@@ -75,7 +79,7 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
     }
   }
 
-  if (bestPoint && bestDist <= snapThreshold) {
+  if (bestPoint) {
     return bestPoint
   }
 
@@ -93,17 +97,14 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
         bestPoint = { x: s.cx + s.r * Math.cos(a), y: s.cy + s.r * Math.sin(a) }
       }
     } else if (s.type === 'segment') {
-      // segment 선분 위 정중앙 스냅
-      // 끝점 근방(pointR + snapThreshold*2)에서는 2단계 완전 제외
-      // → 끝점은 반드시 1단계에서 중앙으로만 스냅
-      const pointR = Math.max((s.width || 3) * 0.8, 4)
-      const exclusion = pointR + snapThreshold * 2
+      // segment 선분 중심축 스냅 — 두께(halfThick) 無시, 수학적 중심선까지 거리만 기준
+      // 끝점 근방(snapThreshold 이내)에서는 2단계 완전 제외 (끝점은 1단계에서만 처리)
       const dToP1 = Math.hypot(p.x - s.x1, p.y - s.y1)
       const dToP2 = Math.hypot(p.x - s.x2, p.y - s.y2)
-      if (dToP1 > exclusion && dToP2 > exclusion) {
+      if (dToP1 > snapThreshold && dToP2 > snapThreshold) {
         const closest = closestPointOnSegment(p.x, p.y, s.x1, s.y1, s.x2, s.y2)
         const d = Math.hypot(p.x - closest.x, p.y - closest.y)
-        if (d <= totalThreshold && d < bestDist) {
+        if (d <= snapThreshold && d < bestDist) {
           bestDist = d
           bestPoint = closest
         }
@@ -114,7 +115,7 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
         const pt2 = s.points[i + 1]
         const closest = closestPointOnSegment(p.x, p.y, pt1.x, pt1.y, pt2.x, pt2.y)
         const d = Math.hypot(p.x - closest.x, p.y - closest.y)
-        if (d <= totalThreshold && d < bestDist) {
+        if (d <= snapThreshold && d < bestDist) {
           bestDist = d
           bestPoint = closest // 선분의 위/아래 가장자리가 아닌 정확한 선분 중심 좌표!
         }

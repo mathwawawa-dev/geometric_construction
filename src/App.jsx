@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.16_20261005_201500_선분끝점스냅완전고정'
+const VERSION = 'v0.2.17_20261005_202300_선두께무시스냅복구'
 
 export default function App() {
   const canvasRef = useRef(null)
