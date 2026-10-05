@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.99_20261005_152600_펜핀거리40px수정'
+const VERSION = 'v0.2.00_20261005_152900_펜선분핀거리25px수정'
 
 export default function App() {
   const canvasRef = useRef(null)
