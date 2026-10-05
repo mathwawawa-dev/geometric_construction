@@ -293,10 +293,14 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
-      // 핀 고정: Shift 직선 완성 후 → 다음 mousedown(startDraw) 까지 커서를 끝점에 유지
+      // 핀 고정: Shift 직선 완성 후 40px 내에선 커서를 끝점에 유지
       if (linePinnedPos.current && !isDrawing.current) {
-        updateFakeCursor(linePinnedPos.current, false)
-        return
+        const dFromPinned = Math.hypot(rawPos.x - linePinnedPos.current.x, rawPos.y - linePinnedPos.current.y)
+        if (dFromPinned < 40) {
+          updateFakeCursor(linePinnedPos.current, false)
+          return
+        }
+        linePinnedPos.current = null
       }
     } else if (activeTool === 'line') {
       let finalPos = rawPos
@@ -359,7 +363,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       // 선분 드래그 완성 후 핀 고정: 실제 마우스가 끝점에서 40px 벗어나기 전까지 커서를 끝점에 고정
       if (linePinnedPos.current && !lineStart) {
         const dFromPinned = Math.hypot(rawPos.x - linePinnedPos.current.x, rawPos.y - linePinnedPos.current.y)
-        if (dFromPinned < 50) {
+        if (dFromPinned < 40) {
           updateFakeCursor(linePinnedPos.current, false)
           return
         }
