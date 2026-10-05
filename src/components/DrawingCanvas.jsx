@@ -362,14 +362,15 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
 
-      // 선분 드래그 완성 후 핀 고정: 실제 마우스가 끝점에서 25px 벗어나기 전까지 커서를 끝점에 고정
-      if (linePinnedPos.current && !lineStart) {
-        const dFromPinned = Math.hypot(rawPos.x - linePinnedPos.current.x, rawPos.y - linePinnedPos.current.y)
-        if (dFromPinned < 25) {
+      // 선분 드래그 완성 후 핀 고정: mouseup 위치에서 10px 이상 움직이기 전까지 끝점에 고정
+      if (linePinnedPos.current && penMouseUpRawPos.current && !lineStart) {
+        const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
+        if (dMoved < 10) {
           updateFakeCursor(linePinnedPos.current, false)
           return
         }
         linePinnedPos.current = null
+        penMouseUpRawPos.current = null
       }
 
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
@@ -481,7 +482,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       } else {
         // 첫 번째 클릭 시 시작
-        linePinnedPos.current = null  // 새 선분 시작 → 핀 해제
+        linePinnedPos.current = null      // 새 선분 시작 → 핀 해제
+        penMouseUpRawPos.current = null   // mouseup 위치 초기화
         setLineStart({ x: finalPos.x, y: finalPos.y })
         isDrawing.current = true
         startPoint.current = { x: finalPos.x, y: finalPos.y }
@@ -537,7 +539,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             if (draftCanvas) {
               draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
             }
-            // 끝점에 커서 핀 고정 (handleMove가 40px 밖으로 나가기 전까지 유지)
+            // mouseup 실제 위치 저장 + 끝점에 핀 고정
+            penMouseUpRawPos.current = upPos
             linePinnedPos.current = finalUpPos
             updateFakeCursor(finalUpPos, false)
           }
