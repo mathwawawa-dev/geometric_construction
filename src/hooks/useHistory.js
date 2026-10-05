@@ -69,5 +69,16 @@ export function useHistory(canvasRef, getStateRef, restoreState) {
     saveSnapshot()
   }, [canvasRef, restoreState, saveSnapshot])
 
-  return { saveSnapshot, undo, redo, clear }
+  // 슬라이드 전환 시 히스토리 통째로 저장/복원
+  const getHistorySnapshot = useCallback(() => ({
+    stack: historyRef.current.slice(),
+    index: indexRef.current,
+  }), [])
+
+  const restoreHistorySnapshot = useCallback(({ stack, index }) => {
+    historyRef.current = stack
+    indexRef.current = index
+  }, [])
+
+  return { saveSnapshot, undo, redo, clear, getHistorySnapshot, restoreHistorySnapshot }
 }

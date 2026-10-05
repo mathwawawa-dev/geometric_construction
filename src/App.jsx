@@ -9,9 +9,10 @@ import CompassTool from './components/CompassTool'
 import RulerTool from './components/RulerTool'
 import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
+import SlideBar from './components/SlideBar'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.2.06_20261005_161400_PNG파일명초단위추가'
+const VERSION = 'v0.2.07_20261005_162500_슬라이드기능추가'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -26,6 +27,19 @@ export default function App() {
   } = useAppState()
   const stateRef = useRef(state)
   useEffect(() => { stateRef.current = state }, [state])
+
+  // ── 슬라이드 관리 ──────────────────────────────────────────
+  const [currentSlideIdx, setCurrentSlideIdx] = useState(0)
+  const currentSlideIdxRef = useRef(0)
+  const slidesRef = useRef([{
+    id: 'slide_1',
+    shapes: [],
+    background: { src: null, opacity: 0.3 },
+    historySnapshot: null,
+    canvasSnapshot: null,
+  }])
+  const [slidesMeta, setSlidesMeta] = useState([{ id: 'slide_1' }])
+  // ────────────────────────────────────────────────────────────
 
   // 개체 선택 상태
   const [selectedIds, setSelectedIds] = useState([])
@@ -63,7 +77,7 @@ export default function App() {
     }
   }, [setCompass, setRuler, setProtractor, setShapes, canvasRef])
 
-  const { saveSnapshot, undo, redo, clear } = useHistory(canvasRef, getStateRef, restoreState)
+  const { saveSnapshot, undo, redo, clear, getHistorySnapshot, restoreHistorySnapshot } = useHistory(canvasRef, getStateRef, restoreState)
 
   useEffect(() => {
     const timer = setTimeout(() => saveSnapshot(), 200)
@@ -304,7 +318,7 @@ export default function App() {
     const ctx = merged.getContext('2d')
     const commit = () => {
       ctx.drawImage(canvas, 0, 0)
-      download(merged)
+      download(merged, currentSlideIdxRef.current + 1)
     }
     if (state.background.src) {
       const img = new Image()
@@ -323,11 +337,107 @@ export default function App() {
     }
   }, [canvasRef, state.background])
 
+  // ── 슬라이드 전환 핵심 로직 ────────────────────────────────
+
+  /** 현재 슬라이드 데이터를 slidesRef에 저장 */
+  const saveCurrentSlideData = useCallback(() => {
+    const slide = slidesRef.current[currentSlideIdxRef.current]
+    const canvas = canvasRef.current
+    if (canvas) {
+      slide.canvasSnapshot = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height)
+    }
+    slide.shapes = JSON.parse(JSON.stringify(stateRef.current.shapes))
+    slide.background = { ...stateRef.current.background }
+    slide.historySnapshot = getHistorySnapshot()
+  }, [canvasRef, getHistorySnapshot])
+
+  /** 지정된 슬라이드로 전환 */
+  const switchSlide = useCallback((newIdx) => {
+    if (newIdx === currentSlideIdxRef.current) return
+    saveCurrentSlideData()
+
+    const newSlide = slidesRef.current[newIdx]
+    const canvas = canvasRef.current
+    if (canvas) {
+      const ctx = canvas.getContext('2d')
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      if (newSlide.canvasSnapshot) {
+        ctx.putImageData(newSlide.canvasSnapshot, 0, 0)
+      } else if (newSlide.shapes.length > 0) {
+        renderShapes(ctx, newSlide.shapes)
+      }
+    }
+    setShapes(newSlide.shapes)
+    setBackground(newSlide.background)
+    restoreHistorySnapshot(newSlide.historySnapshot ?? { stack: [], index: -1 })
+
+    currentSlideIdxRef.current = newIdx
+    setCurrentSlideIdx(newIdx)
+    setTimeout(() => saveSnapshot(), 50)
+  }, [saveCurrentSlideData, canvasRef, setShapes, setBackground, restoreHistorySnapshot, saveSnapshot])
+
+  /** 슬라이드 추가 */
+  const addSlide = useCallback(() => {
+    saveCurrentSlideData()
+    const newSlide = {
+      id: 'slide_' + Date.now(),
+      shapes: [],
+      background: { src: null, opacity: 0.3 },
+      historySnapshot: null,
+      canvasSnapshot: null,
+    }
+    slidesRef.current = [...slidesRef.current, newSlide]
+    setSlidesMeta(slidesRef.current.map(s => ({ id: s.id })))
+
+    const newIdx = slidesRef.current.length - 1
+    const canvas = canvasRef.current
+    if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+    setShapes([])
+    setBackground({ src: null, opacity: 0.3 })
+    restoreHistorySnapshot({ stack: [], index: -1 })
+
+    currentSlideIdxRef.current = newIdx
+    setCurrentSlideIdx(newIdx)
+    setTimeout(() => saveSnapshot(), 50)
+  }, [saveCurrentSlideData, canvasRef, setShapes, setBackground, restoreHistorySnapshot, saveSnapshot])
+
+  /** 슬라이드 삭제 */
+  const deleteSlide = useCallback((delIdx) => {
+    if (slidesRef.current.length <= 1) return
+    saveCurrentSlideData()
+
+    const newSlides = slidesRef.current.filter((_, i) => i !== delIdx)
+    slidesRef.current = newSlides
+    setSlidesMeta(newSlides.map(s => ({ id: s.id })))
+
+    let newActiveIdx = currentSlideIdxRef.current
+    if (delIdx < newActiveIdx) newActiveIdx -= 1
+    else if (delIdx === newActiveIdx) newActiveIdx = Math.min(newActiveIdx, newSlides.length - 1)
+
+    const slide = newSlides[newActiveIdx]
+    const canvas = canvasRef.current
+    if (canvas) {
+      const ctx = canvas.getContext('2d')
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      if (slide.canvasSnapshot) ctx.putImageData(slide.canvasSnapshot, 0, 0)
+      else if (slide.shapes.length > 0) renderShapes(ctx, slide.shapes)
+    }
+    setShapes(slide.shapes)
+    setBackground(slide.background)
+    restoreHistorySnapshot(slide.historySnapshot ?? { stack: [], index: -1 })
+
+    currentSlideIdxRef.current = newActiveIdx
+    setCurrentSlideIdx(newActiveIdx)
+  }, [saveCurrentSlideData, canvasRef, setShapes, setBackground, restoreHistorySnapshot])
+
+  // ────────────────────────────────────────────────────────────
+
   const toolsVisible = {
     compass:    state.compass.visible,
     ruler:      state.ruler.visible,
     protractor: state.protractor.visible,
   }
+
 
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden select-none">
@@ -346,6 +456,14 @@ export default function App() {
         setSnapEnabled={setSnapEnabled}
         compassSnapEnabled={compassSnapEnabled}
         setCompassSnapEnabled={setCompassSnapEnabled}
+      />
+
+      <SlideBar
+        slides={slidesMeta}
+        currentIdx={currentSlideIdx}
+        onSwitch={switchSlide}
+        onAdd={addSlide}
+        onDelete={deleteSlide}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -458,12 +576,12 @@ export default function App() {
   )
 }
 
-function download(canvas) {
+function download(canvas, slideNum = 1) {
   const link = document.createElement('a')
   const now = new Date()
   const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0')
   const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0')
-  link.download = `작도보드_${dateStr}_${timeStr}.png`
+  link.download = `작도보드_슬라이드${slideNum}_${dateStr}_${timeStr}.png`
   link.href = canvas.toDataURL('image/png')
   link.click()
 }
