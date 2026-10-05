@@ -1,4 +1,4 @@
-// 점 (px, py)와 선분 (x1, y1)-(x2, y2) 사이의 거리
+﻿// 점 (px, py)와 선분 (x1, y1)-(x2, y2) 사이의 거리
 export function distToSegment(px, py, x1, y1, x2, y2) {
   const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2
   if (l2 === 0) return Math.hypot(px - x1, py - y1)
@@ -49,39 +49,33 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
       }
     } else if (s.type === 'segment') {
       // segment 끝점 우선 스냅
-      // 탐지 범위: pointR + snapThreshold (단순 점과 동일)
-      // bestDist = 0으로 고정 → 2단계가 절대 이길 수 없음
-      const pointR = Math.max((s.width || 3) * 0.8, 4)
-      const endpointRange = pointR + snapThreshold
       const dStart = Math.hypot(p.x - s.x1, p.y - s.y1)
       const dEnd   = Math.hypot(p.x - s.x2, p.y - s.y2)
-      if (dStart <= endpointRange && dStart < bestDist) {
-        bestDist = 0
+      if (dStart <= snapThreshold && dStart < bestDist) {
+        bestDist = dStart
         bestPoint = { x: s.x1, y: s.y1 }
       }
-      if (dEnd <= endpointRange && dEnd < bestDist) {
-        bestDist = 0
+      if (dEnd <= snapThreshold && dEnd < bestDist) {
+        bestDist = dEnd
         bestPoint = { x: s.x2, y: s.y2 }
       }
     } else if (s.points && s.points.length > 1) {
-      const pointR = Math.max((s.width || 3) * 0.8, 4)
-      const endpointRange = pointR + snapThreshold
       const pStart = s.points[0]
       const pEnd = s.points[s.points.length - 1]
       const dStart = Math.hypot(p.x - pStart.x, p.y - pStart.y)
       const dEnd = Math.hypot(p.x - pEnd.x, p.y - pEnd.y)
-      if (dStart <= endpointRange && dStart < bestDist) {
-        bestDist = 0
+      if (dStart <= snapThreshold && dStart < bestDist) {
+        bestDist = dStart
         bestPoint = { x: pStart.x, y: pStart.y }
       }
-      if (dEnd <= endpointRange && dEnd < bestDist) {
-        bestDist = 0
+      if (dEnd <= snapThreshold && dEnd < bestDist) {
+        bestDist = dEnd
         bestPoint = { x: pEnd.x, y: pEnd.y }
       }
     }
   }
 
-  if (bestPoint) {
+  if (bestPoint && bestDist <= snapThreshold) {
     return bestPoint
   }
 
