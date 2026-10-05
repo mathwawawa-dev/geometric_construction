@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.18_20261005_203300_선중간스냅반경축소'
+const VERSION = 'v0.2.19_20261005_203900_v0214복구_및_끝점보호'
 
 export default function App() {
   const canvasRef = useRef(null)
