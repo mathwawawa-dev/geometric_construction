@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.2.04_20261005_155900_선분핀도mouseup위치기준해제'
+const VERSION = 'v0.2.05_20261005_160500_선분클릭클릭완성핀고정추가'
 
 export default function App() {
   const canvasRef = useRef(null)

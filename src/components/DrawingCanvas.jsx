@@ -480,6 +480,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (draftCanvas) {
           draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
         }
+        // Click-Click 완성: 두 번째 클릭의 실제 위치(rawPos) 기준으로 핀 고정
+        penMouseUpRawPos.current = rawPos
+        linePinnedPos.current = finalPos
+        updateFakeCursor(finalPos, false)
       } else {
         // 첫 번째 클릭 시 시작
         linePinnedPos.current = null      // 새 선분 시작 → 핀 해제
