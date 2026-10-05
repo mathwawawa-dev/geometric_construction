@@ -9,10 +9,9 @@ import CompassTool from './components/CompassTool'
 import RulerTool from './components/RulerTool'
 import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
-import SlideBar from './components/SlideBar'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.2.07_20261005_162500_슬라이드기능추가'
+const VERSION = 'v0.2.08_20261005_163000_슬라이드네비게이션툴바이동'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -456,14 +455,16 @@ export default function App() {
         setSnapEnabled={setSnapEnabled}
         compassSnapEnabled={compassSnapEnabled}
         setCompassSnapEnabled={setCompassSnapEnabled}
-      />
-
-      <SlideBar
-        slides={slidesMeta}
-        currentIdx={currentSlideIdx}
-        onSwitch={switchSlide}
-        onAdd={addSlide}
-        onDelete={deleteSlide}
+        slideCount={slidesMeta.length}
+        currentSlideIdx={currentSlideIdx}
+        onPrevSlide={() => switchSlide(currentSlideIdx - 1)}
+        onNextSlide={() => switchSlide(currentSlideIdx + 1)}
+        onAddSlide={addSlide}
+        onDeleteSlide={() => {
+          if (window.confirm(`슬라이드 ${currentSlideIdx + 1}을(를) 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) {
+            deleteSlide(currentSlideIdx)
+          }
+        }}
       />
 
       <div className="flex flex-1 overflow-hidden">

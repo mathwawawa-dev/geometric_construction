@@ -14,7 +14,7 @@ const COLOR_PRESETS = [
   { color: '#16a34a', label: '초록', bg: '#16a34a' },
 ]
 
-export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, onUndo, onRedo, onClear, onSave, highlightMode, setHighlightMode, snapEnabled, setSnapEnabled, compassSnapEnabled, setCompassSnapEnabled }) {
+export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, onUndo, onRedo, onClear, onSave, highlightMode, setHighlightMode, snapEnabled, setSnapEnabled, compassSnapEnabled, setCompassSnapEnabled, slideCount, currentSlideIdx, onPrevSlide, onNextSlide, onAddSlide, onDeleteSlide }) {
   const [showManual, setShowManual] = useState(false)
 
   return (
@@ -283,6 +283,49 @@ export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, 
         >
           ?
         </button>
+
+        {/* 슬라이드 네비게이션 — 클래스룸스크린 스타일 */}
+        <div className="flex items-center gap-0.5 bg-[#2a2d3a] rounded-xl px-1.5 py-1 ml-1">
+          <button
+            onClick={onPrevSlide}
+            disabled={currentSlideIdx === 0}
+            title="이전 슬라이드"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-white disabled:opacity-30 hover:bg-white/10 transition-colors text-sm"
+          >
+            ‹
+          </button>
+          <span className="text-white font-bold text-sm min-w-[1.5rem] text-center select-none">
+            {currentSlideIdx + 1}
+          </span>
+          <button
+            onClick={onNextSlide}
+            disabled={currentSlideIdx === slideCount - 1}
+            title="다음 슬라이드"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-white disabled:opacity-30 hover:bg-white/10 transition-colors text-sm"
+          >
+            ›
+          </button>
+          <div className="w-px h-4 bg-white/20 mx-0.5" />
+          <button
+            onClick={onAddSlide}
+            title="슬라이드 추가"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-colors text-base font-bold"
+          >
+            +
+          </button>
+          <button
+            onClick={onDeleteSlide}
+            title="현재 슬라이드 삭제"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-white hover:bg-red-500/40 transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+              <path d="M10 11v6M14 11v6" />
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+            </svg>
+          </button>
+        </div>
       </div>
     </header>
     </>
