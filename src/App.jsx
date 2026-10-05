@@ -11,7 +11,13 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.2.12_20261005_192500_세션불러오기빈화면안전모드복구'
+if (typeof window !== 'undefined') {
+  window.onerror = function(message, source, lineno, colno, error) {
+    alert("Runtime Error: " + message + "\nLine: " + lineno + "\nStack: " + (error ? error.stack : ""));
+  };
+}
+
+const VERSION = 'v0.2.13_20261005_193000_에러추적기능추가'
 
 export default function App() {
   const canvasRef = useRef(null)
