@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.1.92_20261005_145900_선분드래그완성후커서끝점고정'
+const VERSION = 'v0.1.93_20261005_150700_선분커서핀고정개선'
 
 export default function App() {
   const canvasRef = useRef(null)

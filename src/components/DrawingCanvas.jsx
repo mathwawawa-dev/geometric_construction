@@ -106,6 +106,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const startPoint = useRef({ x: 0, y: 0 })
   const initialAngle = useRef(null)
   const ctrlHeld = useRef(false)  // Ctrl 누른 동안 임시 스냅 ON
+  const linePinnedPos = useRef(null) // 선분 드래그 완성 후 커서 끝점 고정용
 
   // Ctrl 키 상태 추적
   useEffect(() => {
@@ -349,6 +350,17 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           ctx.restore()
         }
       }
+
+      // 선분 드래그 완성 후 핀 고정: 실제 마우스가 끝점에서 40px 벗어나기 전까지 커서를 끝점에 고정
+      if (linePinnedPos.current && !lineStart) {
+        const dFromPinned = Math.hypot(rawPos.x - linePinnedPos.current.x, rawPos.y - linePinnedPos.current.y)
+        if (dFromPinned < 40) {
+          updateFakeCursor(linePinnedPos.current, false)
+          return
+        }
+        linePinnedPos.current = null
+      }
+
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     }
   }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, shapes, snapEnabled, setIsInsideRuler, lineStart, strokeColor, strokeWidth])
@@ -458,6 +470,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       } else {
         // 첫 번째 클릭 시 시작
+        linePinnedPos.current = null  // 새 선분 시작 → 핀 해제
         setLineStart({ x: finalPos.x, y: finalPos.y })
         isDrawing.current = true
         startPoint.current = { x: finalPos.x, y: finalPos.y }
@@ -513,7 +526,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             if (draftCanvas) {
               draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
             }
-            // 선분 완성 직후 가짜 커서를 스냅된 끝점에 고정 (포인터 튐 방지)
+            // 끝점에 커서 핀 고정 (handleMove가 40px 밖으로 나가기 전까지 유지)
+            linePinnedPos.current = finalUpPos
             updateFakeCursor(finalUpPos, false)
           }
           window.removeEventListener('mouseup', onWindowUpLine)
