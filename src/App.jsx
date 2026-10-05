@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.13_20261005_193000_에러추적기능추가'
+const VERSION = 'v0.2.14_20261005_194000_런타임크래시해결'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -344,86 +344,6 @@ export default function App() {
 
   // ── 세션 저장 / 불러오기 ─────────────────────────────────────
 
-  /** 모든 슬라이드 데이터를 JSON 파일로 저장 */
-  const handleSessionSave = useCallback(() => {
-    saveCurrentSlideData()  // 현재 슬라이드 최신화
-    const sessionData = {
-      version: '1.0',
-      savedAt: new Date().toISOString(),
-      slides: slidesRef.current.map(s => ({
-        id: s.id,
-        shapes: s.shapes,
-        background: s.background,
-      })),
-      currentSlideIdx: currentSlideIdxRef.current,
-    }
-    const blob = new Blob([JSON.stringify(sessionData, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    const now = new Date()
-    const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0')
-    const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0')
-    link.download = `작도보드_${dateStr}_${timeStr}.json`
-    link.href = url
-    link.click()
-    URL.revokeObjectURL(url)
-  }, [saveCurrentSlideData])
-
-  /** JSON 파일을 읽어 모든 슬라이드 복원 */
-  const handleSessionLoad = useCallback((file) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      try {
-        const data = JSON.parse(e.target.result)
-        if (!data.slides || !Array.isArray(data.slides)) {
-          alert('올바른 작도보드 저장 파일이 아닙니다.')
-          return
-        }
-        const newSlides = data.slides.map(s => ({
-          id: s.id || ('slide_' + Date.now()),
-          shapes: Array.isArray(s.shapes) ? s.shapes : [],
-          background: s.background || { src: null, opacity: 0.3 },
-          historySnapshot: null,
-          canvasSnapshot: null,
-        }))
-        slidesRef.current = newSlides
-        setSlidesMeta(newSlides.map(s => ({ id: s.id })))
-
-        const targetIdx = Math.min(data.currentSlideIdx ?? 0, newSlides.length - 1)
-        const targetSlide = newSlides[targetIdx]
-
-        // 1. 상태 업데이트
-        setBackground(targetSlide.background)
-        restoreState(null, targetSlide.shapes)
-        restoreHistorySnapshot({ stack: [], index: -1 })
-        
-        currentSlideIdxRef.current = targetIdx
-        setCurrentSlideIdx(targetIdx)
-
-        // 2. React 렌더링 이후 강제 다시 그리기 (이중 안전장치)
-        setTimeout(() => {
-          const c = canvasRef.current
-          if (c) {
-            renderShapes(c.getContext('2d'), targetSlide.shapes)
-          }
-          saveSnapshot()
-          if (targetSlide.shapes.length === 0) {
-            alert('불러온 파일에 도형 데이터가 없습니다. (빈 화면 저장됨)')
-          }
-        }, 150)
-      } catch (err) {
-        console.error(err)
-        alert('파일을 불러오는 중 오류가 발생했습니다.')
-      }
-    }
-    reader.readAsText(file)
-  }, [canvasRef, setBackground, restoreState, restoreHistorySnapshot, saveSnapshot])
-
-  // ────────────────────────────────────────────────────────────
-
-  // ── 슬라이드 전환 핵심 로직 ────────────────────────────────
-
-  /** 현재 슬라이드 데이터를 slidesRef에 저장 */
   const saveCurrentSlideData = useCallback(() => {
     const slide = slidesRef.current[currentSlideIdxRef.current]
     const canvas = canvasRef.current
@@ -514,6 +434,85 @@ export default function App() {
     setCurrentSlideIdx(newActiveIdx)
   }, [saveCurrentSlideData, canvasRef, setShapes, setBackground, restoreHistorySnapshot])
 
+
+  // ────────────────────────────────────────────────────────────
+
+  /** 모든 슬라이드 데이터를 JSON 파일로 저장 */
+  const handleSessionSave = useCallback(() => {
+    saveCurrentSlideData()  // 현재 슬라이드 최신화
+    const sessionData = {
+      version: '1.0',
+      savedAt: new Date().toISOString(),
+      slides: slidesRef.current.map(s => ({
+        id: s.id,
+        shapes: s.shapes,
+        background: s.background,
+      })),
+      currentSlideIdx: currentSlideIdxRef.current,
+    }
+    const blob = new Blob([JSON.stringify(sessionData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    const now = new Date()
+    const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0')
+    const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0')
+    link.download = `작도보드_${dateStr}_${timeStr}.json`
+    link.href = url
+    link.click()
+    URL.revokeObjectURL(url)
+  }, [saveCurrentSlideData])
+
+  /** JSON 파일을 읽어 모든 슬라이드 복원 */
+  const handleSessionLoad = useCallback((file) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result)
+        if (!data.slides || !Array.isArray(data.slides)) {
+          alert('올바른 작도보드 저장 파일이 아닙니다.')
+          return
+        }
+        const newSlides = data.slides.map(s => ({
+          id: s.id || ('slide_' + Date.now()),
+          shapes: Array.isArray(s.shapes) ? s.shapes : [],
+          background: s.background || { src: null, opacity: 0.3 },
+          historySnapshot: null,
+          canvasSnapshot: null,
+        }))
+        slidesRef.current = newSlides
+        setSlidesMeta(newSlides.map(s => ({ id: s.id })))
+
+        const targetIdx = Math.min(data.currentSlideIdx ?? 0, newSlides.length - 1)
+        const targetSlide = newSlides[targetIdx]
+
+        // 1. 상태 업데이트
+        setBackground(targetSlide.background)
+        restoreState(null, targetSlide.shapes)
+        restoreHistorySnapshot({ stack: [], index: -1 })
+        
+        currentSlideIdxRef.current = targetIdx
+        setCurrentSlideIdx(targetIdx)
+
+        // 2. React 렌더링 이후 강제 다시 그리기 (이중 안전장치)
+        setTimeout(() => {
+          const c = canvasRef.current
+          if (c) {
+            renderShapes(c.getContext('2d'), targetSlide.shapes)
+          }
+          saveSnapshot()
+          if (targetSlide.shapes.length === 0) {
+            alert('불러온 파일에 도형 데이터가 없습니다. (빈 화면 저장됨)')
+          }
+        }, 150)
+      } catch (err) {
+        console.error(err)
+        alert('파일을 불러오는 중 오류가 발생했습니다.')
+      }
+    }
+    reader.readAsText(file)
+  }, [canvasRef, setBackground, restoreState, restoreHistorySnapshot, saveSnapshot])
+
+  // ────────────────────────────────────────────────────────────
   // ────────────────────────────────────────────────────────────
 
   const toolsVisible = {
