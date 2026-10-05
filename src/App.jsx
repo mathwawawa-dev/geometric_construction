@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.2.05_20261005_160500_선분클릭클릭완성핀고정추가'
+const VERSION = 'v0.2.06_20261005_161400_PNG파일명초단위추가'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -460,7 +460,10 @@ export default function App() {
 
 function download(canvas) {
   const link = document.createElement('a')
-  link.download = `작도보드_${new Date().toISOString().slice(0, 10)}.png`
+  const now = new Date()
+  const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0')
+  const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0')
+  link.download = `작도보드_${dateStr}_${timeStr}.png`
   link.href = canvas.toDataURL('image/png')
   link.click()
 }
