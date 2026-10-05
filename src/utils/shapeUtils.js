@@ -97,27 +97,29 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
         bestPoint = { x: s.cx + s.r * Math.cos(a), y: s.cy + s.r * Math.sin(a) }
       }
     } else if (s.type === 'segment') {
-      // segment 선분 중심축 스냅 — 두께(halfThick) 無시, 수학적 중심선까지 거리만 기준
-      // 끝점 근방(snapThreshold 이내)에서는 2단계 완전 제외 (끝점은 1단계에서만 처리)
+      // segment 선분 중심축 스냅
+      // 선 중간은 사용자가 "정확히 중앙에 닿았을 때만" 스냅되길 원하므로 반경을 대폭 축소 (예: 6px)
+      const lineSnapDist = 6
       const dToP1 = Math.hypot(p.x - s.x1, p.y - s.y1)
       const dToP2 = Math.hypot(p.x - s.x2, p.y - s.y2)
       if (dToP1 > snapThreshold && dToP2 > snapThreshold) {
         const closest = closestPointOnSegment(p.x, p.y, s.x1, s.y1, s.x2, s.y2)
         const d = Math.hypot(p.x - closest.x, p.y - closest.y)
-        if (d <= snapThreshold && d < bestDist) {
+        if (d <= lineSnapDist && d < bestDist) {
           bestDist = d
           bestPoint = closest
         }
       }
     } else if (s.points && s.points.length > 1) {
+      const lineSnapDist = 6
       for (let i = 0; i < s.points.length - 1; i++) {
         const pt1 = s.points[i]
         const pt2 = s.points[i + 1]
         const closest = closestPointOnSegment(p.x, p.y, pt1.x, pt1.y, pt2.x, pt2.y)
         const d = Math.hypot(p.x - closest.x, p.y - closest.y)
-        if (d <= snapThreshold && d < bestDist) {
+        if (d <= lineSnapDist && d < bestDist) {
           bestDist = d
-          bestPoint = closest // 선분의 위/아래 가장자리가 아닌 정확한 선분 중심 좌표!
+          bestPoint = closest
         }
       }
     }

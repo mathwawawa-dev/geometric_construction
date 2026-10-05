@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.17_20261005_202300_선두께무시스냅복구'
+const VERSION = 'v0.2.18_20261005_203300_선중간스냅반경축소'
 
 export default function App() {
   const canvasRef = useRef(null)
