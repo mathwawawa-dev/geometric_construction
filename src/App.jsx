@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.2.10_20261005_170600_세션저장불러오기추가'
+const VERSION = 'v0.2.11_20261005_191500_세션불러오기빈화면수정'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -386,27 +386,29 @@ export default function App() {
         const targetIdx = Math.min(data.currentSlideIdx ?? 0, newSlides.length - 1)
         const targetSlide = newSlides[targetIdx]
 
-        const canvas = canvasRef.current
-        if (canvas) {
-          const ctx = canvas.getContext('2d')
-          ctx.clearRect(0, 0, canvas.width, canvas.height)
-          if (targetSlide.shapes.length > 0) {
-            renderShapes(ctx, targetSlide.shapes)
-          }
-        }
+        // ① React 상태를 먼저 모두 업데이트
         setShapes(targetSlide.shapes)
         setBackground(targetSlide.background)
         restoreHistorySnapshot({ stack: [], index: -1 })
-
         currentSlideIdxRef.current = targetIdx
         setCurrentSlideIdx(targetIdx)
-        setTimeout(() => saveSnapshot(), 50)
+
+        // ② React 재렌더 + ResizeObserver 처리 완료 후 캔버스 렌더링
+        //    (즉시 그리면 ResizeObserver가 나중에 발동해 빈 tmp로 덮어쓸 수 있음)
+        const shapesToRender = targetSlide.shapes
+        setTimeout(() => {
+          const c = canvasRef.current
+          if (c) {
+            renderShapes(c.getContext('2d'), shapesToRender)
+          }
+          saveSnapshot()
+        }, 80)
       } catch {
         alert('파일을 불러오는 중 오류가 발생했습니다.')
       }
     }
     reader.readAsText(file)
-  }, [canvasRef, setShapes, setBackground, restoreHistorySnapshot, saveSnapshot, saveCurrentSlideData])
+  }, [canvasRef, setShapes, setBackground, restoreHistorySnapshot, saveSnapshot])
 
   // ────────────────────────────────────────────────────────────
 
