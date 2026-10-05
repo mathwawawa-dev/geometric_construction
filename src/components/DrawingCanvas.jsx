@@ -106,7 +106,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const startPoint = useRef({ x: 0, y: 0 })
   const initialAngle = useRef(null)
   const ctrlHeld = useRef(false)  // Ctrl 누른 동안 임시 스냅 ON
-  const linePinnedPos = useRef(null) // 선분 드래그 완성 후 커서 끝점 고정용
+  const linePinnedPos = useRef(null)       // 선분/펜 커서 끝점 고정용
+  const penMouseUpRawPos = useRef(null)    // 펜 Shift: mouseup 실제 위치 (핀 해제 기준)
 
   // Ctrl 키 상태 추적
   useEffect(() => {
@@ -291,6 +292,16 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           finalPos = pointRes.pos
           isPointSnapped = pointRes.snappedPoint
         }
+      }
+      // 펜 Shift 직선 완성 후: 마우스가 mouseup 위치에서 10px 이상 움직이기 전까지 끝점 고정
+      if (linePinnedPos.current && penMouseUpRawPos.current && !isDrawing.current) {
+        const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
+        if (dMoved < 10) {
+          updateFakeCursor(linePinnedPos.current, false)
+          return
+        }
+        linePinnedPos.current = null
+        penMouseUpRawPos.current = null
       }
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     } else if (activeTool === 'line') {
@@ -593,7 +604,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }
     }
 
-    linePinnedPos.current = null // 새 선 긋기 시작하면 핀 해제
+    linePinnedPos.current = null      // 새 선 긋기 시작하면 핀 해제
+    penMouseUpRawPos.current = null   // mouseup 위치 초기화
 
     if (isPointInsideRuler(finalPos, ruler)) {
       isDrawing.current = false
@@ -610,7 +622,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     updateFakeCursor(finalPos, lock !== null || isPointSnapped)
 
     const onWindowMove = (me) => handleMove(me)
-    const onWindowUp = () => {
+    const onWindowUp = (upEvent) => {
       if (isDrawing.current) {
         const draftCanvas = draftCanvasRef.current
         const mainCanvas = canvasRef.current
@@ -638,14 +650,19 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       isDrawing.current = false
       const wasShiftDrawing = isShiftDrawing.current
       isShiftDrawing.current = false
-      initialAngle.current = null
-      snapLock.current = null
-      // Shift 직선 모드로 그렸으면 끝점에 커서 핀 고정
+      // Shift 직선 모드: initialAngle 클리어 전에 끝점 계산 후 핀 고정
       if (wasShiftDrawing && currentStrokePoints.current.length > 0) {
         const lastPt = currentStrokePoints.current[currentStrokePoints.current.length - 1]
+        const mainCanvas = canvasRef.current
+        if (mainCanvas && upEvent) {
+          const upRawPos = getPos(upEvent, mainCanvas)
+          penMouseUpRawPos.current = upRawPos  // mouseup 실제 위치 저장 (핀 해제 기준)
+        }
         linePinnedPos.current = lastPt
         updateFakeCursor(lastPt, false)
       }
+      initialAngle.current = null
+      snapLock.current = null
       currentStrokePoints.current = []
       document.body.classList.remove('is-drawing')
       // 그리기 종료 후 자 커서 상태 초기화

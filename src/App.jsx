@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.2.02_20261005_154300_펜Shift핀제거_자연추적'
+const VERSION = 'v0.2.03_20261005_154900_펜Shift끝점핀_mouseup위치기준해제'
 
 export default function App() {
   const canvasRef = useRef(null)
