@@ -293,11 +293,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
-      // 핀 고정: Shift 직선 완성 후 → 다음 mousedown(새 획 시작)까지 끝점에 고정
-      if (linePinnedPos.current && !isDrawing.current) {
-        updateFakeCursor(linePinnedPos.current, false)
-        return
-      }
     } else if (activeTool === 'line') {
       let finalPos = rawPos
       let lock = null
