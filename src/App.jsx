@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.2.11_20261005_191500_세션불러오기빈화면수정'
+const VERSION = 'v0.2.12_20261005_192500_세션불러오기빈화면안전모드복구'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -386,29 +386,32 @@ export default function App() {
         const targetIdx = Math.min(data.currentSlideIdx ?? 0, newSlides.length - 1)
         const targetSlide = newSlides[targetIdx]
 
-        // ① React 상태를 먼저 모두 업데이트
-        setShapes(targetSlide.shapes)
+        // 1. 상태 업데이트
         setBackground(targetSlide.background)
+        restoreState(null, targetSlide.shapes)
         restoreHistorySnapshot({ stack: [], index: -1 })
+        
         currentSlideIdxRef.current = targetIdx
         setCurrentSlideIdx(targetIdx)
 
-        // ② React 재렌더 + ResizeObserver 처리 완료 후 캔버스 렌더링
-        //    (즉시 그리면 ResizeObserver가 나중에 발동해 빈 tmp로 덮어쓸 수 있음)
-        const shapesToRender = targetSlide.shapes
+        // 2. React 렌더링 이후 강제 다시 그리기 (이중 안전장치)
         setTimeout(() => {
           const c = canvasRef.current
           if (c) {
-            renderShapes(c.getContext('2d'), shapesToRender)
+            renderShapes(c.getContext('2d'), targetSlide.shapes)
           }
           saveSnapshot()
-        }, 80)
-      } catch {
+          if (targetSlide.shapes.length === 0) {
+            alert('불러온 파일에 도형 데이터가 없습니다. (빈 화면 저장됨)')
+          }
+        }, 150)
+      } catch (err) {
+        console.error(err)
         alert('파일을 불러오는 중 오류가 발생했습니다.')
       }
     }
     reader.readAsText(file)
-  }, [canvasRef, setShapes, setBackground, restoreHistorySnapshot, saveSnapshot])
+  }, [canvasRef, setBackground, restoreState, restoreHistorySnapshot, saveSnapshot])
 
   // ────────────────────────────────────────────────────────────
 
