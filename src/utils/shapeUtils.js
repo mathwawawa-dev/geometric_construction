@@ -48,15 +48,15 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
         bestPoint = { x: s.x, y: s.y }
       }
     } else if (s.type === 'segment') {
-      // segment 끝점 우선 스냅
+      // segment 끝점 우선 스냅 — bestDist를 0으로 고정해 2단계가 절대 이길 수 없게 함
       const dStart = Math.hypot(p.x - s.x1, p.y - s.y1)
       const dEnd   = Math.hypot(p.x - s.x2, p.y - s.y2)
       if (dStart <= snapThreshold && dStart < bestDist) {
-        bestDist = dStart
+        bestDist = 0   // ← 2단계 경쟁 원천 차단
         bestPoint = { x: s.x1, y: s.y1 }
       }
       if (dEnd <= snapThreshold && dEnd < bestDist) {
-        bestDist = dEnd
+        bestDist = 0   // ← 2단계 경쟁 원천 차단
         bestPoint = { x: s.x2, y: s.y2 }
       }
     } else if (s.points && s.points.length > 1) {
@@ -94,12 +94,13 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
       }
     } else if (s.type === 'segment') {
       // segment 선분 위 정중앙 스냅
-      // 끝점(x1,y1)·(x2,y2)의 시각적 원 반경 내에서는 2단계 제외
-      // → 끝점은 1단계에서 중앙으로만 스냅되어야 함
+      // 끝점 근방(pointR + snapThreshold*2)에서는 2단계 완전 제외
+      // → 끝점은 반드시 1단계에서 중앙으로만 스냅
       const pointR = Math.max((s.width || 3) * 0.8, 4)
+      const exclusion = pointR + snapThreshold * 2
       const dToP1 = Math.hypot(p.x - s.x1, p.y - s.y1)
       const dToP2 = Math.hypot(p.x - s.x2, p.y - s.y2)
-      if (dToP1 > pointR + snapThreshold && dToP2 > pointR + snapThreshold) {
+      if (dToP1 > exclusion && dToP2 > exclusion) {
         const closest = closestPointOnSegment(p.x, p.y, s.x1, s.y1, s.x2, s.y2)
         const d = Math.hypot(p.x - closest.x, p.y - closest.y)
         if (d <= totalThreshold && d < bestDist) {
