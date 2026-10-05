@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.14_20261005_194000_런타임크래시해결'
+const VERSION = 'v0.2.15_20261005_200600_선분끝점스냅중앙고정'
 
 export default function App() {
   const canvasRef = useRef(null)
