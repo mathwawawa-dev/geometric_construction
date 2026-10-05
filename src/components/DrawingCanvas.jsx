@@ -293,6 +293,15 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
+      // 핀 고정: Shift 직선 완성 후 40px 내에선 커서를 끝점에 유지
+      if (linePinnedPos.current && !isDrawing.current) {
+        const dFromPinned = Math.hypot(rawPos.x - linePinnedPos.current.x, rawPos.y - linePinnedPos.current.y)
+        if (dFromPinned < 40) {
+          updateFakeCursor(linePinnedPos.current, false)
+          return
+        }
+        linePinnedPos.current = null
+      }
     } else if (activeTool === 'line') {
       let finalPos = rawPos
       let lock = null
@@ -593,6 +602,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }
     }
 
+    linePinnedPos.current = null // 새 선 긋기 시작하면 핀 해제
+
     if (isPointInsideRuler(finalPos, ruler)) {
       isDrawing.current = false
       document.body.classList.remove('is-drawing')
@@ -634,9 +645,16 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
       isDrawing.current = false
+      const wasShiftDrawing = isShiftDrawing.current
       isShiftDrawing.current = false
       initialAngle.current = null
       snapLock.current = null
+      // Shift 직선 모드로 그렸으면 끝점에 커서 핀 고정
+      if (wasShiftDrawing && currentStrokePoints.current.length > 0) {
+        const lastPt = currentStrokePoints.current[currentStrokePoints.current.length - 1]
+        linePinnedPos.current = lastPt
+        updateFakeCursor(lastPt, false)
+      }
       currentStrokePoints.current = []
       document.body.classList.remove('is-drawing')
       // 그리기 종료 후 자 커서 상태 초기화
