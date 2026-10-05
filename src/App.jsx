@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.2.08_20261005_163000_슬라이드네비게이션툴바이동'
+const VERSION = 'v0.2.09_20261005_163200_슬라이드네비라이트스타일'
 
 export default function App() {
   const canvasRef = useRef(null)

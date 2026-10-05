@@ -284,39 +284,39 @@ export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, 
           ?
         </button>
 
-        {/* 슬라이드 네비게이션 — 클래스룸스크린 스타일 */}
-        <div className="flex items-center gap-0.5 bg-[#2a2d3a] rounded-xl px-1.5 py-1 ml-1">
+        {/* 슬라이드 네비게이션 */}
+        <div className="flex items-center gap-0.5 bg-gray-100 border border-gray-200 rounded-xl px-1.5 py-1 ml-1">
           <button
             onClick={onPrevSlide}
             disabled={currentSlideIdx === 0}
             title="이전 슬라이드"
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-white disabled:opacity-30 hover:bg-white/10 transition-colors text-sm"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-600 disabled:opacity-30 hover:bg-gray-200 transition-colors text-sm"
           >
             ‹
           </button>
-          <span className="text-white font-bold text-sm min-w-[1.5rem] text-center select-none">
+          <span className="text-gray-800 font-bold text-sm min-w-[1.5rem] text-center select-none">
             {currentSlideIdx + 1}
           </span>
           <button
             onClick={onNextSlide}
             disabled={currentSlideIdx === slideCount - 1}
             title="다음 슬라이드"
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-white disabled:opacity-30 hover:bg-white/10 transition-colors text-sm"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-600 disabled:opacity-30 hover:bg-gray-200 transition-colors text-sm"
           >
             ›
           </button>
-          <div className="w-px h-4 bg-white/20 mx-0.5" />
+          <div className="w-px h-4 bg-gray-300 mx-0.5" />
           <button
             onClick={onAddSlide}
             title="슬라이드 추가"
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition-colors text-base font-bold"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors text-base font-bold"
           >
             +
           </button>
           <button
             onClick={onDeleteSlide}
             title="현재 슬라이드 삭제"
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-white hover:bg-red-500/40 transition-colors"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="3 6 5 6 21 6" />
