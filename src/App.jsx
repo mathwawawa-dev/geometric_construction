@@ -11,7 +11,7 @@ import ProtractorTool from './components/ProtractorTool'
 import SelectionLayer from './components/SelectionLayer'
 import { renderShapes, moveShape } from './utils/shapeUtils'
 
-const VERSION = 'v0.2.09_20261005_163200_슬라이드네비라이트스타일'
+const VERSION = 'v0.2.10_20261005_170600_세션저장불러오기추가'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -336,6 +336,80 @@ export default function App() {
     }
   }, [canvasRef, state.background])
 
+  // ── 세션 저장 / 불러오기 ─────────────────────────────────────
+
+  /** 모든 슬라이드 데이터를 JSON 파일로 저장 */
+  const handleSessionSave = useCallback(() => {
+    saveCurrentSlideData()  // 현재 슬라이드 최신화
+    const sessionData = {
+      version: '1.0',
+      savedAt: new Date().toISOString(),
+      slides: slidesRef.current.map(s => ({
+        id: s.id,
+        shapes: s.shapes,
+        background: s.background,
+      })),
+      currentSlideIdx: currentSlideIdxRef.current,
+    }
+    const blob = new Blob([JSON.stringify(sessionData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    const now = new Date()
+    const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0')
+    const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0')
+    link.download = `작도보드_${dateStr}_${timeStr}.json`
+    link.href = url
+    link.click()
+    URL.revokeObjectURL(url)
+  }, [saveCurrentSlideData])
+
+  /** JSON 파일을 읽어 모든 슬라이드 복원 */
+  const handleSessionLoad = useCallback((file) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result)
+        if (!data.slides || !Array.isArray(data.slides)) {
+          alert('올바른 작도보드 저장 파일이 아닙니다.')
+          return
+        }
+        const newSlides = data.slides.map(s => ({
+          id: s.id || ('slide_' + Date.now()),
+          shapes: Array.isArray(s.shapes) ? s.shapes : [],
+          background: s.background || { src: null, opacity: 0.3 },
+          historySnapshot: null,
+          canvasSnapshot: null,
+        }))
+        slidesRef.current = newSlides
+        setSlidesMeta(newSlides.map(s => ({ id: s.id })))
+
+        const targetIdx = Math.min(data.currentSlideIdx ?? 0, newSlides.length - 1)
+        const targetSlide = newSlides[targetIdx]
+
+        const canvas = canvasRef.current
+        if (canvas) {
+          const ctx = canvas.getContext('2d')
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          if (targetSlide.shapes.length > 0) {
+            renderShapes(ctx, targetSlide.shapes)
+          }
+        }
+        setShapes(targetSlide.shapes)
+        setBackground(targetSlide.background)
+        restoreHistorySnapshot({ stack: [], index: -1 })
+
+        currentSlideIdxRef.current = targetIdx
+        setCurrentSlideIdx(targetIdx)
+        setTimeout(() => saveSnapshot(), 50)
+      } catch {
+        alert('파일을 불러오는 중 오류가 발생했습니다.')
+      }
+    }
+    reader.readAsText(file)
+  }, [canvasRef, setShapes, setBackground, restoreHistorySnapshot, saveSnapshot, saveCurrentSlideData])
+
+  // ────────────────────────────────────────────────────────────
+
   // ── 슬라이드 전환 핵심 로직 ────────────────────────────────
 
   /** 현재 슬라이드 데이터를 slidesRef에 저장 */
@@ -465,6 +539,8 @@ export default function App() {
             deleteSlide(currentSlideIdx)
           }
         }}
+        onSessionSave={handleSessionSave}
+        onSessionLoad={handleSessionLoad}
       />
 
       <div className="flex flex-1 overflow-hidden">

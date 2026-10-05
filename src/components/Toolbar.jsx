@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 const WIDTH_OPTIONS = [
   { label: '얇게', value: 1.5 },
@@ -14,8 +14,9 @@ const COLOR_PRESETS = [
   { color: '#16a34a', label: '초록', bg: '#16a34a' },
 ]
 
-export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, onUndo, onRedo, onClear, onSave, highlightMode, setHighlightMode, snapEnabled, setSnapEnabled, compassSnapEnabled, setCompassSnapEnabled, slideCount, currentSlideIdx, onPrevSlide, onNextSlide, onAddSlide, onDeleteSlide }) {
+export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, onUndo, onRedo, onClear, onSave, highlightMode, setHighlightMode, snapEnabled, setSnapEnabled, compassSnapEnabled, setCompassSnapEnabled, slideCount, currentSlideIdx, onPrevSlide, onNextSlide, onAddSlide, onDeleteSlide, onSessionSave, onSessionLoad }) {
   const [showManual, setShowManual] = useState(false)
+  const fileInputRef = useRef(null)
 
   return (
     <>
@@ -270,6 +271,46 @@ export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, 
 
       {/* PNG 저장 + 매뉴얼 버튼 묶음 */}
       <div className="flex items-center gap-2 ml-auto">
+
+        {/* 세션 저장/불러오기 */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json,.작도"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) onSessionLoad(file)
+            e.target.value = ''
+          }}
+        />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          title="세션 불러오기 (.json)"
+          className="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium transition-colors flex items-center gap-1"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          불러오기
+        </button>
+        <button
+          onClick={onSessionSave}
+          title="세션 저장 (.json)"
+          className="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium transition-colors flex items-center gap-1"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          세션 저장
+        </button>
+
+        <div className="w-px h-5 bg-gray-200" />
+
         <button
           onClick={onSave}
           className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors"
