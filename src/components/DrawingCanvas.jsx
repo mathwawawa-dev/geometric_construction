@@ -121,6 +121,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     }
   }, [])
 
+  // handleMove를 항상 최신 참조로 유지하는 ref
+  // → 펜 도구용 persistent window 리스너에서 stale closure 방지
+  const handleMoveRef = useRef(null)
+
   // 텍스트 도구 상태
   const [textEditor, setTextEditor] = useState(null)
   const textInputRef = useRef(null)
@@ -376,6 +380,22 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     }
   }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, shapes, snapEnabled, setIsInsideRuler, lineStart, strokeColor, strokeWidth])
+
+  // handleMove가 재생성될 때마다 ref 동기화
+  handleMoveRef.current = handleMove
+
+  // 펜 도구 활성화 중: 캔버스 밖에서도 가짜 커서가 따라다니도록 window 전역 추적
+  // (드로잉 중에는 isDrawing.current=true → 이미 onWindowMove가 처리하므로 skip)
+  useEffect(() => {
+    if (activeTool !== 'pen') return
+    const track = (e) => {
+      if (!isDrawing.current) {
+        handleMoveRef.current?.(e)
+      }
+    }
+    window.addEventListener('mousemove', track)
+    return () => window.removeEventListener('mousemove', track)
+  }, [activeTool])
 
   const commitText = useCallback(() => {
     if (!textEditor) return

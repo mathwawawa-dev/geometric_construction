@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.25_20261007_121300_펜드래그완료즉시자유이동'
+const VERSION = 'v0.2.26_20261007_121800_펜커서캔버스밖추적수정'
 
 export default function App() {
   const canvasRef = useRef(null)
