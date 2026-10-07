@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.45_20261007_200000_연필커서지오지브라스타일'
+const VERSION = 'v0.2.46_20261007_200500_개체근접손커서지오지브라스타일'
 
 export default function App() {
   const canvasRef = useRef(null)

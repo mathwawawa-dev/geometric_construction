@@ -99,6 +99,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const currentStrokePoints = useRef([])
   const lastMousePos = useRef({ x: -9999, y: -9999 })
   const [isInsideRuler, setIsInsideRuler] = useState(false)
+  const [isNearShape, setIsNearShape] = useState(false)
+  const isNearShapeRef = useRef(false)  // re-render 최소화용 ref
   const isShiftDrawing = useRef(false)
   const startPoint = useRef({ x: 0, y: 0 })
   const initialAngle = useRef(null)
@@ -209,6 +211,15 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     // 자 내부 여부 실시간 업데이트 (커서 변경용) - 그리는 중에는 업데이트하지 않음 (스냅 위치에 커서 고정)
     if (!isDrawing.current) {
       setIsInsideRuler(activeTool === 'pen' && isPointInsideRuler(rawPos, ruler))
+      // 개체 근접 감지: 선분 끝점·스냅 포인트 8px 이내 → 손 커서 (지오지브라 방식)
+      const near = !!(
+        snapToSegmentEndpoint(rawPos, shapesRef.current, 8) ||
+        snapToShapesCenter(rawPos, shapesRef.current, 12)
+      )
+      if (near !== isNearShapeRef.current) {
+        isNearShapeRef.current = near
+        setIsNearShape(near)
+      }
     }
 
     if (isDrawing.current && activeTool === 'pen' && !stampMode) {
@@ -649,12 +660,12 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     return () => ro.disconnect()
   }, [canvasRef])
 
-  // 연필 아이콘 커서 (지오지브라 스타일)
-  // 핫스팟(2, 20): 연필 끝부분이 정확히 커서 포인트가 됨
-  const penCursor = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z' fill='white' stroke='%231e40af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 2 22, crosshair`
-
   const getCursorStyle = () => {
-    if (activeTool === 'pen' || activeTool === 'line') return isInsideRuler ? 'grab' : penCursor
+    if (activeTool === 'pen' || activeTool === 'line') {
+      if (isInsideRuler) return 'grab'
+      if (isNearShape) return 'pointer'   // 사진1: 개체 근처 → 손 커서
+      return 'default'                     // 사진2: 평상시 → 화살표
+    }
     if (activeTool === 'text') return 'text'
     return 'default'
   }
