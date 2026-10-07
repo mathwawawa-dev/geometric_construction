@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.62_20261008_002000_스냅드로잉중cursor숨김_점프완전차단'
+const VERSION = 'v0.2.63_20261008_002400_스냅인디케이터canvas_커서점프제거'
 
 export default function App() {
   const canvasRef = useRef(null)
