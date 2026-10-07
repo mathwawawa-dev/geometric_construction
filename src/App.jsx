@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.24_20261007_120700_펜커서끊김freeze임계값확대'
+const VERSION = 'v0.2.25_20261007_121300_펜드래그완료즉시자유이동'
 
 export default function App() {
   const canvasRef = useRef(null)

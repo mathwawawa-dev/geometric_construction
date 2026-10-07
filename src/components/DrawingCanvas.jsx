@@ -657,16 +657,20 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       isDrawing.current = false
       const wasShiftDrawing = isShiftDrawing.current
       isShiftDrawing.current = false
-      // Shift 직선 모드 OR 일반 드래그 모드: mouseup 위치에서 커서 freeze
-      if (currentStrokePoints.current.length > 0) {
+      // Shift 직선 모드에서만 커서 freeze (일반 드래그는 mouseup 즉시 자유 이동)
+      if (wasShiftDrawing && currentStrokePoints.current.length > 0) {
         const lastPt = currentStrokePoints.current[currentStrokePoints.current.length - 1]
         const mainCanvas = canvasRef.current
         if (mainCanvas && upEvent) {
           const upRawPos = getPos(upEvent, mainCanvas)
-          penMouseUpRawPos.current = upRawPos  // mouseup 실제 위치 저장 (핀 해제 기준)
+          penMouseUpRawPos.current = upRawPos
         }
         linePinnedPos.current = lastPt
         updateFakeCursor(lastPt, false)
+      } else {
+        // 일반 드래그: pin 해제 → 커서 자유 이동
+        linePinnedPos.current = null
+        penMouseUpRawPos.current = null
       }
       initialAngle.current = null
       snapLock.current = null
