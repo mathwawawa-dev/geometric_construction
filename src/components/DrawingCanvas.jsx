@@ -199,11 +199,15 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     // 자 내부 여부 실시간 업데이트 (커서 변경용) - 그리는 중에는 업데이트하지 않음 (스냅 위치에 커서 고정)
     if (!isDrawing.current) {
       setIsInsideRuler(activeTool === 'pen' && isPointInsideRuler(rawPos, ruler))
-      // 개체 근접 감지: 선분 끝점·스냅 포인트 8px 이내 → 손 커서 (지오지브라 방식)
-      const near = !!(
-        snapToSegmentEndpoint(rawPos, shapesRef.current, 8) ||
-        snapToShapesCenter(rawPos, shapesRef.current, 12)
+      // 손 커서 감지: 선분 끝점 또는 단일점(점 개체)에 가까울 때만 활성
+      // 선분 몸통·스트로크 몸통은 제외 (지오지브라 방식)
+      const CURSOR_R = 12
+      const nearEndpoint = !!snapToSegmentEndpoint(rawPos, shapesRef.current, CURSOR_R)
+      const nearDot = shapesRef.current.some(s =>
+        s.type === 'stroke' && s.points?.length === 1 &&
+        Math.hypot(rawPos.x - s.points[0].x, rawPos.y - s.points[0].y) <= CURSOR_R
       )
+      const near = nearEndpoint || nearDot
       if (near !== isNearShapeRef.current) {
         isNearShapeRef.current = near
         setIsNearShape(near)

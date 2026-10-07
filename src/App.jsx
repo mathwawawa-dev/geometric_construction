@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.49_20261007_221500_Ctrl스냅eCtrlKey직접읽기'
+const VERSION = 'v0.2.50_20261007_222000_선분끝점점근처만손커서'
 
 export default function App() {
   const canvasRef = useRef(null)
