@@ -125,6 +125,12 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   // → 펜 도구용 persistent window 리스너에서 stale closure 방지
   const handleMoveRef = useRef(null)
 
+  // shapes를 항상 최신 참조로 유지하는 ref
+  // → handleMove/startDraw deps에서 shapes 제거 목적
+  //   (shapes 변경 시 handleMove가 재생성되지 않아 mouseup 후 freeze 방지)
+  const shapesRef = useRef(shapes)
+  shapesRef.current = shapes  // 매 렌더마다 즉시 동기화 (useEffect 불필요)
+
   // 텍스트 도구 상태
   const [textEditor, setTextEditor] = useState(null)
   const textInputRef = useRef(null)
@@ -237,7 +243,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         lock = rLock
         finalPos = rulerSnapped
         if (!lock) {
-          const pointRes = snapToPointCenters(rulerSnapped, shapes)
+          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
           finalPos = pointRes.pos
           isPointSnapped = pointRes.snappedPoint
         }
@@ -292,7 +298,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         lock = rLock
         finalPos = rulerSnapped
         if (!lock) {
-          const pointRes = snapToPointCenters(rulerSnapped, shapes)
+          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
           finalPos = pointRes.pos
           isPointSnapped = pointRes.snappedPoint
         }
@@ -309,7 +315,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         lock = rLock
         finalPos = rulerSnapped
         if (!lock) {
-          const pointRes = snapToPointCenters(rulerSnapped, shapes)
+          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
           finalPos = pointRes.pos
           isPointSnapped = pointRes.snappedPoint
         }
@@ -369,7 +375,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     }
-  }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, shapes, snapEnabled, setIsInsideRuler, lineStart, strokeColor, strokeWidth])
+  }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, snapEnabled, setIsInsideRuler, lineStart, strokeColor, strokeWidth])
 
   // handleMove가 재생성될 때마다 ref 동기화
   handleMoveRef.current = handleMove
@@ -456,7 +462,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
         finalPos = rulerSnapped
         if (!rLock) {
-          const pointRes = snapToPointCenters(rulerSnapped, shapes)
+          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
           finalPos = pointRes.pos
         }
       }
@@ -518,7 +524,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             const { pos: rSnap, lock: rL } = calcRulerSnap(upPos, ruler, null)
             finalUpPos = rSnap
             if (!rL) {
-              const pr = snapToPointCenters(rSnap, shapes)
+              const pr = snapToPointCenters(rSnap, shapesRef.current)
               finalUpPos = pr.pos
             }
           }
@@ -618,7 +624,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       lock = rLock
       finalPos = rulerSnapped
       if (!lock) {
-        const pointRes = snapToPointCenters(rulerSnapped, shapes)
+        const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
         finalPos = pointRes.pos
         isPointSnapped = pointRes.snappedPoint
       }
@@ -684,7 +690,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     window.addEventListener('mouseup', onWindowUp)
     window.addEventListener('touchmove', onWindowMove, { passive: false })
     window.addEventListener('touchend', onWindowUp)
-  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode, renderCurrentStroke, shapes, textEditor, commitText, snapEnabled])
+  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode, renderCurrentStroke, textEditor, commitText, snapEnabled])
 
   useEffect(() => {
     const canvas = canvasRef.current

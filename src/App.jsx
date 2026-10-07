@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useState } from 'react'
+import { useRef, useEffect, useCallback, useState, startTransition } from 'react'
 import { useAppState } from './store/useAppState'
 import { useHistory } from './hooks/useHistory'
 import Toolbar from './components/Toolbar'
@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.32_20261007_163700_교점스냅반경9px'
+const VERSION = 'v0.2.33_20261007_182600_shapes의존성제거freeze근본수정'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -118,14 +118,16 @@ export default function App() {
   }, [selectedIds, deleteShapes, canvasRef, saveSnapshot])
 
   const handleAddShape = useCallback((shape) => {
-    addShape(shape)
-    // renderShapes를 다음 프레임으로 지연: mouseup 직후 mousemove 이벤트가
-    // renderShapes 연산에 의해 블로킹되지 않도록 하여 커서 멈춤 현상 방지
+    // renderShapes: 캔버스는 다음 프레임에 즉시 갱신
     requestAnimationFrame(() => {
       if (canvasRef.current) {
-        const updated = [...stateRef.current.shapes]
+        const updated = [...stateRef.current.shapes, shape]
         renderShapes(canvasRef.current.getContext('2d'), updated)
       }
+    })
+    // React 상태 업데이트는 낮은 우선순위로 지연 → mouseup 직후 mousemove가 먼저 처리됨
+    startTransition(() => {
+      addShape(shape)
     })
     setTimeout(() => saveSnapshot(), 0)
   }, [addShape, saveSnapshot, canvasRef])
