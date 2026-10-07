@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.26_20261007_121800_펜커서캔버스밖추적수정'
+const VERSION = 'v0.2.27_20261007_122400_자유곡선스냅제외성능개선'
 
 export default function App() {
   const canvasRef = useRef(null)

@@ -389,6 +389,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   useEffect(() => {
     if (activeTool !== 'pen') return
     const track = (e) => {
+      // 캔버스 위에서 발생한 이벤트는 캔버스의 onMouseMove가 처리하므로 중복 방지
+      if (e.target && e.target.closest && e.target.closest('.canvas-area')) return
+      
       if (!isDrawing.current) {
         handleMoveRef.current?.(e)
       }

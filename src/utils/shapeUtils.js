@@ -106,7 +106,7 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
         bestDist = d
         bestPoint = closest
       }
-    } else if (s.points && s.points.length > 1) {
+    } else if (s.type !== 'stroke' && s.points && s.points.length > 1) {
       for (let i = 0; i < s.points.length - 1; i++) {
         const pt1 = s.points[i]
         const pt2 = s.points[i + 1]
