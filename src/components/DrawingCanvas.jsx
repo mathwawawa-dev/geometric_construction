@@ -509,10 +509,13 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (draftCanvas) {
           draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
         }
-        // 두 번째 클릭 완성: 커서를 끝점으로 이동 + 5px 미니 freeze 설정
+        // 두 번째 클릭 완성: 커서를 끝점으로 이동 + 적응형 freeze
         updateFakeCursor(finalPos, false)
-        linePinnedPos.current = finalPos  // 5px freeze: 끝점에 고정
-        penMouseUpRawPos.current = rawPos // 5px freeze: 기준 위치
+        const constraintDeltaClick = Math.hypot(finalPos.x - rawPos.x, finalPos.y - rawPos.y)
+        if (constraintDeltaClick > 3) {
+          linePinnedPos.current = finalPos
+          penMouseUpRawPos.current = rawPos
+        }
       } else {
         // 첫 번째 클릭 시 시작
         linePinnedPos.current = null      // 새 선분 시작 → 핀 해제
@@ -572,10 +575,14 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             if (draftCanvas) {
               draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
             }
-            // mouseup 시 커서를 그려진 끝점으로 이동 + 5px 미니 freeze 설정
+            // 커서를 그려진 끝점으로 이동 + 적응형 freeze
+            // Shift/스냅 제약으로 끝점이 rawPos와 다를 때만 5px freeze 적용
             updateFakeCursor(finalUpPos, false)
-            linePinnedPos.current = finalUpPos  // 5px freeze: 끝점에 고정
-            penMouseUpRawPos.current = upPos    // 5px freeze: 기준 위치
+            const constraintDeltaLine = Math.hypot(finalUpPos.x - upPos.x, finalUpPos.y - upPos.y)
+            if (constraintDeltaLine > 3) {
+              linePinnedPos.current = finalUpPos
+              penMouseUpRawPos.current = upPos
+            }
           }
           window.removeEventListener('mouseup', onWindowUpLine)
           window.removeEventListener('touchend', onWindowUpLine)
@@ -698,8 +705,15 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       setIsInsideRuler(false)
       if (lastPt) {
         updateFakeCursor(lastPt, false)
-        linePinnedPos.current = lastPt      // 5px freeze: 끝점에 고정
-        penMouseUpRawPos.current = upRawPos // 5px freeze: 기준 위치
+        // 적응형 freeze: Shift/스냅 제약으로 끝점이 rawPos와 다를 때만 5px freeze 적용
+        // 일반 곡선(lastPt ≈ upRawPos)은 freeze 없음 → 커서 즉시 rawPos 추적
+        const constraintDelta = upRawPos
+          ? Math.hypot(lastPt.x - upRawPos.x, lastPt.y - upRawPos.y)
+          : 0
+        if (constraintDelta > 3) {
+          linePinnedPos.current = lastPt
+          penMouseUpRawPos.current = upRawPos
+        }
       }
       window.removeEventListener('mousemove', onWindowMove)
       window.removeEventListener('mouseup', onWindowUp)

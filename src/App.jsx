@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.37_20261007_185800_5px미니freeze끝점튐방지'
+const VERSION = 'v0.2.38_20261007_190500_적응형freeze제약있을때만5px'
 
 export default function App() {
   const canvasRef = useRef(null)
