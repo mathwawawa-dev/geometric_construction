@@ -288,6 +288,18 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       renderCurrentStroke()
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     } else if (activeTool === 'pen') {
+      // 5px 미니 freeze: mouseup 직후 OS 마우스 jitter 흡수 → 커서가 끝점에 머뭄
+      // 5px 이상 이동하면 즉시 해제 (붙잡혀 있다는 느낌 없음)
+      if (linePinnedPos.current && penMouseUpRawPos.current) {
+        const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
+        if (dMoved < 5) {
+          updateFakeCursor(linePinnedPos.current, false)
+          return
+        }
+        linePinnedPos.current = null
+        penMouseUpRawPos.current = null
+      }
+
       let finalPos = rawPos
       let lock = null
       let isPointSnapped = false
@@ -362,9 +374,17 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
 
-      // linePinnedPos 잔여값 정리 (기존 freeze 제거)
-      if (linePinnedPos.current) linePinnedPos.current = null
-      if (penMouseUpRawPos.current) penMouseUpRawPos.current = null
+      // 5px 미니 freeze: mouseup 직후 OS 마우스 jitter 흡수 → 커서가 끝점에 머뭄
+      // 5px 이상 이동하면 즉시 해제 (!lineStart: 드로잉 완료 후에만 적용)
+      if (linePinnedPos.current && penMouseUpRawPos.current && !lineStart) {
+        const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
+        if (dMoved < 5) {
+          updateFakeCursor(linePinnedPos.current, false)
+          return
+        }
+        linePinnedPos.current = null
+        penMouseUpRawPos.current = null
+      }
 
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     }
@@ -489,9 +509,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (draftCanvas) {
           draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
         }
-        // 두 번째 클릭 완성: 커서를 실제 그려진 끝점(constrainedPos)으로 이동
-        // 마우스 움직이면 즉시 rawPos 추적 (freeze 없음)
+        // 두 번째 클릭 완성: 커서를 끝점으로 이동 + 5px 미니 freeze 설정
         updateFakeCursor(finalPos, false)
+        linePinnedPos.current = finalPos  // 5px freeze: 끝점에 고정
+        penMouseUpRawPos.current = rawPos // 5px freeze: 기준 위치
       } else {
         // 첫 번째 클릭 시 시작
         linePinnedPos.current = null      // 새 선분 시작 → 핀 해제
@@ -551,9 +572,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             if (draftCanvas) {
               draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
             }
-            // mouseup 시 커서를 실제 그려진 끝점(constrainedPos)으로 이동
-            // 마우스 움직이면 즉시 rawPos 추적 (freeze 없음)
+            // mouseup 시 커서를 그려진 끝점으로 이동 + 5px 미니 freeze 설정
             updateFakeCursor(finalUpPos, false)
+            linePinnedPos.current = finalUpPos  // 5px freeze: 끝점에 고정
+            penMouseUpRawPos.current = upPos    // 5px freeze: 기준 위치
           }
           window.removeEventListener('mouseup', onWindowUpLine)
           window.removeEventListener('touchend', onWindowUpLine)
@@ -665,15 +687,19 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       isShiftDrawing.current = false
       initialAngle.current = null
       snapLock.current = null
+      // mouseup 시 커서를 실제 그려진 끝점(constrainedPos)으로 이동 + 5px 미니 freeze 설정
+      // ※ currentStrokePoints 클리어 전에 lastPt를 읽어야 함
+      const pts = currentStrokePoints.current
+      const lastPt = pts.length > 0 ? pts[pts.length - 1] : null
+      const upRawPos = canvasRef.current ? getPos(upEvent, canvasRef.current) : null
       currentStrokePoints.current = []
       document.body.classList.remove('is-drawing')
       // 그리기 종료 후 자 커서 상태 초기화
       setIsInsideRuler(false)
-      // mouseup 시 커서를 실제 그려진 끝점(constrainedPos)으로 이동
-      // → Shift 직선 드로잉 후 끝점에 커서가 위치, 마우스 움직이면 즉시 rawPos 추적
-      if (canvasRef.current && currentStrokePoints.current.length > 0) {
-        const lastPt = currentStrokePoints.current[currentStrokePoints.current.length - 1]
+      if (lastPt) {
         updateFakeCursor(lastPt, false)
+        linePinnedPos.current = lastPt      // 5px freeze: 끝점에 고정
+        penMouseUpRawPos.current = upRawPos // 5px freeze: 기준 위치
       }
       window.removeEventListener('mousemove', onWindowMove)
       window.removeEventListener('mouseup', onWindowUp)

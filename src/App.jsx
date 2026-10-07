@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.36_20261007_184500_mouseup후커서끝점에위치'
+const VERSION = 'v0.2.37_20261007_185800_5px미니freeze끝점튐방지'
 
 export default function App() {
   const canvasRef = useRef(null)
