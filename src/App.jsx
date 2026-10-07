@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.53_20261007_224000_펜스냅포인트가짜커서달라붙기'
+const VERSION = 'v0.2.54_20261007_225800_Ctrl놓으면가짜커서즉시숨김'
 
 export default function App() {
   const canvasRef = useRef(null)

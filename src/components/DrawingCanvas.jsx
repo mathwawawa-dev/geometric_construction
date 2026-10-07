@@ -114,7 +114,18 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const [ctrlActive, setCtrlActive] = useState(false)
   useEffect(() => {
     const down = (e) => { if (e.key === 'Control') setCtrlActive(true) }
-    const up   = (e) => { if (e.key === 'Control') setCtrlActive(false) }
+    const up   = (e) => {
+      if (e.key === 'Control') {
+        setCtrlActive(false)
+        // Ctrl 놓는 즉시 스냅 가짜 커서 숨김
+        // (숨기지 않으면 fake cursor가 남아있고 클릭 위치와 불일치)
+        if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
+        if (snapCursorActiveRef.current) {
+          snapCursorActiveRef.current = false
+          setSnapCursorActive(false)
+        }
+      }
+    }
     window.addEventListener('keydown', down)
     window.addEventListener('keyup',   up)
     return () => {
