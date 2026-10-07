@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.29_20261007_125300_펜freeze완전제거스냅복원'
+const VERSION = 'v0.2.30_20261007_130600_도형추가후커서블로킹제거'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -119,10 +119,14 @@ export default function App() {
 
   const handleAddShape = useCallback((shape) => {
     addShape(shape)
-    if (canvasRef.current) {
-      const updated = [...stateRef.current.shapes, shape]
-      renderShapes(canvasRef.current.getContext('2d'), updated)
-    }
+    // renderShapes를 다음 프레임으로 지연: mouseup 직후 mousemove 이벤트가
+    // renderShapes 연산에 의해 블로킹되지 않도록 하여 커서 멈춤 현상 방지
+    requestAnimationFrame(() => {
+      if (canvasRef.current) {
+        const updated = [...stateRef.current.shapes]
+        renderShapes(canvasRef.current.getContext('2d'), updated)
+      }
+    })
     setTimeout(() => saveSnapshot(), 0)
   }, [addShape, saveSnapshot, canvasRef])
 
