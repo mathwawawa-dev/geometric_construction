@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.57_20261007_235200_snap커서24px동일크기'
+const VERSION = 'v0.2.58_20261008_000000_Shift펜가짜커서투영점표시'
 
 export default function App() {
   const canvasRef = useRef(null)
