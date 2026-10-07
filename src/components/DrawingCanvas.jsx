@@ -362,7 +362,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       // 가짜 커서 위치 업데이트 (DOM 직접 조작 — re-render 없이 이동)
       if (fakeCursorPenRef.current) {
         if (foundSnapPos) {
-          fakeCursorPenRef.current.style.transform = `translate(${foundSnapPos.x - 3}px, ${foundSnapPos.y - 29}px)`
+          fakeCursorPenRef.current.style.transform = `translate(${foundSnapPos.x - 2}px, ${foundSnapPos.y - 22}px)`
           fakeCursorPenRef.current.style.display = 'block'
         } else {
           fakeCursorPenRef.current.style.display = 'none'
@@ -764,7 +764,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         ref={fakeCursorPenRef}
         style={{ display: 'none', position: 'absolute', top: 0, left: 0, pointerEvents: 'none', zIndex: 50 }}
       >
-        <svg width="32" height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" fill="white" stroke="#1e40af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           <line x1="18" y1="6" x2="6" y2="18" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"/>
         </svg>

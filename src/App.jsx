@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.56_20261007_234800_snap가짜커서크기32px'
+const VERSION = 'v0.2.57_20261007_235200_snap커서24px동일크기'
 
 export default function App() {
   const canvasRef = useRef(null)
