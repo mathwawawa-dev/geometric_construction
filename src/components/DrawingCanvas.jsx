@@ -105,6 +105,11 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const startPoint = useRef({ x: 0, y: 0 })
   const initialAngle = useRef(null)
 
+  // 펜 스냅 가짜 커서 (snap point에 달라붙는 연필 div)
+  const fakeCursorPenRef = useRef(null)     // 가짜 커서 div ref
+  const [snapCursorActive, setSnapCursorActive] = useState(false)  // 실제 커서 숨기기용
+  const snapCursorActiveRef = useRef(false) // re-render 최소화용 ref
+
   // Ctrl 키 상태 → 펜 커서 SVG 교체용 (스냅 로직은 e.ctrlKey 직접 사용)
   const [ctrlActive, setCtrlActive] = useState(false)
   useEffect(() => {
@@ -328,32 +333,32 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     } else if (!isDrawing.current && activeTool === 'pen') {
       // 펜 idle 상태에서 스냅 활성 시 → 스냅 포인트 인디케이터 표시 (v0.2.06 재현)
       const isSnapActive = snapEnabled || e.ctrlKey
-      const draftCanvas = draftCanvasRef.current
-      if (draftCanvas) {
-        const ctx = draftCanvas.getContext('2d')
-        ctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height)
-        if (isSnapActive) {
-          const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
-          let snapPos = null
-          if (!rLock) {
-            const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
-            if (pointRes.snappedPoint) snapPos = pointRes.pos
-          } else {
-            snapPos = rulerSnapped
-          }
-          if (snapPos) {
-            // 스냅 포인트에 빨간 원 인디케이터
-            ctx.save()
-            ctx.strokeStyle = '#ef4444'
-            ctx.fillStyle = 'rgba(239,68,68,0.18)'
-            ctx.lineWidth = 2
-            ctx.beginPath()
-            ctx.arc(snapPos.x, snapPos.y, 7, 0, Math.PI * 2)
-            ctx.fill()
-            ctx.stroke()
-            ctx.restore()
-          }
+      // 스냅 포인트 계산
+      let foundSnapPos = null
+      if (isSnapActive) {
+        const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
+        if (!rLock) {
+          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
+          if (pointRes.snappedPoint) foundSnapPos = pointRes.pos
+        } else {
+          foundSnapPos = rulerSnapped
         }
+      }
+      // 가짜 커서 위치 업데이트 (DOM 직접 조작으로 re-render 없이 이동)
+      // 핫스팟 보정: SVG 연필 끝점이 (2,22)이므로 div 위치를 그만큼 뒤로
+      if (fakeCursorPenRef.current) {
+        if (foundSnapPos) {
+          fakeCursorPenRef.current.style.transform = `translate(${foundSnapPos.x - 2}px, ${foundSnapPos.y - 22}px)`
+          fakeCursorPenRef.current.style.display = 'block'
+        } else {
+          fakeCursorPenRef.current.style.display = 'none'
+        }
+      }
+      // 실제 커서 on/off: 스냅 활성화 됐을 때만 re-render (2회만 발생)
+      const shouldHide = !!foundSnapPos
+      if (shouldHide !== snapCursorActiveRef.current) {
+        snapCursorActiveRef.current = shouldHide
+        setSnapCursorActive(shouldHide)
       }
     }
   }, [activeTool, ruler, stampMode, renderCurrentStroke, canvasRef, snapEnabled, setIsInsideRuler, lineStart, strokeColor, strokeWidth])
@@ -593,6 +598,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
     document.body.classList.add('is-drawing')
 
+    // 드로잉 시작 시 스냅 가짜 커서 숨김
+    if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
+    if (snapCursorActiveRef.current) { snapCursorActiveRef.current = false; setSnapCursorActive(false) }
+
     let finalPos = rawPos
     let lock = null
     let isPointSnapped = false
@@ -704,6 +713,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const getCursorStyle = () => {
     if (activeTool === 'pen') {
       if (isInsideRuler) return 'grab'
+      if (snapCursorActive) return 'none'   // 스냅 가짜 커서 표시 중 → 실제 커서 숨김
       return (snapEnabled || ctrlActive) ? penSnapCursor : penSvgCursor
     }
     if (activeTool === 'line') {
@@ -729,6 +739,17 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     >
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
       <canvas ref={draftCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+
+      {/* 펜 스냅 가짜 커서: Ctrl/M 활성 시 snap 포인트에 달라붙는 연필 SVG */}
+      <div
+        ref={fakeCursorPenRef}
+        style={{ display: 'none', position: 'absolute', top: 0, left: 0, pointerEvents: 'none', zIndex: 50 }}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" fill="white" stroke="#1e40af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <line x1="18" y1="6" x2="6" y2="18" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      </div>
 
       {/* 텍스트 입력 에디터 */}
       {textEditor && (

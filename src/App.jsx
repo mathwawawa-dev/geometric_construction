@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.52_20261007_223400_펜스냅포인트빨간원인디케이터'
+const VERSION = 'v0.2.53_20261007_224000_펜스냅포인트가짜커서달라붙기'
 
 export default function App() {
   const canvasRef = useRef(null)
