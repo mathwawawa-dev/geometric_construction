@@ -297,16 +297,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           isPointSnapped = pointRes.snappedPoint
         }
       }
-      // 펜 드래그 완성 후: 마우스가 mouseup 위치에서 30px 이상 움직이기 전까지 끝점 고정
-      if (linePinnedPos.current && penMouseUpRawPos.current && !isDrawing.current) {
-        const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
-        if (dMoved < 30) {
-          updateFakeCursor(linePinnedPos.current, false)
-          return
-        }
-        linePinnedPos.current = null
-        penMouseUpRawPos.current = null
-      }
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     } else if (activeTool === 'line') {
       let finalPos = rawPos
@@ -678,23 +668,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
       isDrawing.current = false
-      const wasShiftDrawing = isShiftDrawing.current
       isShiftDrawing.current = false
-      // Shift 직선 모드에서만 커서 freeze (일반 드래그는 mouseup 즉시 자유 이동)
-      if (wasShiftDrawing && currentStrokePoints.current.length > 0) {
-        const lastPt = currentStrokePoints.current[currentStrokePoints.current.length - 1]
-        const mainCanvas = canvasRef.current
-        if (mainCanvas && upEvent) {
-          const upRawPos = getPos(upEvent, mainCanvas)
-          penMouseUpRawPos.current = upRawPos
-        }
-        linePinnedPos.current = lastPt
-        updateFakeCursor(lastPt, false)
-      } else {
-        // 일반 드래그: pin 해제 → 커서 자유 이동
-        linePinnedPos.current = null
-        penMouseUpRawPos.current = null
-      }
       initialAngle.current = null
       snapLock.current = null
       currentStrokePoints.current = []

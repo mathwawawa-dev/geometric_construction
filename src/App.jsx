@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.28_20261007_124900_자유곡선끝점스냅제외'
+const VERSION = 'v0.2.29_20261007_125300_펜freeze완전제거스냅복원'
 
 export default function App() {
   const canvasRef = useRef(null)
