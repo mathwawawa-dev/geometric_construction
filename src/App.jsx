@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.55_20261007_233000_snap_latch_Ctrl놓아도유지'
+const VERSION = 'v0.2.56_20261007_234800_snap가짜커서크기32px'
 
 export default function App() {
   const canvasRef = useRef(null)
