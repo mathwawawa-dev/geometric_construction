@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.39_20261007_190900_freeze중드로잉시끝점에서시작'
+const VERSION = 'v0.2.40_20261007_191400_선분freeze중시작점일치'
 
 export default function App() {
   const canvasRef = useRef(null)

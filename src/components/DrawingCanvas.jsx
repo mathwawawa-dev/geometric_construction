@@ -518,6 +518,13 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       } else {
         // 첫 번째 클릭 시 시작
+        // freeze 중 mousedown: 커서 끝점에서 새 선분 시작 (rawPos 무시)
+        if (linePinnedPos.current && penMouseUpRawPos.current) {
+          const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
+          if (dMoved < 5) {
+            finalPos = { x: linePinnedPos.current.x, y: linePinnedPos.current.y }
+          }
+        }
         linePinnedPos.current = null      // 새 선분 시작 → 핀 해제
         penMouseUpRawPos.current = null   // mouseup 위치 초기화
         setLineStart({ x: finalPos.x, y: finalPos.y })
