@@ -110,6 +110,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const [snapCursorActive, setSnapCursorActive] = useState(false)  // 실제 커서 숨기기용
   const snapCursorActiveRef = useRef(false) // re-render 최소화용 ref
   const latchedSnapPosRef = useRef(null)    // Ctrl 놓은 뒤에도 snap 유지 (latch)
+  const fakeCursorHideTimer = useRef(null)  // 가짜 커서 지연 숨김 타이머
 
   // Ctrl 키 상태 → 펜 커서 SVG 교체용 (스냅 로직은 e.ctrlKey 직접 사용)
   const [ctrlActive, setCtrlActive] = useState(false)
@@ -627,7 +628,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
     document.body.classList.add('is-drawing')
 
-    // 드로잉 시작 시 스냅 가짜 커서 숨김
+    // 드로잉 시작 시 지연 타이머 취소 + 가짜 커서 즉시 숨김
+    if (fakeCursorHideTimer.current) { clearTimeout(fakeCursorHideTimer.current); fakeCursorHideTimer.current = null }
     if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
     if (snapCursorActiveRef.current) { snapCursorActiveRef.current = false; setSnapCursorActive(false) }
 
@@ -697,9 +699,13 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       currentStrokePoints.current = []
       document.body.classList.remove('is-drawing')
       setIsInsideRuler(false)
-      // Shift 드로잉 종료 시 가짜 커서 숨김
-      if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
-      if (snapCursorActiveRef.current) { snapCursorActiveRef.current = false; setSnapCursorActive(false) }
+      // Shift 드로잉 종료 후 200ms 지연 → 실제 커서 위치로 자연스럽게 전환
+      if (fakeCursorHideTimer.current) clearTimeout(fakeCursorHideTimer.current)
+      fakeCursorHideTimer.current = setTimeout(() => {
+        if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
+        if (snapCursorActiveRef.current) { snapCursorActiveRef.current = false; setSnapCursorActive(false) }
+        fakeCursorHideTimer.current = null
+      }, 200)
 
       window.removeEventListener('mousemove', onWindowMove)
       window.removeEventListener('mouseup', onWindowUp)
