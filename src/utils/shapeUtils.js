@@ -63,7 +63,7 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
         bestDist = 0
         bestPoint = { x: s.x2, y: s.y2 }
       }
-    } else if (s.points && s.points.length > 1) {
+    } else if (s.type !== 'stroke' && s.points && s.points.length > 1) {
       const pointR = Math.max((s.width || 3) * 0.8, 4)
       const endpointRange = pointR + snapThreshold
       const pStart = s.points[0]

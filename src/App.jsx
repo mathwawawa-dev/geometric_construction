@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.27_20261007_122400_자유곡선스냅제외성능개선'
+const VERSION = 'v0.2.28_20261007_124900_자유곡선끝점스냅제외'
 
 export default function App() {
   const canvasRef = useRef(null)
