@@ -325,6 +325,36 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           ctx.restore()
         }
       }
+    } else if (!isDrawing.current && activeTool === 'pen') {
+      // 펜 idle 상태에서 스냅 활성 시 → 스냅 포인트 인디케이터 표시 (v0.2.06 재현)
+      const isSnapActive = snapEnabled || e.ctrlKey
+      const draftCanvas = draftCanvasRef.current
+      if (draftCanvas) {
+        const ctx = draftCanvas.getContext('2d')
+        ctx.clearRect(0, 0, draftCanvas.width, draftCanvas.height)
+        if (isSnapActive) {
+          const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
+          let snapPos = null
+          if (!rLock) {
+            const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
+            if (pointRes.snappedPoint) snapPos = pointRes.pos
+          } else {
+            snapPos = rulerSnapped
+          }
+          if (snapPos) {
+            // 스냅 포인트에 빨간 원 인디케이터
+            ctx.save()
+            ctx.strokeStyle = '#ef4444'
+            ctx.fillStyle = 'rgba(239,68,68,0.18)'
+            ctx.lineWidth = 2
+            ctx.beginPath()
+            ctx.arc(snapPos.x, snapPos.y, 7, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.stroke()
+            ctx.restore()
+          }
+        }
+      }
     }
   }, [activeTool, ruler, stampMode, renderCurrentStroke, canvasRef, snapEnabled, setIsInsideRuler, lineStart, strokeColor, strokeWidth])
 

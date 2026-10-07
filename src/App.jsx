@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.51_20261007_223000_스냅활성연필빨간선커서'
+const VERSION = 'v0.2.52_20261007_223400_펜스냅포인트빨간원인디케이터'
 
 export default function App() {
   const canvasRef = useRef(null)
