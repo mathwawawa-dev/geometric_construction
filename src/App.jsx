@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.21_20261007_114600_TDZ오류수정'
+const VERSION = 'v0.2.22_20261007_115700_선분생성좌측정렬'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -161,15 +161,18 @@ export default function App() {
     const cx = 1500 - pan.x / zoom
     const cy = 1000 - pan.y / zoom
 
+    // 좌측 끝점을 화면 중앙에서 200px 왼쪽으로 고정 → 여러 선분의 왼쪽이 정렬됨
+    const startX = cx - 200
+
     const newShape = {
       id: 'l_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
       type: 'segment',
       color: stateRef.current.strokeColor,
       width: stateRef.current.strokeWidth,
       alpha: 1,
-      x1: cx - pixelLength / 2,
+      x1: startX,
       y1: cy,
-      x2: cx + pixelLength / 2,
+      x2: startX + pixelLength,
       y2: cy,
     }
 
