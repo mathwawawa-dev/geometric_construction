@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.35_20261007_184100_mouseup시커서rawPos즉시이동'
+const VERSION = 'v0.2.36_20261007_184500_mouseup후커서끝점에위치'
 
 export default function App() {
   const canvasRef = useRef(null)

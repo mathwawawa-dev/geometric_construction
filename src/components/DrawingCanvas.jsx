@@ -489,8 +489,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (draftCanvas) {
           draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
         }
-        // 두 번째 클릭 완성: 커서를 실제 클릭 위치(rawPos)로 즉시 이동 (Shift 스냅 후 튀는 현상 방지)
-        updateFakeCursor(rawPos, false)
+        // 두 번째 클릭 완성: 커서를 실제 그려진 끝점(constrainedPos)으로 이동
+        // 마우스 움직이면 즉시 rawPos 추적 (freeze 없음)
+        updateFakeCursor(finalPos, false)
       } else {
         // 첫 번째 클릭 시 시작
         linePinnedPos.current = null      // 새 선분 시작 → 핀 해제
@@ -550,8 +551,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             if (draftCanvas) {
               draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
             }
-            // mouseup 시 커서를 실제 마우스 위치로 즉시 이동 (Shift 각도 스냅 후 튀는 현상 방지)
-            updateFakeCursor(upPos, false)
+            // mouseup 시 커서를 실제 그려진 끝점(constrainedPos)으로 이동
+            // 마우스 움직이면 즉시 rawPos 추적 (freeze 없음)
+            updateFakeCursor(finalUpPos, false)
           }
           window.removeEventListener('mouseup', onWindowUpLine)
           window.removeEventListener('touchend', onWindowUpLine)
@@ -667,11 +669,11 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       document.body.classList.remove('is-drawing')
       // 그리기 종료 후 자 커서 상태 초기화
       setIsInsideRuler(false)
-      // mouseup 시 커서를 실제 마우스 위치로 즉시 이동
-      // (Shift 제약 중 constrainedPos에 있던 커서가 첫 mousemove에 "튀는" 현상 방지)
-      if (canvasRef.current) {
-        const upRawPos = getPos(upEvent, canvasRef.current)
-        updateFakeCursor(upRawPos, false)
+      // mouseup 시 커서를 실제 그려진 끝점(constrainedPos)으로 이동
+      // → Shift 직선 드로잉 후 끝점에 커서가 위치, 마우스 움직이면 즉시 rawPos 추적
+      if (canvasRef.current && currentStrokePoints.current.length > 0) {
+        const lastPt = currentStrokePoints.current[currentStrokePoints.current.length - 1]
+        updateFakeCursor(lastPt, false)
       }
       window.removeEventListener('mousemove', onWindowMove)
       window.removeEventListener('mouseup', onWindowUp)
