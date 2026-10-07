@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.60_20261008_000600_Shift펜가짜커서제거'
+const VERSION = 'v0.2.61_20261008_001300_스냅클릭커서점프및미세획방지'
 
 export default function App() {
   const canvasRef = useRef(null)

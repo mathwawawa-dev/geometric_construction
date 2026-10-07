@@ -111,6 +111,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const snapCursorActiveRef = useRef(false) // re-render 최소화용 ref
   const latchedSnapPosRef = useRef(null)    // Ctrl 놓은 뒤에도 snap 유지 (latch)
   const fakeCursorHideTimer = useRef(null)  // 가짜 커서 지연 숨김 타이머
+  const snapStartPosRef = useRef(null)      // 스냅 클릭 시작점 (8px 이내 이동은 그리기 보류)
 
   // Ctrl 키 상태 → 펜 커서 SVG 교체용 (스냅 로직은 e.ctrlKey 직접 사용)
   const [ctrlActive, setCtrlActive] = useState(false)
@@ -239,6 +240,17 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       let finalPos = rawPos
       let lock = null
 
+      // 스냅 클릭 직후: 실제 마우스가 스냅 시작점 8px 이내이면 그리기 보류
+      // (커서 점프 방지 + 원치 않는 미세 획 방지)
+      if (snapStartPosRef.current) {
+        const d = Math.hypot(rawPos.x - snapStartPosRef.current.x, rawPos.y - snapStartPosRef.current.y)
+        if (d < 8) return  // 아직 너무 가까움 — 가짜 커서 유지, 그리기 안 함
+        // 충분히 멀어짐 → snap start 모드 해제
+        snapStartPosRef.current = null
+        if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
+        if (snapCursorActiveRef.current) { snapCursorActiveRef.current = false; setSnapCursorActive(false) }
+      }
+
       const isSnapActive = snapEnabled || e.ctrlKey
       if (isSnapActive) {
         const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, snapLock.current)
@@ -251,6 +263,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }
 
       if (isPointInsideRuler(finalPos, ruler)) return
+
 
       // Shift: 직선 드로잉 (각도 고정)
       const isShift = e.shiftKey || isShiftDrawing.current
@@ -613,10 +626,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
     document.body.classList.add('is-drawing')
 
-    // 드로잉 시작 시 지연 타이머 취소 + 가짜 커서 즉시 숨김
+    // 타이머 취소 (pending hide timer 있으면 제거)
     if (fakeCursorHideTimer.current) { clearTimeout(fakeCursorHideTimer.current); fakeCursorHideTimer.current = null }
-    if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
-    if (snapCursorActiveRef.current) { snapCursorActiveRef.current = false; setSnapCursorActive(false) }
 
     let finalPos = rawPos
     let lock = null
@@ -637,6 +648,23 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         isPointSnapped = pointRes.snappedPoint
       }
     }
+
+    // 스냅으로 위치가 보정된 경우: 가짜 커서를 스냅 위치에 유지 (커서 점프 방지)
+    // handleMove에서 8px 이상 이동하면 자동 해제됨
+    if (finalPos.x !== rawPos.x || finalPos.y !== rawPos.y) {
+      snapStartPosRef.current = { x: finalPos.x, y: finalPos.y }
+      if (fakeCursorPenRef.current) {
+        fakeCursorPenRef.current.style.transform = `translate(${finalPos.x - 2}px, ${finalPos.y - 22}px)`
+        fakeCursorPenRef.current.style.display = 'block'
+      }
+      if (!snapCursorActiveRef.current) { snapCursorActiveRef.current = true; setSnapCursorActive(true) }
+    } else {
+      // 스냅 없음: 가짜 커서 즉시 숨김
+      snapStartPosRef.current = null
+      if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
+      if (snapCursorActiveRef.current) { snapCursorActiveRef.current = false; setSnapCursorActive(false) }
+    }
+
 
     if (isPointInsideRuler(finalPos, ruler)) {
       isDrawing.current = false
@@ -684,6 +712,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       currentStrokePoints.current = []
       document.body.classList.remove('is-drawing')
       setIsInsideRuler(false)
+      // 스냅 시작 상태 정리
+      snapStartPosRef.current = null
+      if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
+      if (snapCursorActiveRef.current) { snapCursorActiveRef.current = false; setSnapCursorActive(false) }
 
       window.removeEventListener('mousemove', onWindowMove)
       window.removeEventListener('mouseup', onWindowUp)
