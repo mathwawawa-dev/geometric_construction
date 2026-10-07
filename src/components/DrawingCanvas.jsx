@@ -104,18 +104,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const isShiftDrawing = useRef(false)
   const startPoint = useRef({ x: 0, y: 0 })
   const initialAngle = useRef(null)
-  const ctrlHeld = useRef(false)  // Ctrl 누른 동안 임시 스냅 ON
-  // Ctrl 키 상태 추적
-  useEffect(() => {
-    const onKeyDown = (e) => { if (e.key === 'Control') ctrlHeld.current = true }
-    const onKeyUp = (e) => { if (e.key === 'Control') ctrlHeld.current = false }
-    window.addEventListener('keydown', onKeyDown)
-    window.addEventListener('keyup', onKeyUp)
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-      window.removeEventListener('keyup', onKeyUp)
-    }
-  }, [])
 
   // handleMove를 항상 최신 참조로 유지하는 ref
   // → 펜 도구용 persistent window 리스너에서 stale closure 방지
@@ -227,7 +215,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       let finalPos = rawPos
       let lock = null
 
-      const isSnapActive = snapEnabled || ctrlHeld.current
+      const isSnapActive = snapEnabled || e.ctrlKey
       if (isSnapActive) {
         const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, snapLock.current)
         lock = rLock
@@ -267,7 +255,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       let finalPos = rawPos
       let lock = null
 
-      const isSnapActive = snapEnabled || ctrlHeld.current
+      const isSnapActive = snapEnabled || e.ctrlKey
       if (isSnapActive) {
         const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
         lock = rLock
@@ -401,7 +389,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       const rawPos = getPos(e, canvas)
       
       let finalPos = rawPos
-      if (snapEnabled || ctrlHeld.current) {
+      if (snapEnabled || e.ctrlKey) {
         const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
         finalPos = rulerSnapped
         if (!rLock) {
@@ -463,7 +451,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           const upPos = getPos(me, mainCanvas)
           
           let finalUpPos = upPos
-          if (snapEnabled || ctrlHeld.current) {
+          if (snapEnabled || me.ctrlKey) {
             const { pos: rSnap, lock: rL } = calcRulerSnap(upPos, ruler, null)
             finalUpPos = rSnap
             if (!rL) {
@@ -562,7 +550,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     let lock = null
     let isPointSnapped = false
 
-    if (snapEnabled || ctrlHeld.current) {
+    if (snapEnabled || e.ctrlKey) {
       const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
       lock = rLock
       finalPos = rulerSnapped

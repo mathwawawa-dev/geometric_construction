@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.48_20261007_220900_펜도구항상연필커서'
+const VERSION = 'v0.2.49_20261007_221500_Ctrl스냅eCtrlKey직접읽기'
 
 export default function App() {
   const canvasRef = useRef(null)
