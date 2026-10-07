@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.47_20261007_202000_펜연필커서선분화살표커서'
+const VERSION = 'v0.2.48_20261007_220900_펜도구항상연필커서'
 
 export default function App() {
   const canvasRef = useRef(null)

@@ -666,8 +666,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const getCursorStyle = () => {
     if (activeTool === 'pen') {
       if (isInsideRuler) return 'grab'
-      if (isNearShape) return 'pointer'   // 개체 근처 → 손 커서
-      return penSvgCursor                  // 평상시 → 연필
+      return penSvgCursor                  // 항상 연필 (개체 근처도 동일)
     }
     if (activeTool === 'line') {
       if (isInsideRuler) return 'grab'
