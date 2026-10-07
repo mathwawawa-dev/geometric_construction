@@ -660,11 +660,19 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     return () => ro.disconnect()
   }, [canvasRef])
 
+  // 펜 도구 연필 SVG 커서 (핫스팟: 연필 끝점)
+  const penSvgCursor = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z' fill='white' stroke='%231e40af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 2 22, crosshair`
+
   const getCursorStyle = () => {
-    if (activeTool === 'pen' || activeTool === 'line') {
+    if (activeTool === 'pen') {
       if (isInsideRuler) return 'grab'
-      if (isNearShape) return 'pointer'   // 사진1: 개체 근처 → 손 커서
-      return 'default'                     // 사진2: 평상시 → 화살표
+      if (isNearShape) return 'pointer'   // 개체 근처 → 손 커서
+      return penSvgCursor                  // 평상시 → 연필
+    }
+    if (activeTool === 'line') {
+      if (isInsideRuler) return 'grab'
+      if (isNearShape) return 'pointer'   // 개체 근처 → 손 커서
+      return 'default'                     // 평상시 → 화살표
     }
     if (activeTool === 'text') return 'text'
     return 'default'

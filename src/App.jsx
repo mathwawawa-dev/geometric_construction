@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.46_20261007_200500_개체근접손커서지오지브라스타일'
+const VERSION = 'v0.2.47_20261007_202000_펜연필커서선분화살표커서'
 
 export default function App() {
   const canvasRef = useRef(null)
