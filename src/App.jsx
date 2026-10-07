@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.20_20261007_114200_특정길이선분생성'
+const VERSION = 'v0.2.21_20261007_114600_TDZ오류수정'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -126,6 +126,23 @@ export default function App() {
     setTimeout(() => saveSnapshot(), 0)
   }, [addShape, saveSnapshot, canvasRef])
 
+
+
+  const handleUpdateShape = useCallback((id, payload) => {
+    updateShape(id, payload)
+    if (canvasRef.current) {
+      const updated = stateRef.current.shapes.map(s => s.id === id ? { ...s, ...payload } : s)
+      renderShapes(canvasRef.current.getContext('2d'), updated)
+    }
+    setTimeout(() => saveSnapshot(), 0)
+  }, [updateShape, canvasRef, saveSnapshot])
+
+  // 줌/팬 상태
+  const [zoom, setZoom] = useState(1)
+  const [pan, setPan] = useState({ x: 0, y: 0 })
+  const isPanning = useRef(false)
+  const panStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 })
+
   const handleLineRightClick = useCallback(() => {
     const lenStr = prompt("원하는 선분의 길이를 입력하세요 (예: 3.5)", "3.5")
     if (lenStr === null) return
@@ -158,22 +175,6 @@ export default function App() {
 
     handleAddShape(newShape)
   }, [pan, zoom, handleAddShape])
-
-
-  const handleUpdateShape = useCallback((id, payload) => {
-    updateShape(id, payload)
-    if (canvasRef.current) {
-      const updated = stateRef.current.shapes.map(s => s.id === id ? { ...s, ...payload } : s)
-      renderShapes(canvasRef.current.getContext('2d'), updated)
-    }
-    setTimeout(() => saveSnapshot(), 0)
-  }, [updateShape, canvasRef, saveSnapshot])
-
-  // 줌/팬 상태
-  const [zoom, setZoom] = useState(1)
-  const [pan, setPan] = useState({ x: 0, y: 0 })
-  const isPanning = useRef(false)
-  const panStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 })
 
   const clipboardRef = useRef([])
 
