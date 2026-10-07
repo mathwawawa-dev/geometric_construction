@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.34_20261007_183000_선분freeze제거펜네이티브이벤트'
+const VERSION = 'v0.2.35_20261007_184100_mouseup시커서rawPos즉시이동'
 
 export default function App() {
   const canvasRef = useRef(null)

@@ -489,10 +489,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (draftCanvas) {
           draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
         }
-        // Click-Click 완성: 두 번째 클릭의 실제 위치(rawPos) 기준으로 핀 고정
-        penMouseUpRawPos.current = rawPos
-        linePinnedPos.current = finalPos
-        updateFakeCursor(finalPos, false)
+        // 두 번째 클릭 완성: 커서를 실제 클릭 위치(rawPos)로 즉시 이동 (Shift 스냅 후 튀는 현상 방지)
+        updateFakeCursor(rawPos, false)
       } else {
         // 첫 번째 클릭 시 시작
         linePinnedPos.current = null      // 새 선분 시작 → 핀 해제
@@ -552,10 +550,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             if (draftCanvas) {
               draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
             }
-            // mouseup 실제 위치 저장 + 끝점에 핀 고정
-            penMouseUpRawPos.current = upPos
-            linePinnedPos.current = finalUpPos
-            updateFakeCursor(finalUpPos, false)
+            // mouseup 시 커서를 실제 마우스 위치로 즉시 이동 (Shift 각도 스냅 후 튀는 현상 방지)
+            updateFakeCursor(upPos, false)
           }
           window.removeEventListener('mouseup', onWindowUpLine)
           window.removeEventListener('touchend', onWindowUpLine)
@@ -671,6 +667,12 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       document.body.classList.remove('is-drawing')
       // 그리기 종료 후 자 커서 상태 초기화
       setIsInsideRuler(false)
+      // mouseup 시 커서를 실제 마우스 위치로 즉시 이동
+      // (Shift 제약 중 constrainedPos에 있던 커서가 첫 mousemove에 "튀는" 현상 방지)
+      if (canvasRef.current) {
+        const upRawPos = getPos(upEvent, canvasRef.current)
+        updateFakeCursor(upRawPos, false)
+      }
       window.removeEventListener('mousemove', onWindowMove)
       window.removeEventListener('mouseup', onWindowUp)
       window.removeEventListener('touchmove', onWindowMove)
