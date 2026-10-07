@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.40_20261007_191400_선분freeze중시작점일치'
+const VERSION = 'v0.2.41_20261007_192400_지오지브라스타일커서항상rawPos'
 
 export default function App() {
   const canvasRef = useRef(null)
