@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.23_20261007_120400_펜드래그완료커서끊김수정'
+const VERSION = 'v0.2.24_20261007_120700_펜커서끊김freeze임계값확대'
 
 export default function App() {
   const canvasRef = useRef(null)

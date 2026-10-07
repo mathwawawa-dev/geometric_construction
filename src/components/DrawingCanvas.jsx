@@ -293,10 +293,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           isPointSnapped = pointRes.snappedPoint
         }
       }
-      // 펜 Shift 직선 완성 후: 마우스가 mouseup 위치에서 10px 이상 움직이기 전까지 끝점 고정
+      // 펜 드래그 완성 후: 마우스가 mouseup 위치에서 30px 이상 움직이기 전까지 끝점 고정
       if (linePinnedPos.current && penMouseUpRawPos.current && !isDrawing.current) {
         const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
-        if (dMoved < 10) {
+        if (dMoved < 30) {
           updateFakeCursor(linePinnedPos.current, false)
           return
         }
@@ -362,10 +362,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
 
-      // 선분 드래그 완성 후 핀 고정: mouseup 위치에서 10px 이상 움직이기 전까지 끝점에 고정
+      // 선분 드래그 완성 후 핀 고정: mouseup 위치에서 30px 이상 움직이기 전까지 끝점에 고정
       if (linePinnedPos.current && penMouseUpRawPos.current && !lineStart) {
         const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
-        if (dMoved < 10) {
+        if (dMoved < 30) {
           updateFakeCursor(linePinnedPos.current, false)
           return
         }
