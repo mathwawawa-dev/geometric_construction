@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.54_20261007_225800_Ctrl놓으면가짜커서즉시숨김'
+const VERSION = 'v0.2.55_20261007_233000_snap_latch_Ctrl놓아도유지'
 
 export default function App() {
   const canvasRef = useRef(null)

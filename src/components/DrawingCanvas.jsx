@@ -109,23 +109,13 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const fakeCursorPenRef = useRef(null)     // 가짜 커서 div ref
   const [snapCursorActive, setSnapCursorActive] = useState(false)  // 실제 커서 숨기기용
   const snapCursorActiveRef = useRef(false) // re-render 최소화용 ref
+  const latchedSnapPosRef = useRef(null)    // Ctrl 놓은 뒤에도 snap 유지 (latch)
 
   // Ctrl 키 상태 → 펜 커서 SVG 교체용 (스냅 로직은 e.ctrlKey 직접 사용)
   const [ctrlActive, setCtrlActive] = useState(false)
   useEffect(() => {
     const down = (e) => { if (e.key === 'Control') setCtrlActive(true) }
-    const up   = (e) => {
-      if (e.key === 'Control') {
-        setCtrlActive(false)
-        // Ctrl 놓는 즉시 스냅 가짜 커서 숨김
-        // (숨기지 않으면 fake cursor가 남아있고 클릭 위치와 불일치)
-        if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
-        if (snapCursorActiveRef.current) {
-          snapCursorActiveRef.current = false
-          setSnapCursorActive(false)
-        }
-      }
-    }
+    const up   = (e) => { if (e.key === 'Control') setCtrlActive(false) }
     window.addEventListener('keydown', down)
     window.addEventListener('keyup',   up)
     return () => {
@@ -344,9 +334,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     } else if (!isDrawing.current && activeTool === 'pen') {
       // 펜 idle 상태에서 스냅 활성 시 → 스냅 포인트 인디케이터 표시 (v0.2.06 재현)
       const isSnapActive = snapEnabled || e.ctrlKey
-      // 스냅 포인트 계산
       let foundSnapPos = null
+
       if (isSnapActive) {
+        // Ctrl/snap 활성: 새 snap 포인트 계산
         const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
         if (!rLock) {
           const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
@@ -354,9 +345,21 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         } else {
           foundSnapPos = rulerSnapped
         }
+        // latch 갱신 (snap 발견 시 저장, 없으면 해제)
+        latchedSnapPosRef.current = foundSnapPos || null
+      } else if (latchedSnapPosRef.current) {
+        // Ctrl/snap 비활성이지만 latch된 위치 있음
+        // → 마우스가 20px 이내이면 latch 유지 (사용자가 놓은 snap 위치 고정)
+        const latched = latchedSnapPosRef.current
+        const d = Math.hypot(rawPos.x - latched.x, rawPos.y - latched.y)
+        if (d <= 20) {
+          foundSnapPos = latched  // latch 유지
+        } else {
+          latchedSnapPosRef.current = null  // 멀어지면 자동 해제
+        }
       }
-      // 가짜 커서 위치 업데이트 (DOM 직접 조작으로 re-render 없이 이동)
-      // 핫스팟 보정: SVG 연필 끝점이 (2,22)이므로 div 위치를 그만큼 뒤로
+
+      // 가짜 커서 위치 업데이트 (DOM 직접 조작 — re-render 없이 이동)
       if (fakeCursorPenRef.current) {
         if (foundSnapPos) {
           fakeCursorPenRef.current.style.transform = `translate(${foundSnapPos.x - 2}px, ${foundSnapPos.y - 22}px)`
@@ -365,7 +368,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           fakeCursorPenRef.current.style.display = 'none'
         }
       }
-      // 실제 커서 on/off: 스냅 활성화 됐을 때만 re-render (2회만 발생)
+      // 실제 커서 숨김 여부 (re-render은 on/off 전환 시 2회만 발생)
       const shouldHide = !!foundSnapPos
       if (shouldHide !== snapCursorActiveRef.current) {
         snapCursorActiveRef.current = shouldHide
@@ -617,7 +620,12 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     let lock = null
     let isPointSnapped = false
 
-    if (snapEnabled || e.ctrlKey) {
+    // latch된 snap 위치 우선 사용 (Ctrl 놓은 뒤에도 고정된 위치)
+    if (latchedSnapPosRef.current) {
+      finalPos = latchedSnapPosRef.current
+      isPointSnapped = true
+      latchedSnapPosRef.current = null
+    } else if (snapEnabled || e.ctrlKey) {
       const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
       lock = rLock
       finalPos = rulerSnapped
