@@ -18,7 +18,7 @@ const toolDefs = [
 // 넘버스탬프 목록 ①~⑩
 const STAMPS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩']
 
-export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisible, background, setBackground, stampMode, setStampMode }) {
+export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisible, background, setBackground, stampMode, setStampMode, onLineRightClick }) {
   const fileRef = useRef(null)
 
   const handleImageUpload = (e) => {
@@ -38,6 +38,12 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
         <button
           key={m.id}
           onClick={() => { setDrawMode(m.id); setStampMode(null) }}
+          onContextMenu={(e) => {
+            if (m.id === 'line' && onLineRightClick) {
+              e.preventDefault();
+              onLineRightClick();
+            }
+          }}
           title={m.label}
           className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center text-xl transition-all
             ${drawMode === m.id && !stampMode

@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.19_20261005_203900_v0214복구_및_끝점보호'
+const VERSION = 'v0.2.20_20261007_114200_특정길이선분생성'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -125,6 +125,40 @@ export default function App() {
     }
     setTimeout(() => saveSnapshot(), 0)
   }, [addShape, saveSnapshot, canvasRef])
+
+  const handleLineRightClick = useCallback(() => {
+    const lenStr = prompt("원하는 선분의 길이를 입력하세요 (예: 3.5)", "3.5")
+    if (lenStr === null) return
+
+    const len = parseFloat(lenStr)
+    if (isNaN(len) || len <= 0) {
+      alert("올바른 양수를 입력해주세요.")
+      return
+    }
+
+    // 1단위 = 100px 로 가정
+    const PIXELS_PER_UNIT = 100
+    const pixelLength = len * PIXELS_PER_UNIT
+
+    // 현재 뷰포트의 중앙 좌표 계산
+    const cx = 1500 - pan.x / zoom
+    const cy = 1000 - pan.y / zoom
+
+    const newShape = {
+      id: 'l_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      type: 'segment',
+      color: stateRef.current.strokeColor,
+      width: stateRef.current.strokeWidth,
+      alpha: 1,
+      x1: cx - pixelLength / 2,
+      y1: cy,
+      x2: cx + pixelLength / 2,
+      y2: cy,
+    }
+
+    handleAddShape(newShape)
+  }, [pan, zoom, handleAddShape])
+
 
   const handleUpdateShape = useCallback((id, payload) => {
     updateShape(id, payload)
@@ -557,6 +591,7 @@ export default function App() {
         <Sidebar
           drawMode={state.drawMode}
           setDrawMode={setDrawMode}
+          onLineRightClick={handleLineRightClick}
           toggleTool={(tool) => {
             const cx = 1500 - pan.x / zoom;
             const cy = 1000 - pan.y / zoom;
