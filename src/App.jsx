@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.30_20261007_130600_도형추가후커서블로킹제거'
+const VERSION = 'v0.2.31_20261007_163000_교점스냅추가'
 
 export default function App() {
   const canvasRef = useRef(null)

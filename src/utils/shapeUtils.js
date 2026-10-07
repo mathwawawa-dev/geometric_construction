@@ -18,9 +18,138 @@ export function closestPointOnSegment(px, py, x1, y1, x2, y2) {
   return { x: x1 + t * dx, y: y1 + t * dy }
 }
 
+// ─── 교점(Intersection) 스냅 헬퍼 ───────────────────────────────────────────
+
+// 선분 × 선분 교점 (두 선분이 실제 교차하는 경우만)
+function _segSeg(ax1,ay1,ax2,ay2, bx1,by1,bx2,by2) {
+  const dx1=ax2-ax1,dy1=ay2-ay1,dx2=bx2-bx1,dy2=by2-by1
+  const cross=dx1*dy2-dy1*dx2
+  if (Math.abs(cross)<1e-10) return null
+  const t=((bx1-ax1)*dy2-(by1-ay1)*dx2)/cross
+  const u=((bx1-ax1)*dy1-(by1-ay1)*dx1)/cross
+  if (t>=0&&t<=1&&u>=0&&u<=1) return {x:ax1+t*dx1,y:ay1+t*dy1}
+  return null
+}
+
+// 선분 × 원 교점 (선분 위에 있는 점만, 최대 2개)
+function _segCircle(ax1,ay1,ax2,ay2, cx,cy,r) {
+  const dx=ax2-ax1,dy=ay2-ay1,fx=ax1-cx,fy=ay1-cy
+  const a=dx*dx+dy*dy,b=2*(fx*dx+fy*dy),c=fx*fx+fy*fy-r*r
+  const disc=b*b-4*a*c
+  if (disc<0||a<1e-10) return []
+  const sq=Math.sqrt(disc),pts=[]
+  for (const t of [(-b-sq)/(2*a),(-b+sq)/(2*a)])
+    if (t>=0&&t<=1) pts.push({x:ax1+t*dx,y:ay1+t*dy})
+  return pts
+}
+
+// 원 × 원 교점 (최대 2개)
+function _circCirc(cx1,cy1,r1, cx2,cy2,r2) {
+  const d=Math.hypot(cx2-cx1,cy2-cy1)
+  if (d>r1+r2+1e-10||d<Math.abs(r1-r2)-1e-10||d<1e-10) return []
+  const a=(r1*r1-r2*r2+d*d)/(2*d),h2=r1*r1-a*a
+  if (h2<0) return []
+  const h=Math.sqrt(h2)
+  const mx=cx1+a*(cx2-cx1)/d,my=cy1+a*(cy2-cy1)/d
+  const rx=h*(cy2-cy1)/d,ry=h*(cx2-cx1)/d
+  if (h<1e-10) return [{x:mx,y:my}]
+  return [{x:mx+rx,y:my-ry},{x:mx-rx,y:my+ry}]
+}
+
+// 점이 호(arc)의 각도 범위 안에 있는지 확인 (fromAngle/toAngle 없으면 항상 true)
+function _inArcRange(px,py,cx,cy,fromAngle,toAngle,ccw) {
+  if (fromAngle==null||toAngle==null) return true
+  const TWO_PI=Math.PI*2
+  const angle=Math.atan2(py-cy,px-cx)
+  let span,a_rel
+  if (!ccw) {
+    span=((toAngle-fromAngle)%TWO_PI+TWO_PI)%TWO_PI
+    a_rel=((angle-fromAngle)%TWO_PI+TWO_PI)%TWO_PI
+  } else {
+    span=((fromAngle-toAngle)%TWO_PI+TWO_PI)%TWO_PI
+    a_rel=((fromAngle-angle)%TWO_PI+TWO_PI)%TWO_PI
+  }
+  return a_rel<=span+0.05  // 0.05 rad 여유
+}
+
+// 도형에서 커서 p 근처(radius 이내)를 지나는 선분 추출 (성능 필터)
+function _segsNear(shape, px, py, radius) {
+  if (shape.type==='segment') {
+    return distToSegment(px,py,shape.x1,shape.y1,shape.x2,shape.y2)<=radius
+      ? [{x1:shape.x1,y1:shape.y1,x2:shape.x2,y2:shape.y2}] : []
+  }
+  if (shape.points&&shape.points.length>1) {
+    const segs=[]
+    for (let i=0;i<shape.points.length-1;i++) {
+      const p1=shape.points[i],p2=shape.points[i+1]
+      if (distToSegment(px,py,p1.x,p1.y,p2.x,p2.y)<=radius)
+        segs.push({x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y})
+    }
+    return segs
+  }
+  return []
+}
+
+// 도형이 원/호 타입인지 (cx,cy,r 필드 보유)
+function _isCircType(s) {
+  return (s.type==='circle'||s.type==='arc')&&s.cx!=null&&s.r!=null
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+
 // 직선/곡선/원/점의 '정확한 두께 중심(스켈레톤 축선)' 자석 스냅
 export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
   if (!shapes || shapes.length === 0) return null
+
+  // ── 0단계: 교점 스냅 (최우선) ─────────────────────────────────────────────
+  // segment×segment, segment×circle/arc, circle×circle, 자유곡선 포함
+  {
+    const R = snapThreshold
+    let iBest = Infinity, iPoint = null
+    for (let i = 0; i < shapes.length; i++) {
+      for (let j = i + 1; j < shapes.length; j++) {
+        const si = shapes[i], sj = shapes[j]
+        const iC = _isCircType(si), jC = _isCircType(sj)
+        const cands = []
+
+        if (iC && jC) {
+          // 원/호 × 원/호
+          for (const pt of _circCirc(si.cx,si.cy,si.r, sj.cx,sj.cy,sj.r))
+            if (_inArcRange(pt.x,pt.y,si.cx,si.cy,si.fromAngle,si.toAngle,si.ccw) &&
+                _inArcRange(pt.x,pt.y,sj.cx,sj.cy,sj.fromAngle,sj.toAngle,sj.ccw))
+              cands.push(pt)
+        } else if (iC) {
+          // 원/호 × 폴리선(선분·자유곡선·폴리라인호)
+          for (const seg of _segsNear(sj, p.x, p.y, R))
+            for (const pt of _segCircle(seg.x1,seg.y1,seg.x2,seg.y2, si.cx,si.cy,si.r))
+              if (_inArcRange(pt.x,pt.y,si.cx,si.cy,si.fromAngle,si.toAngle,si.ccw))
+                cands.push(pt)
+        } else if (jC) {
+          // 폴리선 × 원/호
+          for (const seg of _segsNear(si, p.x, p.y, R))
+            for (const pt of _segCircle(seg.x1,seg.y1,seg.x2,seg.y2, sj.cx,sj.cy,sj.r))
+              if (_inArcRange(pt.x,pt.y,sj.cx,sj.cy,sj.fromAngle,sj.toAngle,sj.ccw))
+                cands.push(pt)
+        } else {
+          // 폴리선 × 폴리선 (선분·자유곡선·폴리라인호)
+          const segsI = _segsNear(si, p.x, p.y, R)
+          const segsJ = _segsNear(sj, p.x, p.y, R)
+          for (const sI of segsI)
+            for (const sJ of segsJ) {
+              const pt = _segSeg(sI.x1,sI.y1,sI.x2,sI.y2, sJ.x1,sJ.y1,sJ.x2,sJ.y2)
+              if (pt) cands.push(pt)
+            }
+        }
+
+        for (const pt of cands) {
+          const d = Math.hypot(p.x-pt.x, p.y-pt.y)
+          if (d<=R && d<iBest) { iBest=d; iPoint=pt }
+        }
+      }
+    }
+    if (iPoint) return iPoint
+  }
+  // ──────────────────────────────────────────────────────────────────────────
 
   let bestDist = Infinity
   let bestPoint = null
