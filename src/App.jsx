@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.42_20261007_193200_Shift커서선위3px적응형freeze'
+const VERSION = 'v0.2.43_20261007_194000_가짜커서제거시스템커서crosshair'
 
 export default function App() {
   const canvasRef = useRef(null)

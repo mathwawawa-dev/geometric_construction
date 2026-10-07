@@ -97,18 +97,12 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const isDrawing = useRef(false)
   const snapLock = useRef(null)
   const currentStrokePoints = useRef([])
-  const fakeCursorRef = useRef(null)
-  const fakePencilLineRef = useRef(null)
   const lastMousePos = useRef({ x: -9999, y: -9999 })
-  const [isHovering, setIsHovering] = useState(false)
   const [isInsideRuler, setIsInsideRuler] = useState(false)
   const isShiftDrawing = useRef(false)
   const startPoint = useRef({ x: 0, y: 0 })
   const initialAngle = useRef(null)
   const ctrlHeld = useRef(false)  // Ctrl 누른 동안 임시 스냅 ON
-  const linePinnedPos = useRef(null)       // 선분/펜 커서 끝점 고정용
-  const penMouseUpRawPos = useRef(null)    // 펜 Shift: mouseup 실제 위치 (핀 해제 기준)
-
   // Ctrl 키 상태 추적
   useEffect(() => {
     const onKeyDown = (e) => { if (e.key === 'Control') ctrlHeld.current = true }
@@ -171,20 +165,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     }
   }
 
-  const updateFakeCursor = useCallback((pos, snapped) => {
-    lastMousePos.current = pos
-    if (fakeCursorRef.current) {
-      const isStamp = !!stampMode
-      const tx = isStamp ? pos.x - 27 : pos.x - 2
-      const ty = isStamp ? pos.y - 27 : pos.y - 22
-      fakeCursorRef.current.style.transform = `translate(${tx}px, ${ty}px)`
-      fakeCursorRef.current.style.display = 'block'
-    }
-    if (fakePencilLineRef.current) {
-      fakePencilLineRef.current.style.opacity = snapped ? '1' : '0'
-    }
-  }, [stampMode])
-
   // 드래프트 캔버스에 현재 스트로크 단일 경로로 렌더링 (동그라미 겹침 방지)
   const renderCurrentStroke = useCallback(() => {
     const draftCanvas = draftCanvasRef.current
@@ -235,7 +215,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       e.preventDefault()
       let finalPos = rawPos
       let lock = null
-      let isPointSnapped = false
 
       const isSnapActive = snapEnabled || ctrlHeld.current
       if (isSnapActive) {
@@ -245,80 +224,37 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (!lock) {
           const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
           finalPos = pointRes.pos
-          isPointSnapped = pointRes.snappedPoint
         }
       }
 
-      if (isPointInsideRuler(finalPos, ruler)) {
-        updateFakeCursor(finalPos, false)
-        return
-      }
+      if (isPointInsideRuler(finalPos, ruler)) return
 
-      // Shift 키를 누른 상태이거나 Shift로 시작한 직선 드로잉인 경우 (첫 시작 방향 각도 유지)
+      // Shift: 직선 드로잉 (각도 고정)
       const isShift = e.shiftKey || isShiftDrawing.current
       if (isShift && !lock) {
         const p0 = startPoint.current
         const p1 = finalPos
         const d = Math.hypot(p1.x - p0.x, p1.y - p0.y)
-
-        // 6px 이상 움직였을 때 첫 시작 방향(각도) 고정
         if (initialAngle.current === null && d >= 6) {
           initialAngle.current = Math.atan2(p1.y - p0.y, p1.x - p0.x)
         }
-
         if (initialAngle.current !== null) {
           const ang = initialAngle.current
-          const ux = Math.cos(ang)
-          const uy = Math.sin(ang)
+          const ux = Math.cos(ang), uy = Math.sin(ang)
           const proj = (p1.x - p0.x) * ux + (p1.y - p0.y) * uy
-          const straightPos = { x: p0.x + proj * ux, y: p0.y + proj * uy }
-          currentStrokePoints.current = [p0, straightPos]
-          renderCurrentStroke()
-          updateFakeCursor(straightPos, isPointSnapped)
-          return
+          currentStrokePoints.current = [p0, { x: p0.x + proj * ux, y: p0.y + proj * uy }]
         } else {
           currentStrokePoints.current = [p0, p1]
-          renderCurrentStroke()
-          updateFakeCursor(finalPos, isPointSnapped)
-          return
         }
+        renderCurrentStroke()
+        return
       }
 
       currentStrokePoints.current.push({ x: finalPos.x, y: finalPos.y })
       renderCurrentStroke()
-      updateFakeCursor(finalPos, lock !== null || isPointSnapped)
-    } else if (activeTool === 'pen') {
-      // 3px 초소형 freeze: Shift 완료 후 OS jitter 흡수 (적응형 — Shift 활성 시만)
-      if (linePinnedPos.current && penMouseUpRawPos.current) {
-        const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
-        if (dMoved < 3) {
-          updateFakeCursor(linePinnedPos.current, false)
-          return
-        }
-        linePinnedPos.current = null
-        penMouseUpRawPos.current = null
-      }
-
-      let finalPos = rawPos
-      let lock = null
-      let isPointSnapped = false
-
-      const isSnapActive = snapEnabled || ctrlHeld.current
-      if (isSnapActive) {
-        const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
-        lock = rLock
-        finalPos = rulerSnapped
-        if (!lock) {
-          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
-          finalPos = pointRes.pos
-          isPointSnapped = pointRes.snappedPoint
-        }
-      }
-      updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     } else if (activeTool === 'line') {
       let finalPos = rawPos
       let lock = null
-      let isPointSnapped = false
 
       const isSnapActive = snapEnabled || ctrlHeld.current
       if (isSnapActive) {
@@ -328,18 +264,15 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (!lock) {
           const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
           finalPos = pointRes.pos
-          isPointSnapped = pointRes.snappedPoint
         }
       }
 
-      // Shift 누른 상태: 5도 단위 각도 스냅 → 커서도 constrainedPos(선 위)에 위치
+      // Shift: 5도 단위 각도 스냅
       if (lineStart && e.shiftKey) {
         const dx = finalPos.x - lineStart.x
         const dy = finalPos.y - lineStart.y
         const dist = Math.hypot(dx, dy)
-        const rawAngle = Math.atan2(dy, dx)
-        const step = (5 * Math.PI) / 180
-        const snappedAngle = Math.round(rawAngle / step) * step
+        const snappedAngle = Math.round(Math.atan2(dy, dx) / (5 * Math.PI / 180)) * (5 * Math.PI / 180)
         finalPos = {
           x: lineStart.x + dist * Math.cos(snappedAngle),
           y: lineStart.y + dist * Math.sin(snappedAngle),
@@ -372,22 +305,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           ctx.restore()
         }
       }
-
-      // 3px 초소형 freeze: Shift 완료 후 OS jitter(~2px) 흡수
-      // 3px 이상 이동하면 즉시 rawPos 추적 — "붙잡혀 있다" 느낌 없음
-      if (linePinnedPos.current && penMouseUpRawPos.current && !lineStart) {
-        const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
-        if (dMoved < 3) {
-          updateFakeCursor(linePinnedPos.current, false)
-          return
-        }
-        linePinnedPos.current = null
-        penMouseUpRawPos.current = null
-      }
-
-      updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     }
-  }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, snapEnabled, setIsInsideRuler, lineStart, strokeColor, strokeWidth])
+  }, [activeTool, ruler, stampMode, renderCurrentStroke, canvasRef, snapEnabled, setIsInsideRuler, lineStart, strokeColor, strokeWidth])
 
   // handleMove가 재생성될 때마다 ref 동기화
   handleMoveRef.current = handleMove
@@ -508,17 +427,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (draftCanvas) {
           draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
         }
-        // 커서를 끝점으로 이동 + 적응형 3px freeze
-        updateFakeCursor(finalPos, false)
-        const cDeltaClick = Math.hypot(finalPos.x - rawPos.x, finalPos.y - rawPos.y)
-        if (cDeltaClick > 3) {
-          linePinnedPos.current = finalPos
-          penMouseUpRawPos.current = rawPos
-        }
       } else {
         // 첫 번째 클릭 시 시작
-        linePinnedPos.current = null      // 새 선분 시작 → 핀 해제
-        penMouseUpRawPos.current = null   // mouseup 위치 초기화
         setLineStart({ x: finalPos.x, y: finalPos.y })
         isDrawing.current = true
         startPoint.current = { x: finalPos.x, y: finalPos.y }
@@ -573,13 +483,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             const draftCanvas = draftCanvasRef.current
             if (draftCanvas) {
               draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
-            }
-            // 커서를 그려진 끝점으로 이동 + 적응형 3px freeze
-            updateFakeCursor(finalUpPos, false)
-            const cDelta = Math.hypot(finalUpPos.x - upPos.x, finalUpPos.y - upPos.y)
-            if (cDelta > 3) {
-              linePinnedPos.current = finalUpPos
-              penMouseUpRawPos.current = upPos
             }
           }
           window.removeEventListener('mouseup', onWindowUpLine)
@@ -645,9 +548,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }
     }
 
-    linePinnedPos.current = null      // 새 선 긋기 시작하면 핀 해제
-    penMouseUpRawPos.current = null   // mouseup 위치 초기화
-
     if (isPointInsideRuler(finalPos, ruler)) {
       isDrawing.current = false
       document.body.classList.remove('is-drawing')
@@ -660,7 +560,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     initialAngle.current = null
     currentStrokePoints.current = [{ x: finalPos.x, y: finalPos.y }]
     renderCurrentStroke()
-    updateFakeCursor(finalPos, lock !== null || isPointSnapped)
 
     const onWindowMove = (me) => handleMove(me)
     const onWindowUp = (upEvent) => {
@@ -692,25 +591,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       isShiftDrawing.current = false
       initialAngle.current = null
       snapLock.current = null
-      // currentStrokePoints 클리어 전에 lastPt, upRawPos 읽기
-      const pts = currentStrokePoints.current
-      const lastPt = pts.length > 0 ? pts[pts.length - 1] : null
-      const upRawPos = canvasRef.current ? getPos(upEvent, canvasRef.current) : null
       currentStrokePoints.current = []
       document.body.classList.remove('is-drawing')
       setIsInsideRuler(false)
-      if (lastPt) {
-        updateFakeCursor(lastPt, false)
-        // 적응형 3px freeze: Shift로 인해 끝점이 rawPos와 다를 때만 적용
-        // OS jitter(≤2px) 흡수, 의도적 이동 시 즉시 해제 — "붙잡혀 있다" 느낌 없음
-        const constraintDelta = upRawPos
-          ? Math.hypot(lastPt.x - upRawPos.x, lastPt.y - upRawPos.y)
-          : 0
-        if (constraintDelta > 3) {
-          linePinnedPos.current = lastPt
-          penMouseUpRawPos.current = upRawPos
-        }
-      }
       window.removeEventListener('mousemove', onWindowMove)
       window.removeEventListener('mouseup', onWindowUp)
       window.removeEventListener('touchmove', onWindowMove)
@@ -720,7 +603,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     window.addEventListener('mouseup', onWindowUp)
     window.addEventListener('touchmove', onWindowMove, { passive: false })
     window.addEventListener('touchend', onWindowUp)
-  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, updateFakeCursor, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode, renderCurrentStroke, textEditor, commitText, snapEnabled])
+  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode, renderCurrentStroke, textEditor, commitText, snapEnabled])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -752,43 +635,22 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     return () => ro.disconnect()
   }, [canvasRef])
 
-  useEffect(() => {
-    if (activeTool === 'pen' || activeTool === 'line') {
-      setIsHovering(true)
-      if (fakeCursorRef.current && lastMousePos.current.x > -100) {
-        fakeCursorRef.current.style.display = 'block'
-      }
-    }
-  }, [activeTool])
-
-  const isStampMode = activeTool === 'pen' && !!stampMode
+  const getCursorStyle = () => {
+    if (activeTool === 'pen') return isInsideRuler ? 'grab' : 'crosshair'
+    if (activeTool === 'line') return isInsideRuler ? 'grab' : 'crosshair'
+    if (activeTool === 'text') return 'text'
+    return 'default'
+  }
 
   return (
     <div
       className="absolute inset-0 w-full h-full"
-      onMouseEnter={(e) => {
-        setIsHovering(true)
-        const canvas = canvasRef.current
-        if (canvas) {
-          const p = getPos(e, canvas)
-          lastMousePos.current = p
-        }
-        if (fakeCursorRef.current) fakeCursorRef.current.style.display = 'block'
-      }}
-      onMouseLeave={() => {
-        if (!isDrawing.current && !lineStart) {
-          setIsHovering(false)
-          if (fakeCursorRef.current) fakeCursorRef.current.style.display = 'none'
-        }
-      }}
       onMouseMove={handleMove}
       onTouchMove={handleMove}
       onMouseDown={startDraw}
       onTouchStart={startDraw}
       style={{
-        cursor: (activeTool === 'pen' || activeTool === 'line')
-          ? (isInsideRuler ? 'grab' : 'none')
-          : (activeTool === 'text' ? 'text' : 'default'),
+        cursor: getCursorStyle(),
         touchAction: 'none',
       }}
     >
@@ -839,42 +701,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
               boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
             }}
           />
-        </div>
-      )}
-
-      {(activeTool === 'pen' || activeTool === 'line') && isHovering && !isInsideRuler && (
-        <div
-          id="fake-pen-cursor"
-          ref={fakeCursorRef}
-          className="absolute top-0 left-0 pointer-events-none drop-shadow-md"
-          style={{
-            zIndex: 9999,
-            willChange: 'transform',
-            transform: (() => {
-              if (lastMousePos.current.x <= -100) return 'none'
-              if (isStampMode) {
-                // 스탬프: 문자 중앙이 포인터에 오도록 (fontSize 53 → 절반 ~26.5)
-                return `translate(${lastMousePos.current.x - 27}px, ${lastMousePos.current.y - 27}px)`
-              }
-              return `translate(${lastMousePos.current.x - 2}px, ${lastMousePos.current.y - 22}px)`
-            })(),
-            display: lastMousePos.current.x > -100 ? 'block' : 'none',
-          }}
-        >
-          {isStampMode ? (
-            <div style={{ fontSize: 53, lineHeight: 1, userSelect: 'none', opacity: 0.75 }}>
-              {stampMode}
-            </div>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-              fill={highlightMode ? 'rgba(250,204,21,0.6)' : 'white'}
-              stroke={highlightMode ? '#ca8a04' : '#1e40af'}
-              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            >
-              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-              <line ref={fakePencilLineRef} x1="18" y1="6" x2="6" y2="18" stroke="#ef4444" strokeWidth="2" style={{ opacity: 0, transition: 'opacity 0.15s' }} />
-            </svg>
-          )}
         </div>
       )}
     </div>
