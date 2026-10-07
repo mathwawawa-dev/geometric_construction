@@ -647,6 +647,16 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }
     }
 
+    // freeze 중 mousedown: 커서가 끝점에 핀 고정된 상태에서 그리기 시작
+    // → 시각적 커서 위치(linePinnedPos) = 새 선 시작점이 되어야 함
+    if (linePinnedPos.current && penMouseUpRawPos.current) {
+      const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
+      if (dMoved < 5) {
+        // freeze 해제 전 mousedown → 끝점에서 시작 (rawPos 무시)
+        finalPos = { x: linePinnedPos.current.x, y: linePinnedPos.current.y }
+        lock = null
+      }
+    }
     linePinnedPos.current = null      // 새 선 긋기 시작하면 핀 해제
     penMouseUpRawPos.current = null   // mouseup 위치 초기화
 

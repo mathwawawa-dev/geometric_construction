@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.38_20261007_190500_적응형freeze제약있을때만5px'
+const VERSION = 'v0.2.39_20261007_190900_freeze중드로잉시끝점에서시작'
 
 export default function App() {
   const canvasRef = useRef(null)
