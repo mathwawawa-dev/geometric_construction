@@ -240,17 +240,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       let finalPos = rawPos
       let lock = null
 
-      // 스냅 클릭 직후: 실제 마우스가 스냅 시작점 8px 이내이면 그리기 보류
-      // (커서 점프 방지 + 원치 않는 미세 획 방지)
-      if (snapStartPosRef.current) {
-        const d = Math.hypot(rawPos.x - snapStartPosRef.current.x, rawPos.y - snapStartPosRef.current.y)
-        if (d < 8) return  // 아직 너무 가까움 — 가짜 커서 유지, 그리기 안 함
-        // 충분히 멀어짐 → snap start 모드 해제
-        snapStartPosRef.current = null
-        if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
-        if (snapCursorActiveRef.current) { snapCursorActiveRef.current = false; setSnapCursorActive(false) }
-      }
-
       const isSnapActive = snapEnabled || e.ctrlKey
       if (isSnapActive) {
         const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, snapLock.current)
@@ -263,7 +252,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }
 
       if (isPointInsideRuler(finalPos, ruler)) return
-
 
       // Shift: 직선 드로잉 (각도 고정)
       const isShift = e.shiftKey || isShiftDrawing.current
@@ -649,22 +637,17 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }
     }
 
-    // 스냅으로 위치가 보정된 경우: 가짜 커서를 스냅 위치에 유지 (커서 점프 방지)
-    // handleMove에서 8px 이상 이동하면 자동 해제됨
+    // 스냅으로 위치가 보정된 경우: 가짜 커서 div 숨기되 cursor:none 유지
+    // → 드로잉 내내 커서 안 보임(strokePath가 시각 피드백) → 커서 점프 원천 차단
     if (finalPos.x !== rawPos.x || finalPos.y !== rawPos.y) {
-      snapStartPosRef.current = { x: finalPos.x, y: finalPos.y }
-      if (fakeCursorPenRef.current) {
-        fakeCursorPenRef.current.style.transform = `translate(${finalPos.x - 2}px, ${finalPos.y - 22}px)`
-        fakeCursorPenRef.current.style.display = 'block'
-      }
+      if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
       if (!snapCursorActiveRef.current) { snapCursorActiveRef.current = true; setSnapCursorActive(true) }
     } else {
-      // 스냅 없음: 가짜 커서 즉시 숨김
-      snapStartPosRef.current = null
+      // 스냅 없음: 가짜 커서 즉시 숨김, 실제 커서 복귀
       if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
       if (snapCursorActiveRef.current) { snapCursorActiveRef.current = false; setSnapCursorActive(false) }
     }
-
+    snapStartPosRef.current = null  // 8px 가드 미사용 → 항상 null
 
     if (isPointInsideRuler(finalPos, ruler)) {
       isDrawing.current = false

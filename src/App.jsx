@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.61_20261008_001300_스냅클릭커서점프및미세획방지'
+const VERSION = 'v0.2.62_20261008_002000_스냅드로잉중cursor숨김_점프완전차단'
 
 export default function App() {
   const canvasRef = useRef(null)
