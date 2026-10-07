@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.59_20261008_000200_마우스업가짜커서200ms지연숨김'
+const VERSION = 'v0.2.60_20261008_000600_Shift펜가짜커서제거'
 
 export default function App() {
   const canvasRef = useRef(null)

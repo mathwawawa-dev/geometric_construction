@@ -261,32 +261,17 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (initialAngle.current === null && d >= 6) {
           initialAngle.current = Math.atan2(p1.y - p0.y, p1.x - p0.x)
         }
-        let projPoint = p1
         if (initialAngle.current !== null) {
           const ang = initialAngle.current
           const ux = Math.cos(ang), uy = Math.sin(ang)
           const proj = (p1.x - p0.x) * ux + (p1.y - p0.y) * uy
-          projPoint = { x: p0.x + proj * ux, y: p0.y + proj * uy }
-          currentStrokePoints.current = [p0, projPoint]
+          currentStrokePoints.current = [p0, { x: p0.x + proj * ux, y: p0.y + proj * uy }]
         } else {
           currentStrokePoints.current = [p0, p1]
-        }
-        // 가짜 커서를 투영점(projected point)에 표시 — 실제 마우스와 선이 일치해 보임
-        if (fakeCursorPenRef.current) {
-          fakeCursorPenRef.current.style.transform = `translate(${projPoint.x - 2}px, ${projPoint.y - 22}px)`
-          fakeCursorPenRef.current.style.display = 'block'
-        }
-        if (!snapCursorActiveRef.current) {
-          snapCursorActiveRef.current = true
-          setSnapCursorActive(true)
         }
         renderCurrentStroke()
         return
       }
-
-      // Shift 해제 시 가짜 커서 숨김
-      if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
-      if (snapCursorActiveRef.current) { snapCursorActiveRef.current = false; setSnapCursorActive(false) }
 
       currentStrokePoints.current.push({ x: finalPos.x, y: finalPos.y })
       renderCurrentStroke()
@@ -699,13 +684,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       currentStrokePoints.current = []
       document.body.classList.remove('is-drawing')
       setIsInsideRuler(false)
-      // Shift 드로잉 종료 후 200ms 지연 → 실제 커서 위치로 자연스럽게 전환
-      if (fakeCursorHideTimer.current) clearTimeout(fakeCursorHideTimer.current)
-      fakeCursorHideTimer.current = setTimeout(() => {
-        if (fakeCursorPenRef.current) fakeCursorPenRef.current.style.display = 'none'
-        if (snapCursorActiveRef.current) { snapCursorActiveRef.current = false; setSnapCursorActive(false) }
-        fakeCursorHideTimer.current = null
-      }, 200)
 
       window.removeEventListener('mousemove', onWindowMove)
       window.removeEventListener('mouseup', onWindowUp)
