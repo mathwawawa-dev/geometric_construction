@@ -657,8 +657,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       isDrawing.current = false
       const wasShiftDrawing = isShiftDrawing.current
       isShiftDrawing.current = false
-      // Shift 직선 모드: initialAngle 클리어 전에 끝점 계산 후 핀 고정
-      if (wasShiftDrawing && currentStrokePoints.current.length > 0) {
+      // Shift 직선 모드 OR 일반 드래그 모드: mouseup 위치에서 커서 freeze
+      if (currentStrokePoints.current.length > 0) {
         const lastPt = currentStrokePoints.current[currentStrokePoints.current.length - 1]
         const mainCanvas = canvasRef.current
         if (mainCanvas && upEvent) {

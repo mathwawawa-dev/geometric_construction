@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.22_20261007_115700_선분생성좌측정렬'
+const VERSION = 'v0.2.23_20261007_120400_펜드래그완료커서끊김수정'
 
 export default function App() {
   const canvasRef = useRef(null)
