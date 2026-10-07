@@ -105,6 +105,19 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const startPoint = useRef({ x: 0, y: 0 })
   const initialAngle = useRef(null)
 
+  // Ctrl 키 상태 → 펜 커서 SVG 교체용 (스냅 로직은 e.ctrlKey 직접 사용)
+  const [ctrlActive, setCtrlActive] = useState(false)
+  useEffect(() => {
+    const down = (e) => { if (e.key === 'Control') setCtrlActive(true) }
+    const up   = (e) => { if (e.key === 'Control') setCtrlActive(false) }
+    window.addEventListener('keydown', down)
+    window.addEventListener('keyup',   up)
+    return () => {
+      window.removeEventListener('keydown', down)
+      window.removeEventListener('keyup',   up)
+    }
+  }, [])
+
   // handleMove를 항상 최신 참조로 유지하는 ref
   // → 펜 도구용 persistent window 리스너에서 stale closure 방지
   const handleMoveRef = useRef(null)
@@ -652,13 +665,16 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     return () => ro.disconnect()
   }, [canvasRef])
 
-  // 펜 도구 연필 SVG 커서 (핫스팟: 연필 끝점)
+  // 펜 도구 연필 SVG 커서 — 평상시
   const penSvgCursor = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z' fill='white' stroke='%231e40af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 2 22, crosshair`
+
+  // 펜 도구 연필 SVG 커서 — 스냅 활성 시 (빨간 선 추가)
+  const penSnapCursor = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z' fill='white' stroke='%231e40af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='18' y1='6' x2='6' y2='18' stroke='%23ef4444' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") 2 22, crosshair`
 
   const getCursorStyle = () => {
     if (activeTool === 'pen') {
       if (isInsideRuler) return 'grab'
-      return penSvgCursor                  // 항상 연필 (개체 근처도 동일)
+      return (snapEnabled || ctrlActive) ? penSnapCursor : penSvgCursor
     }
     if (activeTool === 'line') {
       if (isInsideRuler) return 'grab'

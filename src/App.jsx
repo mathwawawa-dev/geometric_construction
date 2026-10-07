@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.50_20261007_222000_선분끝점점근처만손커서'
+const VERSION = 'v0.2.51_20261007_223000_스냅활성연필빨간선커서'
 
 export default function App() {
   const canvasRef = useRef(null)
