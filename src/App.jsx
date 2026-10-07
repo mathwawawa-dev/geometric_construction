@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.43_20261007_194000_가짜커서제거시스템커서crosshair'
+const VERSION = 'v0.2.44_20261007_195000_선분끝점8px항상스냅'
 
 export default function App() {
   const canvasRef = useRef(null)

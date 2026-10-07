@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
-import { snapToShapesCenter } from '../utils/shapeUtils'
+import { snapToShapesCenter, snapToSegmentEndpoint } from '../utils/shapeUtils'
 
 const RULER_THICKNESS = 120
 const SNAP_DIST = 12
@@ -279,6 +279,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
 
+      // 선분 끝점 항상-스냅: snapEnabled 무관, 8px 반경 내 선분 끝점에 흡착 (지오지브라 방식)
+      const epSnap = snapToSegmentEndpoint(rawPos, shapesRef.current, 8)
+      if (epSnap) finalPos = epSnap
+
       if (lineStart) {
         const draftCanvas = draftCanvasRef.current
         if (draftCanvas) {
@@ -410,6 +414,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           }
         }
 
+        // 선분 끝점 항상-스냅 (8px, 최우선)
+        const ep2 = snapToSegmentEndpoint(rawPos, shapesRef.current, 8)
+        if (ep2) finalPos = ep2
+
         // 두 번째 클릭 시 선분 완성
         const shape = {
           id: 'seg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
@@ -428,7 +436,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
         }
       } else {
-        // 첫 번째 클릭 시 시작
+        // 첫 번째 클릭 시 시작 — 선분 끝점 항상-스냅 (8px)
+        const ep1 = snapToSegmentEndpoint(rawPos, shapesRef.current, 8)
+        if (ep1) finalPos = ep1
         setLineStart({ x: finalPos.x, y: finalPos.y })
         isDrawing.current = true
         startPoint.current = { x: finalPos.x, y: finalPos.y }
@@ -464,6 +474,10 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
               y: startPoint.current.y + dist * Math.sin(snappedAngle),
             }
           }
+
+          // 선분 끝점 항상-스냅 (8px, 최우선)
+          const epDrag = snapToSegmentEndpoint(upPos, shapesRef.current, 8)
+          if (epDrag) finalUpPos = epDrag
           
           const d = Math.hypot(finalUpPos.x - startPoint.current.x, finalUpPos.y - startPoint.current.y)
           if (d > 5) {
