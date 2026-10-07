@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.31_20261007_163000_교점스냅추가'
+const VERSION = 'v0.2.32_20261007_163700_교점스냅반경9px'
 
 export default function App() {
   const canvasRef = useRef(null)

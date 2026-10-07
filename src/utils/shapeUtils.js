@@ -104,7 +104,7 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
   // ── 0단계: 교점 스냅 (최우선) ─────────────────────────────────────────────
   // segment×segment, segment×circle/arc, circle×circle, 자유곡선 포함
   {
-    const R = snapThreshold
+    const R = 9  // 교점 스냅 반경: 끝점(18px)보다 좁게 설정
     let iBest = Infinity, iPoint = null
     for (let i = 0; i < shapes.length; i++) {
       for (let j = i + 1; j < shapes.length; j++) {
