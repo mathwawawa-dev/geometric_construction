@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.33_20261007_182600_shapes의존성제거freeze근본수정'
+const VERSION = 'v0.2.34_20261007_183000_선분freeze제거펜네이티브이벤트'
 
 export default function App() {
   const canvasRef = useRef(null)

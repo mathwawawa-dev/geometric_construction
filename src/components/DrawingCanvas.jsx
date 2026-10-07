@@ -362,16 +362,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
 
-      // 선분 드래그 완성 후 핀 고정: mouseup 위치에서 30px 이상 움직이기 전까지 끝점에 고정
-      if (linePinnedPos.current && penMouseUpRawPos.current && !lineStart) {
-        const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
-        if (dMoved < 30) {
-          updateFakeCursor(linePinnedPos.current, false)
-          return
-        }
-        linePinnedPos.current = null
-        penMouseUpRawPos.current = null
-      }
+      // linePinnedPos 잔여값 정리 (기존 freeze 제거)
+      if (linePinnedPos.current) linePinnedPos.current = null
+      if (penMouseUpRawPos.current) penMouseUpRawPos.current = null
 
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     }
@@ -380,14 +373,11 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   // handleMove가 재생성될 때마다 ref 동기화
   handleMoveRef.current = handleMove
 
-  // 펜 도구 활성화 중: 캔버스 밖에서도 가짜 커서가 따라다니도록 window 전역 추적
-  // (드로잉 중에는 isDrawing.current=true → 이미 onWindowMove가 처리하므로 skip)
+  // 펜 도구 활성화 중: 캔버스 안/밖 전역에서 네이티브 이벤트로 가짜 커서 추적
+  // → React 합성 이벤트(onMouseMove) 대신 네이티브 window 이벤트 사용으로 지연 제거
   useEffect(() => {
     if (activeTool !== 'pen') return
     const track = (e) => {
-      // 캔버스 위에서 발생한 이벤트는 캔버스의 onMouseMove가 처리하므로 중복 방지
-      if (e.target && e.target.closest && e.target.closest('.canvas-area')) return
-      
       if (!isDrawing.current) {
         handleMoveRef.current?.(e)
       }
