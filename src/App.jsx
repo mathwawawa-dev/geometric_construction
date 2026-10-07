@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.41_20261007_192400_지오지브라스타일커서항상rawPos'
+const VERSION = 'v0.2.42_20261007_193200_Shift커서선위3px적응형freeze'
 
 export default function App() {
   const canvasRef = useRef(null)

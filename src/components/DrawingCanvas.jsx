@@ -274,8 +274,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           const straightPos = { x: p0.x + proj * ux, y: p0.y + proj * uy }
           currentStrokePoints.current = [p0, straightPos]
           renderCurrentStroke()
-          // 지오지브라 스타일: Shift 각도 제약은 선에만 적용, 커서는 rawPos/스냅점에 위치
-          updateFakeCursor(p1, isPointSnapped)
+          updateFakeCursor(straightPos, isPointSnapped)
           return
         } else {
           currentStrokePoints.current = [p0, p1]
@@ -289,6 +288,17 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       renderCurrentStroke()
       updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     } else if (activeTool === 'pen') {
+      // 3px 초소형 freeze: Shift 완료 후 OS jitter 흡수 (적응형 — Shift 활성 시만)
+      if (linePinnedPos.current && penMouseUpRawPos.current) {
+        const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
+        if (dMoved < 3) {
+          updateFakeCursor(linePinnedPos.current, false)
+          return
+        }
+        linePinnedPos.current = null
+        penMouseUpRawPos.current = null
+      }
+
       let finalPos = rawPos
       let lock = null
       let isPointSnapped = false
@@ -322,11 +332,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
 
-      // 지오지브라 스타일: Shift 각도 제약은 선 끝점에만 적용, 커서는 rawPos/스냅점에 유지
-      // cursorPos = Shift 제약 이전 위치 (rawPos 또는 스냅점)
-      const cursorPos = { x: finalPos.x, y: finalPos.y }
-
-      // Shift 누른 상태: 5도 단위 각도 스냅 (선 geometry에만 적용)
+      // Shift 누른 상태: 5도 단위 각도 스냅 → 커서도 constrainedPos(선 위)에 위치
       if (lineStart && e.shiftKey) {
         const dx = finalPos.x - lineStart.x
         const dy = finalPos.y - lineStart.y
@@ -367,8 +373,19 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
 
-      // 커서는 Shift 제약 이전 위치(rawPos/스냅점) — freeze 없음
-      updateFakeCursor(cursorPos, lock !== null || isPointSnapped)
+      // 3px 초소형 freeze: Shift 완료 후 OS jitter(~2px) 흡수
+      // 3px 이상 이동하면 즉시 rawPos 추적 — "붙잡혀 있다" 느낌 없음
+      if (linePinnedPos.current && penMouseUpRawPos.current && !lineStart) {
+        const dMoved = Math.hypot(rawPos.x - penMouseUpRawPos.current.x, rawPos.y - penMouseUpRawPos.current.y)
+        if (dMoved < 3) {
+          updateFakeCursor(linePinnedPos.current, false)
+          return
+        }
+        linePinnedPos.current = null
+        penMouseUpRawPos.current = null
+      }
+
+      updateFakeCursor(finalPos, lock !== null || isPointSnapped)
     }
   }, [activeTool, ruler, updateFakeCursor, stampMode, renderCurrentStroke, canvasRef, snapEnabled, setIsInsideRuler, lineStart, strokeColor, strokeWidth])
 
@@ -491,7 +508,13 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (draftCanvas) {
           draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
         }
-        // 지오지브라 스타일: 커서가 이미 rawPos에 있으므로 별도 cursor 업데이트 불필요
+        // 커서를 끝점으로 이동 + 적응형 3px freeze
+        updateFakeCursor(finalPos, false)
+        const cDeltaClick = Math.hypot(finalPos.x - rawPos.x, finalPos.y - rawPos.y)
+        if (cDeltaClick > 3) {
+          linePinnedPos.current = finalPos
+          penMouseUpRawPos.current = rawPos
+        }
       } else {
         // 첫 번째 클릭 시 시작
         linePinnedPos.current = null      // 새 선분 시작 → 핀 해제
@@ -551,7 +574,13 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             if (draftCanvas) {
               draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
             }
-            // 지오지브라 스타일: 커서가 이미 rawPos에 있으므로 별도 cursor 업데이트 불필요
+            // 커서를 그려진 끝점으로 이동 + 적응형 3px freeze
+            updateFakeCursor(finalUpPos, false)
+            const cDelta = Math.hypot(finalUpPos.x - upPos.x, finalUpPos.y - upPos.y)
+            if (cDelta > 3) {
+              linePinnedPos.current = finalUpPos
+              penMouseUpRawPos.current = upPos
+            }
           }
           window.removeEventListener('mouseup', onWindowUpLine)
           window.removeEventListener('touchend', onWindowUpLine)
@@ -663,11 +692,25 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       isShiftDrawing.current = false
       initialAngle.current = null
       snapLock.current = null
+      // currentStrokePoints 클리어 전에 lastPt, upRawPos 읽기
+      const pts = currentStrokePoints.current
+      const lastPt = pts.length > 0 ? pts[pts.length - 1] : null
+      const upRawPos = canvasRef.current ? getPos(upEvent, canvasRef.current) : null
       currentStrokePoints.current = []
       document.body.classList.remove('is-drawing')
-      // 그리기 종료 후 자 커서 상태 초기화
       setIsInsideRuler(false)
-      // 지오지브라 스타일: 커서가 이미 rawPos에 있으므로 별도 cursor 업데이트 불필요
+      if (lastPt) {
+        updateFakeCursor(lastPt, false)
+        // 적응형 3px freeze: Shift로 인해 끝점이 rawPos와 다를 때만 적용
+        // OS jitter(≤2px) 흡수, 의도적 이동 시 즉시 해제 — "붙잡혀 있다" 느낌 없음
+        const constraintDelta = upRawPos
+          ? Math.hypot(lastPt.x - upRawPos.x, lastPt.y - upRawPos.y)
+          : 0
+        if (constraintDelta > 3) {
+          linePinnedPos.current = lastPt
+          penMouseUpRawPos.current = upRawPos
+        }
+      }
       window.removeEventListener('mousemove', onWindowMove)
       window.removeEventListener('mouseup', onWindowUp)
       window.removeEventListener('touchmove', onWindowMove)
