@@ -649,9 +649,12 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     return () => ro.disconnect()
   }, [canvasRef])
 
+  // 연필 아이콘 커서 (지오지브라 스타일)
+  // 핫스팟(2, 20): 연필 끝부분이 정확히 커서 포인트가 됨
+  const penCursor = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z' fill='white' stroke='%231e40af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 2 22, crosshair`
+
   const getCursorStyle = () => {
-    if (activeTool === 'pen') return isInsideRuler ? 'grab' : 'crosshair'
-    if (activeTool === 'line') return isInsideRuler ? 'grab' : 'crosshair'
+    if (activeTool === 'pen' || activeTool === 'line') return isInsideRuler ? 'grab' : penCursor
     if (activeTool === 'text') return 'text'
     return 'default'
   }

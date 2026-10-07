@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.44_20261007_195000_선분끝점8px항상스냅'
+const VERSION = 'v0.2.45_20261007_200000_연필커서지오지브라스타일'
 
 export default function App() {
   const canvasRef = useRef(null)
