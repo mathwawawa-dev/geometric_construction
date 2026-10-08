@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.71_20261009_002300_각도기디자인개선'
+const VERSION = 'v0.2.72_20261009_004200_각도기반원방향수정'
 
 export default function App() {
   const canvasRef = useRef(null)
