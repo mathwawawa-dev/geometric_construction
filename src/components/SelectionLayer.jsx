@@ -34,11 +34,14 @@ export default function SelectionLayer({
     }
   }, [])
 
-  // 키보드 단축키 (Delete, Backspace, Escape)
+  // 키보드 단축키 (Delete, Backspace, Escape, 방향키 이동)
+  const finishMoveTimer = useRef(null)
+
   useEffect(() => {
     if (!active) return
     const onKeyDown = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (selectedIds.length > 0) {
           e.preventDefault()
@@ -46,11 +49,33 @@ export default function SelectionLayer({
         }
       } else if (e.key === 'Escape') {
         setSelectedIds([])
+      } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        if (selectedIds.length > 0) {
+          e.preventDefault()
+          const step = e.shiftKey ? 10 : 1
+          let dx = 0
+          let dy = 0
+          if (e.key === 'ArrowUp') dy = -step
+          else if (e.key === 'ArrowDown') dy = step
+          else if (e.key === 'ArrowLeft') dx = -step
+          else if (e.key === 'ArrowRight') dx = step
+
+          onMoveShapes(selectedIds, dx, dy)
+
+          if (finishMoveTimer.current) clearTimeout(finishMoveTimer.current)
+          finishMoveTimer.current = setTimeout(() => {
+            onFinishMove?.()
+            finishMoveTimer.current = null
+          }, 300)
+        }
       }
     }
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [active, selectedIds, onDeleteSelected, setSelectedIds])
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      if (finishMoveTimer.current) clearTimeout(finishMoveTimer.current)
+    }
+  }, [active, selectedIds, onDeleteSelected, setSelectedIds, onMoveShapes, onFinishMove])
 
   const commitEditText = () => {
     if (!editingText) return

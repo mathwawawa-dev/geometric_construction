@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.68_20261009_000100_자색상가시성개선'
+const VERSION = 'v0.2.69_20261009_000300_선택개체방향키이동'
 
 export default function App() {
   const canvasRef = useRef(null)
