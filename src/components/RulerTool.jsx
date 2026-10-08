@@ -148,8 +148,8 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
             width={length}
             height={RULER_THICKNESS}
             rx="4"
-            fill="rgba(186, 230, 253, 0.2)"
-            stroke="rgba(14, 165, 233, 0.15)"
+            fill="rgba(186, 230, 253, 0.35)"
+            stroke="rgba(14, 165, 233, 0.4)"
             strokeWidth="1.5"
             style={{ pointerEvents: 'none' }}
           />

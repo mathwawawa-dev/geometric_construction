@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.67_20261008_235400_끝점스냅거리경쟁및반경12px개선'
+const VERSION = 'v0.2.68_20261009_000100_자색상가시성개선'
 
 export default function App() {
   const canvasRef = useRef(null)
