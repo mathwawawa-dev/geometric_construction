@@ -298,8 +298,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
 
-      // 선분 끝점 항상-스냅: snapEnabled 무관, 8px 반경 내 선분 끝점에 흡착 (지오지브라 방식)
-      const epSnap = snapToSegmentEndpoint(rawPos, shapesRef.current, 8)
+      // 선분 끝점 항상-스냅: snapEnabled 무관, 12px 반경 내 선분 끝점에 흡착 (커서 감지 반경과 동일)
+      const epSnap = snapToSegmentEndpoint(rawPos, shapesRef.current, 12)
       if (epSnap) finalPos = epSnap
 
       if (lineStart) {
@@ -471,8 +471,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           }
         }
 
-        // 선분 끝점 항상-스냅 (8px, 최우선)
-        const ep2 = snapToSegmentEndpoint(rawPos, shapesRef.current, 8)
+        // 선분 끝점 항상-스냅 (12px, 최우선)
+        const ep2 = snapToSegmentEndpoint(rawPos, shapesRef.current, 12)
         if (ep2) finalPos = ep2
 
         // 두 번째 클릭 시 선분 완성
@@ -493,8 +493,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
         }
       } else {
-        // 첫 번째 클릭 시 시작 — 선분 끝점 항상-스냅 (8px)
-        const ep1 = snapToSegmentEndpoint(rawPos, shapesRef.current, 8)
+        // 첫 번째 클릭 시 시작 — 선분 끝점 항상-스냅 (12px)
+        const ep1 = snapToSegmentEndpoint(rawPos, shapesRef.current, 12)
         if (ep1) finalPos = ep1
         setLineStart({ x: finalPos.x, y: finalPos.y })
         isDrawing.current = true
@@ -532,8 +532,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             }
           }
 
-          // 선분 끝점 항상-스냅 (8px, 최우선)
-          const epDrag = snapToSegmentEndpoint(upPos, shapesRef.current, 8)
+          // 선분 끝점 항상-스냅 (12px, 최우선)
+          const epDrag = snapToSegmentEndpoint(upPos, shapesRef.current, 12)
           if (epDrag) finalUpPos = epDrag
           
           const d = Math.hypot(finalUpPos.x - startPoint.current.x, finalUpPos.y - startPoint.current.y)

@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.63_20261008_002400_스냅인디케이터canvas_커서점프제거'
+const VERSION = 'v0.2.64_20261008_124900_선분snap반경8→12px커서감지일치'
 
 export default function App() {
   const canvasRef = useRef(null)
