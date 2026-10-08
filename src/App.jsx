@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.70_20261009_001600_자경계그리기lock유지수정'
+const VERSION = 'v0.2.71_20261009_002300_각도기디자인개선'
 
 export default function App() {
   const canvasRef = useRef(null)

@@ -1,7 +1,7 @@
 import { useRef, useCallback } from 'react'
 
 const HANDLE_R = 10
-const SNAP_DEG = 5 // 5도 단위 snap
+const SNAP_DEG = 5
 
 function snapAngle(a) {
   const deg = a * (180 / Math.PI)
@@ -70,8 +70,15 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
 
   const degAngle = angle * (180 / Math.PI)
 
-  // 눈금 (0~180도, 1도 단위)
+  // 바깥 반경 (눈금 시작), 안쪽 반경 (반원 호 띠)
+  const R_outer = radius
+  const R_inner = radius * 0.88  // 눈금 띠 안쪽
+
+  // 눈금 배열 0~180
   const ticks = Array.from({ length: 181 }, (_, i) => i)
+
+  // 10도 단위 방사선 (사진처럼 중심에서 뻗는 선)
+  const radialLines = [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170]
 
   return (
     <svg
@@ -79,57 +86,82 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
       className="absolute inset-0 w-full h-full tool-overlay"
       style={{ touchAction: 'none', pointerEvents: 'none', zIndex: 20 }}
     >
-      {/* 각도기 몸통 그룹 */}
       <g
         transform={`rotate(${degAngle}, ${cx}, ${cy})`}
         style={{ pointerEvents: 'all', cursor: 'grab' }}
         onMouseDown={onPointerDown('center')}
         onTouchStart={onPointerDown('center')}
       >
-        {/* 반원 채우기 */}
+        {/* 반원 내부 채우기 (연한 회색 배경) */}
         <path
-          d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy} Z`}
-          fill="rgba(254, 240, 138, 0.35)"
-          stroke="#ca8a04"
-          strokeWidth="2"
+          d={`M ${cx - R_outer} ${cy} A ${R_outer} ${R_outer} 0 0 1 ${cx + R_outer} ${cy} Z`}
+          fill="rgba(245, 245, 245, 0.75)"
+          stroke="none"
         />
 
-        {/* 기준 가로선 */}
-        <line x1={cx - radius} y1={cy} x2={cx + radius} y2={cy}
-          stroke="#ca8a04" strokeWidth="1" strokeDasharray="4 3" opacity="0.5"
+        {/* 바깥 반원 호 (눈금 띠) — 두꺼운 흰 채움 띠 */}
+        <path
+          d={`M ${cx - R_outer} ${cy} A ${R_outer} ${R_outer} 0 0 1 ${cx + R_outer} ${cy}
+              L ${cx + R_inner} ${cy} A ${R_inner} ${R_inner} 0 0 0 ${cx - R_inner} ${cy} Z`}
+          fill="white"
+          stroke="#444"
+          strokeWidth="1"
         />
 
-        {/* 눈금 (1도 단위) */}
-        {ticks.map((i) => {
-          // 각도기 좌측(180°) → 우측(0°) 방향 배치
-          const tickRad = Math.PI - (i * Math.PI) / 180
-          const is10 = i % 10 === 0
-          const is5  = i % 5 === 0
-          const tickLen = is10 ? 18 : is5 ? 12 : 7
-          const x1 = cx + radius * Math.cos(tickRad)
-          const y1 = cy + radius * Math.sin(tickRad)
-          const x2 = cx + (radius - tickLen) * Math.cos(tickRad)
-          const y2 = cy + (radius - tickLen) * Math.sin(tickRad)
+        {/* 10도 단위 방사선 (중심에서 R_inner까지) */}
+        {radialLines.map((deg) => {
+          const rad = Math.PI - (deg * Math.PI) / 180
+          const x2 = cx + R_inner * Math.cos(rad)
+          const y2 = cy + R_inner * Math.sin(rad)
           return (
-            <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
-              stroke="#92400e"
-              strokeWidth={is10 ? 1.8 : is5 ? 1.2 : 0.7}
+            <line key={deg} x1={cx} y1={cy} x2={x2} y2={y2}
+              stroke="#bbb" strokeWidth="0.7" opacity="0.6"
             />
           )
         })}
 
-        {/* 숫자 레이블 (10도 단위) */}
+        {/* 기준선 (지름) */}
+        <line x1={cx - R_inner} y1={cy} x2={cx + R_inner} y2={cy}
+          stroke="#bbb" strokeWidth="0.7" opacity="0.6"
+        />
+
+        {/* 눈금 (바깥호에 새기기) */}
+        {ticks.map((i) => {
+          const tickRad = Math.PI - (i * Math.PI) / 180
+          const is10 = i % 10 === 0
+          const is5  = i % 5 === 0
+          const is1  = !is5
+
+          // 눈금 길이
+          const tickLen = is10 ? R_outer * 0.09 : is5 ? R_outer * 0.06 : R_outer * 0.03
+
+          const x1 = cx + R_outer * Math.cos(tickRad)
+          const y1 = cy + R_outer * Math.sin(tickRad)
+          const x2 = cx + (R_outer - tickLen) * Math.cos(tickRad)
+          const y2 = cy + (R_outer - tickLen) * Math.sin(tickRad)
+          return (
+            <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
+              stroke="#444"
+              strokeWidth={is10 ? 1.5 : is5 ? 1 : 0.6}
+            />
+          )
+        })}
+
+        {/* 숫자 레이블 — 외측(0~180) */}
         {[0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180].map((deg) => {
           const tickRad = Math.PI - (deg * Math.PI) / 180
-          const labelR = radius - 26
+          const labelR = R_outer - R_outer * 0.065
           const lx = cx + labelR * Math.cos(tickRad)
           const ly = cy + labelR * Math.sin(tickRad)
+          // 텍스트를 반지름 방향 기준 회전 (읽기 쉽게)
+          const rotDeg = (Math.PI - tickRad) * (180 / Math.PI) - 90
           return (
-            <text key={deg} x={lx} y={ly}
+            <text key={`out-${deg}`} x={lx} y={ly}
               textAnchor="middle" dominantBaseline="middle"
-              fontSize={deg % 30 === 0 ? 11 : 9}
-              fontWeight={deg % 30 === 0 ? 'bold' : 'normal'}
-              fill="#92400e"
+              fontSize={R_outer * 0.058}
+              fontWeight="normal"
+              fill="#222"
+              transform={`rotate(${rotDeg}, ${lx}, ${ly})`}
               style={{ userSelect: 'none', pointerEvents: 'none' }}
             >
               {deg}
@@ -137,10 +169,42 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           )
         })}
 
-        {/* 중앙 십자 */}
-        <line x1={cx} y1={cy - 12} x2={cx} y2={cy + 6} stroke="#ca8a04" strokeWidth="2" />
-        <line x1={cx - 12} y1={cy} x2={cx + 12} y2={cy} stroke="#ca8a04" strokeWidth="2" />
-        <circle cx={cx} cy={cy} r="4" fill="#ca8a04" />
+        {/* 숫자 레이블 — 내측(180~0, 사진의 안쪽 숫자) */}
+        {[0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180].map((deg) => {
+          const innerDeg = 180 - deg
+          const tickRad = Math.PI - (deg * Math.PI) / 180
+          const labelR = R_outer - R_outer * 0.165
+          const lx = cx + labelR * Math.cos(tickRad)
+          const ly = cy + labelR * Math.sin(tickRad)
+          const rotDeg = (Math.PI - tickRad) * (180 / Math.PI) - 90
+          return (
+            <text key={`in-${deg}`} x={lx} y={ly}
+              textAnchor="middle" dominantBaseline="middle"
+              fontSize={R_outer * 0.052}
+              fontWeight="normal"
+              fill="#555"
+              transform={`rotate(${rotDeg}, ${lx}, ${ly})`}
+              style={{ userSelect: 'none', pointerEvents: 'none' }}
+            >
+              {innerDeg}
+            </text>
+          )
+        })}
+
+        {/* 내측 반원 테두리 */}
+        <path
+          d={`M ${cx - R_inner} ${cy} A ${R_inner} ${R_inner} 0 0 1 ${cx + R_inner} ${cy}`}
+          fill="none"
+          stroke="#444"
+          strokeWidth="1"
+        />
+
+        {/* 중앙 기준점 작은 원 */}
+        <circle cx={cx} cy={cy} r={radius * 0.025} fill="none" stroke="#444" strokeWidth="1.2" />
+        {/* 중앙 수직선 */}
+        <line x1={cx} y1={cy - R_inner} x2={cx} y2={cy}
+          stroke="#555" strokeWidth="0.8"
+        />
       </g>
 
       {/* 회전 핸들 */}
