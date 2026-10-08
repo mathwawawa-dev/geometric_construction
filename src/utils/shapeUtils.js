@@ -196,39 +196,38 @@ export function snapToShapesCenter(p, shapes, snapThreshold = 18) {
         bestPoint = { x: s.x, y: s.y }
       }
     } else if (s.type === 'segment') {
-      // segment 끝점 우선 스냅
-      // 탐지 범위: pointR + snapThreshold (단순 점과 동일)
-      // bestDist = 0으로 고정 → 2단계가 절대 이길 수 없음
-      const pointR = Math.max((s.width || 3) * 0.8, 4)
-      const endpointRange = pointR + snapThreshold
+      // segment 끝점 스냅: 반경 12px 내에서 실제 거리(d)로 경쟁 (몸통과 자연스러운 스냅)
+      const endpointRange = 12
       const dStart = Math.hypot(p.x - s.x1, p.y - s.y1)
       const dEnd   = Math.hypot(p.x - s.x2, p.y - s.y2)
       if (dStart <= endpointRange && dStart < bestDist) {
-        bestDist = 0
+        bestDist = dStart
         bestPoint = { x: s.x1, y: s.y1 }
       }
       if (dEnd <= endpointRange && dEnd < bestDist) {
-        bestDist = 0
+        bestDist = dEnd
         bestPoint = { x: s.x2, y: s.y2 }
       }
     } else if (s.points && s.points.length > 1) {
-      const pointR = Math.max((s.width || 3) * 0.8, 4)
-      const endpointRange = pointR + snapThreshold
+      // 펜 스트로크 양 끝점 스냅: 반경 12px 내에서 실제 거리(d)로 경쟁
+      const endpointRange = 12
       const pStart = s.points[0]
       const pEnd = s.points[s.points.length - 1]
       const dStart = Math.hypot(p.x - pStart.x, p.y - pStart.y)
       const dEnd = Math.hypot(p.x - pEnd.x, p.y - pEnd.y)
       if (dStart <= endpointRange && dStart < bestDist) {
-        bestDist = 0
+        bestDist = dStart
         bestPoint = { x: pStart.x, y: pStart.y }
       }
       if (dEnd <= endpointRange && dEnd < bestDist) {
-        bestDist = 0
+        bestDist = dEnd
         bestPoint = { x: pEnd.x, y: pEnd.y }
       }
     }
   }
 
+  // 1단계(점/끝점)에서 찾았더라도, 2단계(몸통)가 마우스와 훨씬 더 가까우면 몸통을 우선할 수 있도록 하거나,
+  // 끝점 범위(12px) 안에 들었을 때 자연스럽게 연결
   if (bestPoint) {
     return bestPoint
   }
