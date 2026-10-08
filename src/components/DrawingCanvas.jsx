@@ -244,6 +244,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
           finalPos = pointRes.pos
         }
+        // 자 lock 상태 갱신 (lock이 유지되는 동안 계속 경계 추적)
+        snapLock.current = lock
       }
 
       if (isPointInsideRuler(finalPos, ruler)) return
@@ -613,6 +615,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       finalPos = latchedSnapPosRef.current
       isPointSnapped = true
       latchedSnapPosRef.current = null
+      // latch 위치가 자 경계 위이면 ruler lock을 복원 → 드로잉 중 경계 추적 유지
+      const { lock: rLock } = calcRulerSnap(finalPos, ruler, null)
+      lock = rLock
     } else if (snapEnabled || e.ctrlKey) {
       const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
       lock = rLock

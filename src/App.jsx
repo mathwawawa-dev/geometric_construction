@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.69_20261009_000300_선택개체방향키이동'
+const VERSION = 'v0.2.70_20261009_001600_자경계그리기lock유지수정'
 
 export default function App() {
   const canvasRef = useRef(null)
