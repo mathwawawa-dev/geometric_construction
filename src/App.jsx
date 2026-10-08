@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.65_20261008_132300_스냅반경12px조정'
+const VERSION = 'v0.2.66_20261008_225600_스냅반경16px조정'
 
 export default function App() {
   const canvasRef = useRef(null)
