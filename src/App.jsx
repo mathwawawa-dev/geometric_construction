@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.64_20261008_124900_선분snap반경8→12px커서감지일치'
+const VERSION = 'v0.2.65_20261008_132300_스냅반경12px조정'
 
 export default function App() {
   const canvasRef = useRef(null)

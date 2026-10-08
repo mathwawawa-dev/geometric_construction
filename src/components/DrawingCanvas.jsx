@@ -87,7 +87,7 @@ function isPointInsideRuler(pos, ruler) {
 }
 
 // 점의 중심 및 직선/곡선의 '두께 중심축(위-아래 정중앙)' 자석 스냅 함수
-function snapToPointCenters(pos, shapes, snapRadius = 20) {
+function snapToPointCenters(pos, shapes, snapRadius = 12) {
   const center = snapToShapesCenter(pos, shapes, snapRadius)
   return center ? { pos: center, snappedPoint: true } : { pos, snappedPoint: false }
 }
@@ -345,7 +345,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       } else if (latchedSnapPosRef.current) {
         const latched = latchedSnapPosRef.current
         const d = Math.hypot(rawPos.x - latched.x, rawPos.y - latched.y)
-        if (d <= 20) foundSnapPos = latched
+        if (d <= 16) foundSnapPos = latched
         else latchedSnapPosRef.current = null
       }
 
