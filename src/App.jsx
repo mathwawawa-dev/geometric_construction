@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.90_20261009_234800_각도기초기크기1.5배확대'
+const VERSION = 'v0.2.91_20261009_235000_각도기초기크기95퍼센트축소'
 
 export default function App() {
   const canvasRef = useRef(null)
