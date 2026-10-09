@@ -255,35 +255,57 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
             onMouseDown={onPointerDown('rotate')}
             onTouchStart={onPointerDown('rotate')}
           >
-            {/* 48x48 스케일로 초록색과 완전 동일한 비례 유지 */}
+            {/* 48x48 스케일로 초록색과 동일한 비례 유지 + marker 기반 화살표 끝 정렬(refX=11) */}
             <g transform={`scale(${S / 48})`}>
+              <defs>
+                <marker
+                  id="protRotateArrowStart"
+                  markerWidth="14"
+                  markerHeight="14"
+                  refX="11"
+                  refY="6.5"
+                  orient="auto-start-reverse"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <path
+                    d="M 2 2 L 11 6.5 L 2 11"
+                    fill="none"
+                    stroke="#1e293b"
+                    strokeWidth="3.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </marker>
+                <marker
+                  id="protRotateArrowEnd"
+                  markerWidth="14"
+                  markerHeight="14"
+                  refX="11"
+                  refY="6.5"
+                  orient="auto"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <path
+                    d="M 2 2 L 11 6.5 L 2 11"
+                    fill="none"
+                    stroke="#1e293b"
+                    strokeWidth="3.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </marker>
+              </defs>
               {/* 배경 원 */}
               <circle cx="24" cy="24" r="22" fill="#fef08a" stroke="#ca8a04" strokeWidth="2.5" />
-              {/* 우측 볼록 곡선 본체 (strokeWidth 3.5: 초록색과 동일) */}
+              {/* 우측 볼록 곡선 본체 및 선 끝에 정확히 정렬된 화살촉 */}
               <path
-                d="M 21 11 C 36 17, 36 31, 21 37"
+                d="M 20 10 C 37 17, 37 31, 20 38"
                 fill="none"
-                stroke="#854d0e"
+                stroke="#1e293b"
                 strokeWidth="3.5"
                 strokeLinecap="round"
-              />
-              {/* 상단 화살촉 (초록색 화살촉과 동일한 3.5px 두께, 선명한 크기) */}
-              <polyline
-                points="17,17 21,11 27,14"
-                fill="none"
-                stroke="#854d0e"
-                strokeWidth="3.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              {/* 하단 화살촉 */}
-              <polyline
-                points="17,31 21,37 27,34"
-                fill="none"
-                stroke="#854d0e"
-                strokeWidth="3.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                markerStart="url(#protRotateArrowStart)"
+                markerEnd="url(#protRotateArrowEnd)"
               />
             </g>
           </g>

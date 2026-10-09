@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.95_20261010_014400_각도기회전핸들크기두께초록핸들과동일화'
+const VERSION = 'v0.2.96_20261010_014800_각도기회전화살표선끝정렬보정'
 
 export default function App() {
   const canvasRef = useRef(null)

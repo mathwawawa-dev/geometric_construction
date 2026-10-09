@@ -5,14 +5,14 @@
       markerUnits="strokeWidth"를 userSpaceOnUse로 변경해 크기 고정
     -->
     <marker id="arrowStart" markerWidth="14" markerHeight="14"
-            refX="9" refY="6.5" orient="auto-start-reverse"
+            refX="11" refY="6.5" orient="auto-start-reverse"
             markerUnits="userSpaceOnUse">
       <path d="M 2 2 L 11 6.5 L 2 11"
             fill="none" stroke="black" stroke-width="3.2"
             stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
     <marker id="arrowEnd" markerWidth="14" markerHeight="14"
-            refX="9" refY="6.5" orient="auto"
+            refX="11" refY="6.5" orient="auto"
             markerUnits="userSpaceOnUse">
       <path d="M 2 2 L 11 6.5 L 2 11"
             fill="none" stroke="black" stroke-width="3.2"
