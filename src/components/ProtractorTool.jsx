@@ -100,10 +100,17 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
         onMouseDown={onPointerDown('center')}
         onTouchStart={onPointerDown('center')}
       >
-        {/* 반원 외곽 투명 채우기 (마우스 드래그/이동 이벤트 수신용) */}
+        {/* 반원 외곽 투명 채우기 (마우스 드래그/이동 이벤트 수신용) & 테두리 호선 (0/180도 숫자 구간은 바닥선을 그리지 않음) */}
+        {/* 마우스 인터랙션을 위한 완전 투명 반원 */}
         <path
           d={`M ${cx - R_outer} ${cy} A ${R_outer} ${R_outer} 0 0 1 ${cx + R_outer} ${cy} Z`}
-          fill="rgba(255, 255, 255, 0.01)"
+          fill="rgba(255, 255, 255, 0.001)"
+          stroke="none"
+        />
+        {/* 반원 외곽 호 (상단 반원 호만 긋고 바닥 기준선은 제외) */}
+        <path
+          d={`M ${cx - R_outer} ${cy} A ${R_outer} ${R_outer} 0 0 1 ${cx + R_outer} ${cy}`}
+          fill="none"
           stroke="#333"
           strokeWidth="1.2"
         />
@@ -132,7 +139,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           strokeWidth="1.2"
         />
 
-        {/* 기준 지름 수평선: 숫자가 있는 바깥 구간(R_inner ~ R_outer)에는 선을 긋지 않고, 안쪽(cx - R_inner ~ cx + R_inner)만 긋기 */}
+        {/* 기준 지름 수평선: 0도/180도 숫자가 있는 바깥 구간(R_inner ~ R_outer)에는 선이 없고 안쪽(cx - R_inner ~ cx + R_inner)에만 표시 */}
         <line x1={cx - R_inner} y1={cy} x2={cx + R_inner} y2={cy}
           stroke="#333" strokeWidth="1.2"
         />
@@ -154,21 +161,19 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           stroke="#333" strokeWidth="1.2"
         />
 
-        {/* 눈금 (R_outer에서 시작하여 안쪽으로: 1°는 R_tick_1deg에 도달, 5°와 10°는 더 길게 안쪽으로 뻗음) */}
+        {/* 눈금: 1°는 R_tick_1deg까지, 5°는 1.4배, 10°는 1.8배로 사진1처럼 단정하고 합리적인 길이 */}
         {ticks.map((i) => {
           const tickRad = Math.PI - (i * Math.PI) / 180
           const is10 = i % 10 === 0
           const is5  = i % 5 === 0
-          // 1° 눈금 깊이: R_outer - R_tick_1deg
           const baseDepth = R_outer - R_tick_1deg
-          // 10도는 바깥 숫자 직전(R_tick_inner)까지 도달, 5도는 중간, 1도는 R_tick_1deg까지
-          const len = is10 ? (R_outer - R_tick_inner) : is5 ? (baseDepth * 1.8) : baseDepth
+          const len = is10 ? baseDepth * 1.8 : is5 ? baseDepth * 1.4 : baseDepth
           return (
             <line key={i}
               x1={aX(R_outer, tickRad)}       y1={aY(R_outer, tickRad)}
               x2={aX(R_outer - len, tickRad)} y2={aY(R_outer - len, tickRad)}
               stroke="#222"
-              strokeWidth={is10 ? 1.4 : is5 ? 1 : 0.6}
+              strokeWidth={is10 ? 1.3 : is5 ? 0.9 : 0.6}
             />
           )
         })}

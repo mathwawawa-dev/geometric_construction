@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.79_20261009_230100_작은눈금끝호선배치'
+const VERSION = 'v0.2.80_20261009_230500_0180도구간기준선제거및눈금길이최적화'
 
 export default function App() {
   const canvasRef = useRef(null)
