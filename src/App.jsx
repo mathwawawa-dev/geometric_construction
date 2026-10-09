@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.89_20261009_234600_각도기회전Ctrl상대5도Shift절대5도배수'
+const VERSION = 'v0.2.90_20261009_234800_각도기초기크기1.5배확대'
 
 export default function App() {
   const canvasRef = useRef(null)

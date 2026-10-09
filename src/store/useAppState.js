@@ -23,7 +23,7 @@ const initialState = {
   protractor: {
     visible: false,
     cx: 400, cy: 350,
-    radius: 240,
+    radius: 360,
     angle: 0,
   },
   background: {
