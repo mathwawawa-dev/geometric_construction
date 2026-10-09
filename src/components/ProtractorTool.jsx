@@ -29,6 +29,9 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
     }
   }
 
+  const startAngleRef = useRef(0)
+  const startMouseAngleRef = useRef(0)
+
   const onPointerDown = useCallback((part) => (e) => {
     e.stopPropagation()
     e.preventDefault()
@@ -37,6 +40,10 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
 
     if (part === 'center') {
       dragOffset.current = { dx: pos.x - cx, dy: pos.y - cy }
+    } else if (part === 'rotate') {
+      startAngleRef.current = angle
+      startMouseAngleRef.current = Math.atan2(pos.y - cy, pos.x - cx)
+      dragOffset.current = { dx: 0, dy: 0 }
     } else {
       dragOffset.current = { dx: 0, dy: 0 }
     }
@@ -50,9 +57,17 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
         const nr = Math.hypot(p.x - cx, p.y - cy)
         setProtractor({ radius: Math.max(60, nr) })
       } else if (dragging.current === 'rotate') {
+        const currentMouseAngle = Math.atan2(p.y - cy, p.x - cx)
+        let delta = currentMouseAngle - startMouseAngleRef.current
+        // 정규화 (-PI ~ PI)
+        while (delta > Math.PI) delta -= 2 * Math.PI
+        while (delta < -Math.PI) delta += 2 * Math.PI
+
+        const deltaDeg = delta * (180 / Math.PI)
         const step = me.shiftKey ? 5 : 1
-        const a = snapAngle(Math.atan2(p.y - cy, p.x - cx), step)
-        setProtractor({ angle: a })
+        const snappedDeltaDeg = Math.round(deltaDeg / step) * step
+        const newAngle = startAngleRef.current + snappedDeltaDeg * (Math.PI / 180)
+        setProtractor({ angle: newAngle })
       }
     }
     const onUp = () => {
