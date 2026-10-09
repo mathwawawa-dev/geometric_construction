@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>선분 끝점 조절(길이/각도) 프로토타입 체험</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      user-select: none;
+    }
+    .header {
+      margin-bottom: 16px;
+    }
+    h1 { margin: 0 0 8px; font-size: 20px; }
+    .desc { font-size: 14px; color: #64748b; line-height: 1.5; }
+    .badges { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #e2e8f0;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .container {
+      position: relative;
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      width: 800px;
+      height: 520px;
+      overflow: hidden;
+    }
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .info-panel {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+      pointer-events: none;
+      line-height: 1.6;
+    }
+    .info-panel span { font-weight: bold; color: #2563eb; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📐 선택 도구: 선분 끝점 조절(길이 & 각도) 인터랙티브 샘플</h1>
+    <div class="desc">
+      1. 선분의 <b>몸통(가운데)</b>을 잡고 드래그하면 → <b>선분 전체 이동</b><br>
+      2. 선분의 <b>양 끝점(파란 점)</b>을 잡고 드래그하면 → <b>길이 및 각도 조절</b><br>
+      3. 끝점 드래그 중 <b>Shift 누름</b> → 5° 단위 스냅 / <b>Shift + Ctrl 누름</b> → 1° 단위 정밀 스냅
+    </div>
+    <div class="badges">
+      <span class="badge">몸통 드래그: 전체 이동</span>
+      <span class="badge">끝점 드래그: 길이 & 회전각 조절</span>
+      <span class="badge">Shift: 5° 각도 스냅</span>
+      <span class="badge">Shift + Ctrl: 1° 각도 스냅</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <svg id="svgArea">
+      <!-- 배경 격자 (눈금 가이드) -->
+      <defs>
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#f1f5f9" stroke-width="1.5" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid)" />
+
+      <!-- 선분 몸통 (호버/클릭 감지용 굵은 투명 영역 포함) -->
+      <line id="segHitbox" stroke="transparent" stroke-width="24" stroke-linecap="round" style="cursor: move;" />
+      <line id="segLine" stroke="#2563eb" stroke-width="4" stroke-linecap="round" style="cursor: move;" />
+
+      <!-- 길이 가이드 텍스트 -->
+      <text id="segText" fill="#64748b" font-size="12" text-anchor="middle" dominant-baseline="middle" style="pointer-events: none;"></text>
+
+      <!-- 끝점 A 핸들 (시작점) -->
+      <g id="handleA" style="cursor: crosshair;">
+        <circle id="circleA_outer" r="14" fill="rgba(37, 99, 235, 0.15)" stroke="transparent" />
+        <circle id="circleA" r="7" fill="#ffffff" stroke="#2563eb" stroke-width="3" />
+      </g>
+
+      <!-- 끝점 B 핸들 (끝점) -->
+      <g id="handleB" style="cursor: crosshair;">
+        <circle id="circleB_outer" r="14" fill="rgba(37, 99, 235, 0.15)" stroke="transparent" />
+        <circle id="circleB" r="7" fill="#ffffff" stroke="#2563eb" stroke-width="3" />
+      </g>
+    </svg>
+
+    <div class="info-panel">
+      선분 길이: <span id="infoLen">0 px</span><br>
+      선분 각도: <span id="infoAngle">0°</span><br>
+      상태: <span id="infoMode">대기 중</span>
+    </div>
+  </div>
+
+  <script>
+    // 선분 데이터
+    let seg = {
+      x1: 220,
+      y1: 320,
+      x2: 560,
+      y2: 200
+    }
+
+    const svg = document.getElementById('svgArea')
+    const segLine = document.getElementById('segLine')
+    const segHitbox = document.getElementById('segHitbox')
+    const segText = document.getElementById('segText')
+    const handleA = document.getElementById('handleA')
+    const circleA = document.getElementById('circleA')
+    const handleB = document.getElementById('handleB')
+    const circleB = document.getElementById('circleB')
+    const infoLen = document.getElementById('infoLen')
+    const infoAngle = document.getElementById('infoAngle')
+    const infoMode = document.getElementById('infoMode')
+
+    function updateView() {
+      // 선분 좌표
+      segLine.setAttribute('x1', seg.x1)
+      segLine.setAttribute('y1', seg.y1)
+      segLine.setAttribute('x2', seg.x2)
+      segLine.setAttribute('y2', seg.y2)
+
+      segHitbox.setAttribute('x1', seg.x1)
+      segHitbox.setAttribute('y1', seg.y1)
+      segHitbox.setAttribute('x2', seg.x2)
+      segHitbox.setAttribute('y2', seg.y2)
+
+      // 핸들 좌표
+      handleA.setAttribute('transform', `translate(${seg.x1}, ${seg.y1})`)
+      handleB.setAttribute('transform', `translate(${seg.x2}, ${seg.y2})`)
+
+      // 길이 및 각도 계산
+      const dx = seg.x2 - seg.x1
+      const dy = seg.y2 - seg.y1
+      const length = Math.round(Math.hypot(dx, dy))
+      let angle = Math.round((-Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360)
+
+      infoLen.innerText = `${length} px`
+      infoAngle.innerText = `${angle}°`
+
+      // 텍스트 위치 (선분 중앙 위쪽)
+      const mx = (seg.x1 + seg.x2) / 2
+      const my = (seg.y1 + seg.y2) / 2
+      const normalX = -dy / (length || 1)
+      const normalY = dx / (length || 1)
+      segText.setAttribute('x', mx + normalX * 16)
+      segText.setAttribute('y', my + normalY * 16)
+      segText.textContent = `${length}px (${angle}°)`
+    }
+
+    function getPos(e) {
+      const rect = svg.getBoundingClientRect()
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      }
+    }
+
+    let dragType = null // 'body' | 'pointA' | 'pointB'
+    let dragStart = { x: 0, y: 0 }
+    let origSeg = { ...seg }
+
+    function snap(fixedX, fixedY, moveX, moveY, e) {
+      if (!e.shiftKey) return { x: moveX, y: moveY }
+      const step = (e.shiftKey && e.ctrlKey) ? 1 : 5
+      const dx = moveX - fixedX
+      const dy = moveY - fixedY
+      const r = Math.hypot(dx, dy)
+      let deg = Math.atan2(dy, dx) * (180 / Math.PI)
+      const snappedDeg = Math.round(deg / step) * step
+      const rad = snappedDeg * (Math.PI / 180)
+      return {
+        x: fixedX + r * Math.cos(rad),
+        y: fixedY + r * Math.sin(rad)
+      }
+    }
+
+    // 마우스 다운 이벤트
+    function startDrag(type, e) {
+      e.preventDefault()
+      e.stopPropagation()
+      dragType = type
+      dragStart = getPos(e)
+      origSeg = { ...seg }
+      infoMode.innerText = type === 'body' ? '선분 전체 이동 중' : (type === 'pointA' ? '끝점 A 조절 중' : '끝점 B 조절 중')
+      infoMode.style.color = '#ef4444'
+
+      window.addEventListener('mousemove', onMove)
+      window.addEventListener('mouseup', onUp)
+    }
+
+    segHitbox.addEventListener('mousedown', (e) => startDrag('body', e))
+    segLine.addEventListener('mousedown', (e) => startDrag('body', e))
+    handleA.addEventListener('mousedown', (e) => startDrag('pointA', e))
+    handleB.addEventListener('mousedown', (e) => startDrag('pointB', e))
+
+    function onMove(e) {
+      if (!dragType) return
+      const cur = getPos(e)
+
+      if (dragType === 'body') {
+        const dx = cur.x - dragStart.x
+        const dy = cur.y - dragStart.y
+        seg.x1 = origSeg.x1 + dx
+        seg.y1 = origSeg.y1 + dy
+        seg.x2 = origSeg.x2 + dx
+        seg.y2 = origSeg.y2 + dy
+      } else if (dragType === 'pointA') {
+        // B 고정, A 이동
+        const target = snap(origSeg.x2, origSeg.y2, cur.x, cur.y, e)
+        seg.x1 = target.x
+        seg.y1 = target.y
+      } else if (dragType === 'pointB') {
+        // A 고정, B 이동
+        const target = snap(origSeg.x1, origSeg.y1, cur.x, cur.y, e)
+        seg.x2 = target.x
+        seg.y2 = target.y
+      }
+
+      updateView()
+    }
+
+    function onUp() {
+      dragType = null
+      infoMode.innerText = '대기 중'
+      infoMode.style.color = '#2563eb'
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+
+    // 초기 렌더링
+    updateView()
+  </script>
+</body>
+</html>

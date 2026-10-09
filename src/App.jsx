@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.02_20261010_021000_각도기회전핸들R4원형순환화살표적용'
+const VERSION = 'v0.3.03_20261010_022800_선택도구선분끝점길이각도조절'
 
 export default function App() {
   const canvasRef = useRef(null)

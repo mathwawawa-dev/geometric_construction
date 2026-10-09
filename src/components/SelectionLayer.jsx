@@ -104,6 +104,8 @@ export default function SelectionLayer({
     }
   }
 
+  const draggingEndpoint = useRef(null) // { shapeId, endpoint: 'p1' | 'p2', origX, origY, fixedX, fixedY }
+
   const handlePointerDown = (e) => {
     if (!active) return
     // 이미 편집 중이면 커밋 후 종료
@@ -115,37 +117,88 @@ export default function SelectionLayer({
     dragStartPos.current = pos
     lastPos.current = pos
 
-    // 1. 이미 선택된 도형 위를 클릭했는지 확인 (선택된 것들 즉시 이동)
-    const clickedSelected = shapes.find(
-      (s) => selectedIds.includes(s.id) && isPointNearShape(pos.x, pos.y, s)
-    )
-
-    if (clickedSelected) {
-      isDraggingShapes.current = true
-      activeDragIds.current = selectedIds
-    } else {
-      // 2. 다른 도형을 클릭했는지 확인 (선택과 동시에 원터치 드래그 이동 시작!)
-      const hit = [...shapes].reverse().find((s) => isPointNearShape(pos.x, pos.y, s))
-      if (hit) {
-        const nextIds = e.shiftKey
-          ? (selectedIds.includes(hit.id) ? selectedIds.filter((id) => id !== hit.id) : [...selectedIds, hit.id])
-          : [hit.id]
-        setSelectedIds(nextIds)
-        activeDragIds.current = nextIds
-        isDraggingShapes.current = true
-      } else {
-        // 3. 빈 공간 클릭 -> 영역 드래그 선택 (블록 지정) 시작
-        if (!e.shiftKey) {
-          setSelectedIds([])
+    // 0. 단일 선택된 선분의 끝점 핸들 근처를 클릭했는지 확인 (우선순위 최고)
+    if (selectedIds.length === 1) {
+      const selectedShape = shapes.find((s) => s.id === selectedIds[0])
+      if (selectedShape && selectedShape.type === 'segment') {
+        const HANDLE_RADIUS = 12
+        const d1 = Math.hypot(pos.x - selectedShape.x1, pos.y - selectedShape.y1)
+        const d2 = Math.hypot(pos.x - selectedShape.x2, pos.y - selectedShape.y2)
+        if (d1 <= HANDLE_RADIUS) {
+          draggingEndpoint.current = {
+            shapeId: selectedShape.id,
+            endpoint: 'p1',
+            fixedX: selectedShape.x2,
+            fixedY: selectedShape.y2,
+          }
+        } else if (d2 <= HANDLE_RADIUS) {
+          draggingEndpoint.current = {
+            shapeId: selectedShape.id,
+            endpoint: 'p2',
+            fixedX: selectedShape.x1,
+            fixedY: selectedShape.y1,
+          }
         }
-        activeDragIds.current = []
-        setMarquee({ x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y })
+      }
+    }
+
+    if (!draggingEndpoint.current) {
+      // 1. 이미 선택된 도형 위를 클릭했는지 확인 (선택된 것들 즉시 이동)
+      const clickedSelected = shapes.find(
+        (s) => selectedIds.includes(s.id) && isPointNearShape(pos.x, pos.y, s)
+      )
+
+      if (clickedSelected) {
+        isDraggingShapes.current = true
+        activeDragIds.current = selectedIds
+      } else {
+        // 2. 다른 도형을 클릭했는지 확인 (선택과 동시에 원터치 드래그 이동 시작!)
+        const hit = [...shapes].reverse().find((s) => isPointNearShape(pos.x, pos.y, s))
+        if (hit) {
+          const nextIds = e.shiftKey
+            ? (selectedIds.includes(hit.id) ? selectedIds.filter((id) => id !== hit.id) : [...selectedIds, hit.id])
+            : [hit.id]
+          setSelectedIds(nextIds)
+          activeDragIds.current = nextIds
+          isDraggingShapes.current = true
+        } else {
+          // 3. 빈 공간 클릭 -> 영역 드래그 선택 (블록 지정) 시작
+          if (!e.shiftKey) {
+            setSelectedIds([])
+          }
+          activeDragIds.current = []
+          setMarquee({ x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y })
+        }
       }
     }
 
     const onPointerMove = (me) => {
       const curPos = getSVGPos(me)
-      if (isDraggingShapes.current && activeDragIds.current.length > 0) {
+
+      if (draggingEndpoint.current) {
+        // 끝점 드래그 처리 (Shift: 5° 스냅, Shift+Ctrl: 1° 스냅)
+        const { shapeId, endpoint, fixedX, fixedY } = draggingEndpoint.current
+        let targetX = curPos.x
+        let targetY = curPos.y
+
+        if (me.shiftKey) {
+          const step = me.ctrlKey ? 1 : 5
+          const dx = curPos.x - fixedX
+          const dy = curPos.y - fixedY
+          const r = Math.hypot(dx, dy)
+          const deg = Math.atan2(dy, dx) * (180 / Math.PI)
+          const snappedDeg = Math.round(deg / step) * step
+          const rad = snappedDeg * (Math.PI / 180)
+          targetX = fixedX + r * Math.cos(rad)
+          targetY = fixedY + r * Math.sin(rad)
+        }
+
+        if (endpoint === 'p1') {
+          onUpdateShape?.(shapeId, { x1: targetX, y1: targetY })
+        } else {
+          onUpdateShape?.(shapeId, { x2: targetX, y2: targetY })
+        }
+      } else if (isDraggingShapes.current && activeDragIds.current.length > 0) {
         const dx = curPos.x - lastPos.current.x
         const dy = curPos.y - lastPos.current.y
         lastPos.current = curPos
@@ -158,6 +211,11 @@ export default function SelectionLayer({
     }
 
     const onPointerUp = () => {
+      if (draggingEndpoint.current) {
+        draggingEndpoint.current = null
+        onFinishMove?.()
+      }
+
       if (isDraggingShapes.current) {
         isDraggingShapes.current = false
         activeDragIds.current = []
@@ -230,6 +288,18 @@ export default function SelectionLayer({
                 <rect x={x + w - 3.5} y={y - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
                 <rect x={x - 3.5} y={y + h - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
                 <rect x={x + w - 3.5} y={y + h - 3.5} width="7" height="7" fill="#ffffff" stroke="#2563eb" strokeWidth="1.5" />
+
+                {/* 선분(segment)인 경우: 양 끝점에 길이/각도 조절 원형 핸들 표시 */}
+                {s.type === 'segment' && (
+                  <g className="pointer-events-none">
+                    {/* 끝점 1 (x1, y1) */}
+                    <circle cx={s.x1} cy={s.y1} r={10} fill="rgba(37, 99, 235, 0.15)" stroke="none" />
+                    <circle cx={s.x1} cy={s.y1} r={5} fill="#ffffff" stroke="#2563eb" strokeWidth="2.5" />
+                    {/* 끝점 2 (x2, y2) */}
+                    <circle cx={s.x2} cy={s.y2} r={10} fill="rgba(37, 99, 235, 0.15)" stroke="none" />
+                    <circle cx={s.x2} cy={s.y2} r={5} fill="#ffffff" stroke="#2563eb" strokeWidth="2.5" />
+                  </g>
+                )}
               </g>
             )
           })}
