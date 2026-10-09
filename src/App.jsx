@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.85_20261009_232900_각도기중심점스냅추가'
+const VERSION = 'v0.2.86_20261009_233400_선분도구ShiftCtrl1도스냅추가'
 
 export default function App() {
   const canvasRef = useRef(null)

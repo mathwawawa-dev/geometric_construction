@@ -292,12 +292,14 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
 
-      // Shift: 5도 단위 각도 스냅
+      // Shift: 5도 단위 각도 스냅 / Shift + Ctrl: 1도 단위 각도 스냅
       if (lineStart && e.shiftKey) {
         const dx = finalPos.x - lineStart.x
         const dy = finalPos.y - lineStart.y
         const dist = Math.hypot(dx, dy)
-        const snappedAngle = Math.round(Math.atan2(dy, dx) / (5 * Math.PI / 180)) * (5 * Math.PI / 180)
+        const stepDeg = e.ctrlKey ? 1 : 5
+        const stepRad = (stepDeg * Math.PI) / 180
+        const snappedAngle = Math.round(Math.atan2(dy, dx) / stepRad) * stepRad
         finalPos = {
           x: lineStart.x + dist * Math.cos(snappedAngle),
           y: lineStart.y + dist * Math.sin(snappedAngle),
@@ -468,13 +470,14 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }
 
       if (lineStart) {
-        // 두 번째 클릭 시 Shift 5도 스냅 적용
+        // 두 번째 클릭 시 Shift 스냅 적용 (Shift: 5도 / Shift+Ctrl: 1도)
         if (e.shiftKey) {
           const dx = finalPos.x - lineStart.x
           const dy = finalPos.y - lineStart.y
           const dist = Math.hypot(dx, dy)
           const rawAngle = Math.atan2(dy, dx)
-          const step = (5 * Math.PI) / 180
+          const stepDeg = e.ctrlKey ? 1 : 5
+          const step = (stepDeg * Math.PI) / 180
           const snappedAngle = Math.round(rawAngle / step) * step
           finalPos = {
             x: lineStart.x + dist * Math.cos(snappedAngle),
@@ -539,13 +542,14 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             }
           }
 
-          // Shift 드래그 시 5도 단위 스냅
+          // Shift 드래그 시 스냅 (Shift: 5도 / Shift+Ctrl: 1도)
           if (me.shiftKey) {
             const dx = finalUpPos.x - startPoint.current.x
             const dy = finalUpPos.y - startPoint.current.y
             const dist = Math.hypot(dx, dy)
             const rawAngle = Math.atan2(dy, dx)
-            const step = (5 * Math.PI) / 180
+            const stepDeg = me.ctrlKey ? 1 : 5
+            const step = (stepDeg * Math.PI) / 180
             const snappedAngle = Math.round(rawAngle / step) * step
             finalUpPos = {
               x: startPoint.current.x + dist * Math.cos(snappedAngle),
