@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.96_20261010_014800_각도기회전화살표선끝정렬보정'
+const VERSION = 'v0.2.97_20261010_015100_각도기회전화살표refX7수정'
 
 export default function App() {
   const canvasRef = useRef(null)
