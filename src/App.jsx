@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.06_20261010_023600_각도기회전핸들R4원형순환화살표이전버전복구'
+const VERSION = 'v0.3.07_20261010_031800_각도기회전및크기조절핸들화살촉2단위축소반영'
 
 export default function App() {
   const canvasRef = useRef(null)

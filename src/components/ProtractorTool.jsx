@@ -243,7 +243,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
         })}
       </g>
 
-      {/* 회전 핸들 — 초록색 아이콘과 동일한 비례와 두께(3.5px)로 굵고 크게 렌더링 */}
+      {/* 회전 핸들 — 양방향 순환 원호 화살표 (r=27.5, 선두께 6.2px, 촉 날개 11.5px) */}
       {(() => {
         const hx = cx + radius * Math.cos(angle)
         const hy = cy + radius * Math.sin(angle)
@@ -255,7 +255,6 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
             onMouseDown={onPointerDown('rotate')}
             onTouchStart={onPointerDown('rotate')}
           >
-            {/* R4 양방향 2중 원형 순환 화살표 임베딩 */}
             <svg
               x={0}
               y={0}
@@ -271,71 +270,48 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
                 r="45"
                 fill="#fef08a"
                 stroke="#ca8a04"
-                strokeWidth="5"
+                strokeWidth="3"
               />
 
-              <defs>
-                <marker
-                  id="arr4A"
-                  markerWidth="14"
-                  markerHeight="14"
-                  refX="7"
-                  refY="6.5"
-                  orient="auto"
-                  markerUnits="userSpaceOnUse"
-                >
-                  <path
-                    d="M 2 0.5 L 11 6.5 L 2 12.5"
-                    fill="none"
-                    stroke="black"
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </marker>
-                <marker
-                  id="arr4B"
-                  markerWidth="14"
-                  markerHeight="14"
-                  refX="7"
-                  refY="6.5"
-                  orient="auto"
-                  markerUnits="userSpaceOnUse"
-                >
-                  <path
-                    d="M 2 0.5 L 11 6.5 L 2 12.5"
-                    fill="none"
-                    stroke="black"
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </marker>
-              </defs>
-
-              {/* 2개의 대칭 130도 원호로 이루어진 완전한 회전 원 */}
+              {/* 상단 원호 및 화살촉 */}
               <path
-                d="M 50 20 A 30 30 0 0 1 80 50"
+                d="M 47.6 22.6 A 27.5 27.5 0 0 1 77.1 54.8"
                 fill="none"
                 stroke="black"
-                strokeWidth="5"
+                strokeWidth="6.2"
                 strokeLinecap="round"
-                markerEnd="url(#arr4A)"
               />
               <path
-                d="M 50 80 A 30 30 0 0 1 20 50"
+                d="M 69.3 48.4 L 76.6 57.2 L 85.5 49.9"
                 fill="none"
                 stroke="black"
-                strokeWidth="5"
+                strokeWidth="5.5"
                 strokeLinecap="round"
-                markerEnd="url(#arr4B)"
+                strokeLinejoin="round"
+              />
+
+              {/* 하단 원호 및 화살촉 */}
+              <path
+                d="M 52.4 77.4 A 27.5 27.5 0 0 1 22.9 45.2"
+                fill="none"
+                stroke="black"
+                strokeWidth="6.2"
+                strokeLinecap="round"
+              />
+              <path
+                d="M 30.7 51.6 L 23.4 42.8 L 14.5 50.1"
+                fill="none"
+                stroke="black"
+                strokeWidth="5.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </g>
         )
       })()}
 
-      {/* 크기 조절 핸들 — 대각선 양방향 화살표 아이콘 */}
+      {/* 크기 조절 핸들 — 대각선 양방향 화살표 아이콘 (촉 날개 6px) */}
       {(() => {
         const hx = cx + radius * Math.cos(angle - Math.PI / 2)
         const hy = cy + radius * Math.sin(angle - Math.PI / 2)
@@ -351,8 +327,8 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
             <g transform={`scale(${S/48})`}>
               <circle cx="24" cy="24" r="22" fill="#dcfce7" stroke="#16a34a" strokeWidth="2.5"/>
               <line x1="14" y1="34" x2="34" y2="14" stroke="black" strokeWidth="3.0" strokeLinecap="round"/>
-              <polyline points="22,34 14,34 14,26" fill="none" stroke="black" strokeWidth="3.0" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="26,14 34,14 34,22" fill="none" stroke="black" strokeWidth="3.0" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="20,34 14,34 14,28" fill="none" stroke="black" strokeWidth="3.0" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="28,14 34,14 34,20" fill="none" stroke="black" strokeWidth="3.0" strokeLinecap="round" strokeLinejoin="round"/>
             </g>
           </g>
         )
