@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.74_20261009_223800_각도기투명화및숫자배치개선'
+const VERSION = 'v0.2.75_20261009_224600_각도기여백절반축소'
 
 export default function App() {
   const canvasRef = useRef(null)

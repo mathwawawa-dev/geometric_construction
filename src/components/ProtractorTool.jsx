@@ -70,9 +70,11 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
 
   const degAngle = angle * (180 / Math.PI)
 
-  const R_outer = radius
-  const R_tick_inner = radius * 0.90  // 눈금 끝나는 안쪽 반원선
-  const R_inner = radius * 0.65       // 숫자 아래 안쪽 반원선 (사진의 큰 안쪽 호)
+  const R_inner = radius * 0.65       // 파란색 선 (선2, 고정)
+  const R_in_label = radius * 0.685   // 안쪽 숫자 (선2와의 여백 절반으로 축소)
+  const R_out_label = radius * 0.735  // 바깥쪽 숫자 (안쪽 숫자와의 여백 절반으로 축소)
+  const R_tick_inner = radius * 0.785 // 분홍색 선 (선1, 바깥쪽 숫자와의 여백 절반으로 축소)
+  const R_outer = radius * 0.885      // 가장 바깥쪽 눈금 끝 (눈금 폭 비율 유지)
   const R_hub = radius * 0.16         // 사진의 중심 반원 허브
 
   const ticks = Array.from({ length: 181 }, (_, i) => i)
@@ -105,7 +107,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           strokeWidth="1.2"
         />
 
-        {/* 눈금 바닥 호선 (R_tick_inner) */}
+        {/* 눈금 바닥 호선 (선1, R_tick_inner) */}
         <path
           d={`M ${cx - R_tick_inner} ${cy} A ${R_tick_inner} ${R_tick_inner} 0 0 1 ${cx + R_tick_inner} ${cy}`}
           fill="none"
@@ -113,7 +115,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           strokeWidth="1"
         />
 
-        {/* 숫자 아래 안쪽 큰 호선 (R_inner) */}
+        {/* 숫자 아래 안쪽 큰 호선 (선2, R_inner) */}
         <path
           d={`M ${cx - R_inner} ${cy} A ${R_inner} ${R_inner} 0 0 1 ${cx + R_inner} ${cy}`}
           fill="none"
@@ -169,17 +171,16 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           )
         })}
 
-        {/* 바깥쪽 숫자 (0~180) - 눈금 호선(R_tick_inner) 아래에 안전하게 배치 */}
+        {/* 바깥쪽 숫자 (0~180) */}
         {labelDegrees.map((deg) => {
           const tickRad = Math.PI - (deg * Math.PI) / 180
-          const rLabel = radius * 0.82
-          const lx = aX(rLabel, tickRad)
-          const ly = aY(rLabel, tickRad)
+          const lx = aX(R_out_label, tickRad)
+          const ly = aY(R_out_label, tickRad)
           const rotDeg = deg - 90
           return (
             <text key={`out-${deg}`} x={lx} y={ly}
               textAnchor="middle" dominantBaseline="middle"
-              fontSize={Math.max(9, radius * 0.052)}
+              fontSize={Math.max(8, radius * 0.046)}
               fontWeight="600"
               fill="#111"
               transform={`rotate(${rotDeg}, ${lx}, ${ly})`}
@@ -190,18 +191,17 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           )
         })}
 
-        {/* 안쪽 숫자 (180~0) - 안쪽 호선(R_inner) 위에 안전하게 배치 */}
+        {/* 안쪽 숫자 (180~0) */}
         {labelDegrees.map((deg) => {
           const innerDeg = 180 - deg
           const tickRad = Math.PI - (deg * Math.PI) / 180
-          const rLabel = radius * 0.72
-          const lx = aX(rLabel, tickRad)
-          const ly = aY(rLabel, tickRad)
+          const lx = aX(R_in_label, tickRad)
+          const ly = aY(R_in_label, tickRad)
           const rotDeg = deg - 90
           return (
             <text key={`in-${deg}`} x={lx} y={ly}
               textAnchor="middle" dominantBaseline="middle"
-              fontSize={Math.max(8, radius * 0.046)}
+              fontSize={Math.max(7, radius * 0.04)}
               fontWeight="500"
               fill="#333"
               transform={`rotate(${rotDeg}, ${lx}, ${ly})`}
