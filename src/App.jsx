@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.00_20261010_020000_각도기회전핸들사용자SVG완전통합'
+const VERSION = 'v0.3.01_20261010_020700_크기조절핸들화살표검정및굵기미세축소'
 
 export default function App() {
   const canvasRef = useRef(null)

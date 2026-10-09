@@ -344,9 +344,9 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
             {/* 배경 원 (viewBox 0 0 48 48 → S×S 스케일) */}
             <g transform={`scale(${S/48})`}>
               <circle cx="24" cy="24" r="22" fill="#dcfce7" stroke="#16a34a" strokeWidth="2.5"/>
-              <line x1="14" y1="34" x2="34" y2="14" stroke="#15803d" strokeWidth="3.5" strokeLinecap="round"/>
-              <polyline points="22,34 14,34 14,26" fill="none" stroke="#15803d" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="26,14 34,14 34,22" fill="none" stroke="#15803d" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <line x1="14" y1="34" x2="34" y2="14" stroke="black" strokeWidth="3.0" strokeLinecap="round"/>
+              <polyline points="22,34 14,34 14,26" fill="none" stroke="black" strokeWidth="3.0" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="26,14 34,14 34,22" fill="none" stroke="black" strokeWidth="3.0" strokeLinecap="round" strokeLinejoin="round"/>
             </g>
           </g>
         )
