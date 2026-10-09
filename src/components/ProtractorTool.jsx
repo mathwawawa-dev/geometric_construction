@@ -107,14 +107,6 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           strokeWidth="1.2"
         />
 
-        {/* 눈금 바닥 호선 (선1, R_tick_inner) */}
-        <path
-          d={`M ${cx - R_tick_inner} ${cy} A ${R_tick_inner} ${R_tick_inner} 0 0 1 ${cx + R_tick_inner} ${cy}`}
-          fill="none"
-          stroke="#333"
-          strokeWidth="1"
-        />
-
         {/* 숫자 아래 안쪽 큰 호선 (선2, R_inner) */}
         <path
           d={`M ${cx - R_inner} ${cy} A ${R_inner} ${R_inner} 0 0 1 ${cx + R_inner} ${cy}`}
@@ -131,8 +123,8 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           strokeWidth="1.2"
         />
 
-        {/* 기준 지름 수평선 */}
-        <line x1={cx - R_outer} y1={cy} x2={cx + R_outer} y2={cy}
+        {/* 기준 지름 수평선: 숫자가 있는 바깥 구간(R_inner ~ R_outer)에는 선을 긋지 않고, 안쪽(cx - R_inner ~ cx + R_inner)만 긋기 */}
+        <line x1={cx - R_inner} y1={cy} x2={cx + R_inner} y2={cy}
           stroke="#333" strokeWidth="1.2"
         />
 
@@ -176,15 +168,16 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           const outerDeg = 180 - deg
           const tickRad = Math.PI - (deg * Math.PI) / 180
           const lx = aX(R_out_label, tickRad)
-          const ly = aY(R_out_label, tickRad)
-          const rotDeg = deg - 90
+          const ly = deg === 0 || deg === 180 ? cy - (radius * 0.02) : aY(R_out_label, tickRad)
+          // 0°와 180°는 사진처럼 가로로 똑바로 세워 기준선 위에 앉히기
+          const rotDeg = deg === 0 || deg === 180 ? 0 : deg - 90
           return (
             <text key={`out-${deg}`} x={lx} y={ly}
               textAnchor="middle" dominantBaseline="middle"
               fontSize={Math.max(8, radius * 0.046)}
               fontWeight="600"
               fill="#111"
-              transform={`rotate(${rotDeg}, ${lx}, ${ly})`}
+              transform={rotDeg !== 0 ? `rotate(${rotDeg}, ${lx}, ${ly})` : undefined}
               style={{ userSelect: 'none', pointerEvents: 'none' }}
             >
               {outerDeg}
@@ -196,15 +189,16 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
         {labelDegrees.map((deg) => {
           const tickRad = Math.PI - (deg * Math.PI) / 180
           const lx = aX(R_in_label, tickRad)
-          const ly = aY(R_in_label, tickRad)
-          const rotDeg = deg - 90
+          const ly = deg === 0 || deg === 180 ? cy - (radius * 0.02) : aY(R_in_label, tickRad)
+          // 0°와 180°는 사진처럼 가로로 똑바로 세워 기준선 위에 앉히기
+          const rotDeg = deg === 0 || deg === 180 ? 0 : deg - 90
           return (
             <text key={`in-${deg}`} x={lx} y={ly}
               textAnchor="middle" dominantBaseline="middle"
               fontSize={Math.max(7, radius * 0.04)}
               fontWeight="500"
               fill="#333"
-              transform={`rotate(${rotDeg}, ${lx}, ${ly})`}
+              transform={rotDeg !== 0 ? `rotate(${rotDeg}, ${lx}, ${ly})` : undefined}
               style={{ userSelect: 'none', pointerEvents: 'none' }}
             >
               {deg}

@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.76_20261009_225000_각도기안팎숫자교체'
+const VERSION = 'v0.2.77_20261009_225400_각도기눈금호선제거및기준선정리'
 
 export default function App() {
   const canvasRef = useRef(null)
