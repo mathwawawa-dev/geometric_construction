@@ -171,8 +171,9 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           )
         })}
 
-        {/* 바깥쪽 숫자 (0~180) */}
+        {/* 바깥쪽 숫자: 180~0 (왼쪽=0°, 오른쪽=180°) */}
         {labelDegrees.map((deg) => {
+          const outerDeg = 180 - deg
           const tickRad = Math.PI - (deg * Math.PI) / 180
           const lx = aX(R_out_label, tickRad)
           const ly = aY(R_out_label, tickRad)
@@ -186,14 +187,13 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
               transform={`rotate(${rotDeg}, ${lx}, ${ly})`}
               style={{ userSelect: 'none', pointerEvents: 'none' }}
             >
-              {deg}
+              {outerDeg}
             </text>
           )
         })}
 
-        {/* 안쪽 숫자 (180~0) */}
+        {/* 안쪽 숫자: 0~180 (왼쪽=180°, 오른쪽=0°) */}
         {labelDegrees.map((deg) => {
-          const innerDeg = 180 - deg
           const tickRad = Math.PI - (deg * Math.PI) / 180
           const lx = aX(R_in_label, tickRad)
           const ly = aY(R_in_label, tickRad)
@@ -207,7 +207,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
               transform={`rotate(${rotDeg}, ${lx}, ${ly})`}
               style={{ userSelect: 'none', pointerEvents: 'none' }}
             >
-              {innerDeg}
+              {deg}
             </text>
           )
         })}

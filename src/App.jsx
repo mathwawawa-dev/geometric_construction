@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.75_20261009_224600_각도기여백절반축소'
+const VERSION = 'v0.2.76_20261009_225000_각도기안팎숫자교체'
 
 export default function App() {
   const canvasRef = useRef(null)
