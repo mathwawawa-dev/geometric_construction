@@ -243,11 +243,11 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
         })}
       </g>
 
-      {/* 회전 핸들 — 곡선 양방향 화살표 아이콘 */}
+      {/* 회전 핸들 — rotate_final.svg 완전 일치 적용 */}
       {(() => {
         const hx = cx + radius * Math.cos(angle)
         const hy = cy + radius * Math.sin(angle)
-        const S = 24 // 아이콘 크기(px)
+        const S = 26 // 핸들 직경 (px)
         return (
           <g
             transform={`translate(${hx - S / 2}, ${hy - S / 2})`}
@@ -256,28 +256,57 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
             onTouchStart={onPointerDown('rotate')}
           >
             {/* 배경 원 */}
-            <circle cx={S/2} cy={S/2} r={S/2} fill="#fef08a" stroke="#ca8a04" strokeWidth="1.5"/>
-            {/* 곡선 양방향 화살표 아이콘 (viewBox 0 0 100 100 → S×S 스케일) */}
-            <g transform={`scale(${S/100})`}>
+            <circle cx={S / 2} cy={S / 2} r={S / 2} fill="#fef08a" stroke="#ca8a04" strokeWidth="1.5" />
+            {/* rotate_final.svg 완전 동일 렌더링 (viewBox 0 0 100 100) */}
+            <svg x={S * 0.12} y={S * 0.12} width={S * 0.76} height={S * 0.76} viewBox="0 0 100 100" overflow="visible">
               <defs>
-                <marker id="rS" markerWidth="13" markerHeight="13"
-                        refX="9" refY="6.5" orient="auto-start-reverse"
-                        markerUnits="userSpaceOnUse">
-                  <path d="M 2 2 L 11 6.5 L 2 11" fill="none" stroke="#854d0e" strokeWidth="2.2"
-                        strokeLinecap="round" strokeLinejoin="round"/>
+                <marker
+                  id="rotateArrowStart"
+                  markerWidth="13"
+                  markerHeight="13"
+                  refX="9"
+                  refY="6.5"
+                  orient="auto-start-reverse"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <path
+                    d="M 2 2 L 11 6.5 L 2 11"
+                    fill="none"
+                    stroke="#000000"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </marker>
-                <marker id="rE" markerWidth="13" markerHeight="13"
-                        refX="9" refY="6.5" orient="auto"
-                        markerUnits="userSpaceOnUse">
-                  <path d="M 2 2 L 11 6.5 L 2 11" fill="none" stroke="#854d0e" strokeWidth="2.2"
-                        strokeLinecap="round" strokeLinejoin="round"/>
+                <marker
+                  id="rotateArrowEnd"
+                  markerWidth="13"
+                  markerHeight="13"
+                  refX="9"
+                  refY="6.5"
+                  orient="auto"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <path
+                    d="M 2 2 L 11 6.5 L 2 11"
+                    fill="none"
+                    stroke="#000000"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </marker>
               </defs>
-              <path d="M 45 18 C 76 30, 76 70, 45 82"
-                    fill="none" stroke="#854d0e" strokeWidth="7"
-                    strokeLinecap="round"
-                    markerStart="url(#rS)" markerEnd="url(#rE)"/>
-            </g>
+              <path
+                d="M 45 18 C 76 30, 76 70, 45 82"
+                fill="none"
+                stroke="#000000"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                markerStart="url(#rotateArrowStart)"
+                markerEnd="url(#rotateArrowEnd)"
+              />
+            </svg>
           </g>
         )
       })()}

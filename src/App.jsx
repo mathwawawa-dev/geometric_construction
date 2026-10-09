@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.92_20261010_013500_각도기핸들SVG아이콘적용'
+const VERSION = 'v0.2.93_20261010_014100_각도기회전핸들SVG일치보정'
 
 export default function App() {
   const canvasRef = useRef(null)
