@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.94_20261010_014200_각도기회전핸들두께강화'
+const VERSION = 'v0.2.95_20261010_014400_각도기회전핸들크기두께초록핸들과동일화'
 
 export default function App() {
   const canvasRef = useRef(null)

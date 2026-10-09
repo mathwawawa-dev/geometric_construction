@@ -243,11 +243,11 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
         })}
       </g>
 
-      {/* 회전 핸들 — rotate_final.svg 완전 일치 적용 */}
+      {/* 회전 핸들 — 초록색 아이콘과 동일한 비례와 두께(3.5px)로 굵고 크게 렌더링 */}
       {(() => {
         const hx = cx + radius * Math.cos(angle)
         const hy = cy + radius * Math.sin(angle)
-        const S = 26 // 핸들 직경 (px)
+        const S = 24
         return (
           <g
             transform={`translate(${hx - S / 2}, ${hy - S / 2})`}
@@ -255,58 +255,37 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
             onMouseDown={onPointerDown('rotate')}
             onTouchStart={onPointerDown('rotate')}
           >
-            {/* 배경 원 */}
-            <circle cx={S / 2} cy={S / 2} r={S / 2} fill="#fef08a" stroke="#ca8a04" strokeWidth="1.5" />
-            {/* rotate_final.svg 완전 동일 렌더링 (viewBox 0 0 100 100) */}
-            <svg x={S * 0.12} y={S * 0.12} width={S * 0.76} height={S * 0.76} viewBox="0 0 100 100" overflow="visible">
-              <defs>
-                <marker
-                  id="rotateArrowStart"
-                  markerWidth="14"
-                  markerHeight="14"
-                  refX="9"
-                  refY="6.5"
-                  orient="auto-start-reverse"
-                  markerUnits="userSpaceOnUse"
-                >
-                  <path
-                    d="M 2 2 L 11 6.5 L 2 11"
-                    fill="none"
-                    stroke="#000000"
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </marker>
-                <marker
-                  id="rotateArrowEnd"
-                  markerWidth="14"
-                  markerHeight="14"
-                  refX="9"
-                  refY="6.5"
-                  orient="auto"
-                  markerUnits="userSpaceOnUse"
-                >
-                  <path
-                    d="M 2 2 L 11 6.5 L 2 11"
-                    fill="none"
-                    stroke="#000000"
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </marker>
-              </defs>
+            {/* 48x48 스케일로 초록색과 완전 동일한 비례 유지 */}
+            <g transform={`scale(${S / 48})`}>
+              {/* 배경 원 */}
+              <circle cx="24" cy="24" r="22" fill="#fef08a" stroke="#ca8a04" strokeWidth="2.5" />
+              {/* 우측 볼록 곡선 본체 (strokeWidth 3.5: 초록색과 동일) */}
               <path
-                d="M 45 18 C 76 30, 76 70, 45 82"
+                d="M 21 11 C 36 17, 36 31, 21 37"
                 fill="none"
-                stroke="#000000"
-                strokeWidth="5.5"
+                stroke="#854d0e"
+                strokeWidth="3.5"
                 strokeLinecap="round"
-                markerStart="url(#rotateArrowStart)"
-                markerEnd="url(#rotateArrowEnd)"
               />
-            </svg>
+              {/* 상단 화살촉 (초록색 화살촉과 동일한 3.5px 두께, 선명한 크기) */}
+              <polyline
+                points="17,17 21,11 27,14"
+                fill="none"
+                stroke="#854d0e"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* 하단 화살촉 */}
+              <polyline
+                points="17,31 21,37 27,34"
+                fill="none"
+                stroke="#854d0e"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </g>
           </g>
         )
       })()}
