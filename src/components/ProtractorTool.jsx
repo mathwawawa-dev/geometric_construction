@@ -70,12 +70,11 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
 
   const degAngle = angle * (180 / Math.PI)
 
-  const R_inner = radius * 0.65       // 파란색 선 (선2, 고정)
-  const R_in_label = radius * 0.685   // 안쪽 숫자 (선2와의 여백 절반으로 축소)
-  const R_out_label = radius * 0.735  // 바깥쪽 숫자 (안쪽 숫자와의 여백 절반으로 축소)
-  const R_tick_inner = radius * 0.785 // 분홍색 선 (선1, 바깥쪽 숫자와의 여백 절반으로 축소)
-  const R_tick_1deg = radius * 0.85   // 작은 눈금(1°)의 끝에 위치하는 호선
-  const R_outer = radius * 0.885      // 가장 바깥쪽 눈금 끝 (눈금 폭 비율 유지)
+  const R_inner = radius * 0.68       // 안쪽 큰 호선
+  const R_in_label = radius * 0.73    // 안쪽 숫자
+  const R_out_label = radius * 0.795  // 바깥쪽 숫자 (눈금 바로 밑으로 밀착)
+  const R_tick_1deg = radius * 0.84   // 작은 눈금(1°)의 끝에 위치하는 호선
+  const R_outer = radius * 0.885      // 가장 바깥쪽 눈금 끝
   const R_hub = radius * 0.16         // 사진의 중심 반원 허브
 
   const ticks = Array.from({ length: 181 }, (_, i) => i)
