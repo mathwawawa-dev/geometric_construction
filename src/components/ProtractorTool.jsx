@@ -255,8 +255,17 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
             onMouseDown={onPointerDown('rotate')}
             onTouchStart={onPointerDown('rotate')}
           >
-            {/* 48x48 스케일로 초록색과 동일한 비례 유지 + marker 기반 화살표 끝 정렬(refX=11) */}
-            <g transform={`scale(${S / 48})`}>
+            {/* 배경 원 */}
+            <circle cx={S / 2} cy={S / 2} r={S / 2} fill="#fef08a" stroke="#ca8a04" strokeWidth="1.5" />
+            {/* rotate_final.svg 원본 그대로 1:1 비율 축소 임베딩 (짤림 없이 원 중앙 배치) */}
+            <svg
+              x={S * 0.16}
+              y={S * 0.16}
+              width={S * 0.68}
+              height={S * 0.68}
+              viewBox="0 0 100 100"
+              overflow="visible"
+            >
               <defs>
                 <marker
                   id="protRotateArrowStart"
@@ -270,7 +279,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
                   <path
                     d="M 2 0.5 L 11 6.5 L 2 12.5"
                     fill="none"
-                    stroke="#1e293b"
+                    stroke="black"
                     strokeWidth="3.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -288,26 +297,23 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
                   <path
                     d="M 2 0.5 L 11 6.5 L 2 12.5"
                     fill="none"
-                    stroke="#1e293b"
+                    stroke="black"
                     strokeWidth="3.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                 </marker>
               </defs>
-              {/* 배경 원 */}
-              <circle cx="24" cy="24" r="22" fill="#fef08a" stroke="#ca8a04" strokeWidth="2.5" />
-              {/* 우측 볼록 곡선 본체 및 선 끝에 정확히 정렬된 화살촉 */}
               <path
-                d="M 20 10 C 37 17, 37 31, 20 38"
+                d="M 45 18 C 76 30, 76 70, 45 82"
                 fill="none"
-                stroke="#1e293b"
-                strokeWidth="3.5"
+                stroke="black"
+                strokeWidth="5.5"
                 strokeLinecap="round"
                 markerStart="url(#protRotateArrowStart)"
                 markerEnd="url(#protRotateArrowEnd)"
               />
-            </g>
+            </svg>
           </g>
         )
       })()}

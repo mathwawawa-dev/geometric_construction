@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.98_20261010_015200_각도기회전화살표벌어짐각확대'
+const VERSION = 'v0.2.99_20261010_015400_각도기회전SVG파일1대1축소일치'
 
 export default function App() {
   const canvasRef = useRef(null)
