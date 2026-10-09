@@ -168,16 +168,15 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           const outerDeg = 180 - deg
           const tickRad = Math.PI - (deg * Math.PI) / 180
           const lx = aX(R_out_label, tickRad)
-          const ly = deg === 0 || deg === 180 ? cy - (radius * 0.02) : aY(R_out_label, tickRad)
-          // 0°와 180°는 사진처럼 가로로 똑바로 세워 기준선 위에 앉히기
-          const rotDeg = deg === 0 || deg === 180 ? 0 : deg - 90
+          const ly = aY(R_out_label, tickRad)
+          const rotDeg = deg - 90
           return (
             <text key={`out-${deg}`} x={lx} y={ly}
               textAnchor="middle" dominantBaseline="middle"
               fontSize={Math.max(8, radius * 0.046)}
               fontWeight="600"
               fill="#111"
-              transform={rotDeg !== 0 ? `rotate(${rotDeg}, ${lx}, ${ly})` : undefined}
+              transform={`rotate(${rotDeg}, ${lx}, ${ly})`}
               style={{ userSelect: 'none', pointerEvents: 'none' }}
             >
               {outerDeg}
@@ -189,16 +188,15 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
         {labelDegrees.map((deg) => {
           const tickRad = Math.PI - (deg * Math.PI) / 180
           const lx = aX(R_in_label, tickRad)
-          const ly = deg === 0 || deg === 180 ? cy - (radius * 0.02) : aY(R_in_label, tickRad)
-          // 0°와 180°는 사진처럼 가로로 똑바로 세워 기준선 위에 앉히기
-          const rotDeg = deg === 0 || deg === 180 ? 0 : deg - 90
+          const ly = aY(R_in_label, tickRad)
+          const rotDeg = deg - 90
           return (
             <text key={`in-${deg}`} x={lx} y={ly}
               textAnchor="middle" dominantBaseline="middle"
               fontSize={Math.max(7, radius * 0.04)}
               fontWeight="500"
               fill="#333"
-              transform={rotDeg !== 0 ? `rotate(${rotDeg}, ${lx}, ${ly})` : undefined}
+              transform={`rotate(${rotDeg}, ${lx}, ${ly})`}
               style={{ userSelect: 'none', pointerEvents: 'none' }}
             >
               {deg}

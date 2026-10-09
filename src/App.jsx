@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.77_20261009_225400_각도기눈금호선제거및기준선정리'
+const VERSION = 'v0.2.78_20261009_225700_각도기숫자방사형복원및선겹침방지'
 
 export default function App() {
   const canvasRef = useRef(null)
