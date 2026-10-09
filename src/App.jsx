@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.99_20261010_015400_각도기회전SVG파일1대1축소일치'
+const VERSION = 'v0.3.00_20261010_020000_각도기회전핸들사용자SVG완전통합'
 
 export default function App() {
   const canvasRef = useRef(null)

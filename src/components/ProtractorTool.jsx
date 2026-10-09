@@ -255,17 +255,25 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
             onMouseDown={onPointerDown('rotate')}
             onTouchStart={onPointerDown('rotate')}
           >
-            {/* 배경 원 */}
-            <circle cx={S / 2} cy={S / 2} r={S / 2} fill="#fef08a" stroke="#ca8a04" strokeWidth="1.5" />
-            {/* rotate_final.svg 원본 그대로 1:1 비율 축소 임베딩 (짤림 없이 원 중앙 배치) */}
+            {/* 사용자 작성 100x100 SVG 원본 그대로 임베딩 */}
             <svg
-              x={S * 0.16}
-              y={S * 0.16}
-              width={S * 0.68}
-              height={S * 0.68}
+              x={0}
+              y={0}
+              width={S}
+              height={S}
               viewBox="0 0 100 100"
               overflow="visible"
             >
+              {/* 배경 원 (노란색/주황색 계열 테마 유지) */}
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="#fef08a"
+                stroke="#ca8a04"
+                strokeWidth="5"
+              />
+
               <defs>
                 <marker
                   id="protRotateArrowStart"
@@ -285,6 +293,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
                     strokeLinejoin="round"
                   />
                 </marker>
+
                 <marker
                   id="protRotateArrowEnd"
                   markerWidth="14"
@@ -304,6 +313,8 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
                   />
                 </marker>
               </defs>
+
+              {/* 오른쪽으로 볼록한 수직 곡선 화살표 */}
               <path
                 d="M 45 18 C 76 30, 76 70, 45 82"
                 fill="none"
