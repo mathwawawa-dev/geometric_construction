@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <circle cx="24" cy="24" r="22" fill="#fef08a" stroke="#ca8a04" stroke-width="2.5" />
+
+  <!-- 상단 원호: 조금 더 큰 반지름 15 -->
+  <path d="M 12 15 A 15 15 0 0 1 38.5 20.5" fill="none" stroke="black" stroke-width="3.0" stroke-linecap="round" />
+  <polyline points="36,13.5 39,21 31.5,23.5" fill="none" stroke="black" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- 하단 원호: 반지름 15 -->
+  <path d="M 36 33 A 15 15 0 0 1 9.5 27.5" fill="none" stroke="black" stroke-width="3.0" stroke-linecap="round" />
+  <polyline points="12,34.5 9,27 16.5,24.5" fill="none" stroke="black" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

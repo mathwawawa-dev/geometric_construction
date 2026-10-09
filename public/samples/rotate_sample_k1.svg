@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- 배경 원: 노란색 배경 (크기조절 핸들과 동일한 48x48 뷰박스 및 stroke-width 2.5) -->
+  <circle cx="24" cy="24" r="22" fill="#fef08a" stroke="#ca8a04" stroke-width="2.5" />
+
+  <!-- 상단 시계방향 원호: 중심 (24,24), 반지름 14, -140도 ~ -15도 (약 125도) -->
+  <!-- 시작: (13.3, 15.0), 끝: (37.5, 20.4) -->
+  <path d="M 13.5 15 A 14 14 0 0 1 37.5 20.5" fill="none" stroke="black" stroke-width="3.0" stroke-linecap="round" />
+  <!-- 상단 화살촉 (크기조절과 동일한 8px 직각 폴리라인 촉, 접선 방향 정렬) -->
+  <polyline points="35,14 38,21 31,23" fill="none" stroke="black" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- 하단 시계방향 원호: 중심 (24,24), 반지름 14, 40도 ~ 165도 (약 125도) -->
+  <!-- 시작: (34.7, 33.0), 끝: (10.5, 27.6) -->
+  <path d="M 34.5 33 A 14 14 0 0 1 10.5 27.5" fill="none" stroke="black" stroke-width="3.0" stroke-linecap="round" />
+  <!-- 하단 화살촉 (크기조절과 동일한 8px 직각 폴리라인 촉) -->
+  <polyline points="13,34 10,27 17,25" fill="none" stroke="black" stroke-width="3.0" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

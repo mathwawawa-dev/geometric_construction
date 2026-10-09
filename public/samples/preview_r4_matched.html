@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>크기조절 화살표 스타일을 R4에 적용한 샘플 비교</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+      background: #f8fafc;
+      padding: 36px;
+      color: #0f172a;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    p.desc {
+      color: #64748b;
+      margin-top: 0;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .reference-box {
+      background: white;
+      border: 2px solid #86efac;
+      border-radius: 12px;
+      padding: 16px 24px;
+      margin-bottom: 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 4px 10px rgba(22, 163, 74, 0.08);
+    }
+    .reference-box img {
+      width: 56px;
+      height: 56px;
+    }
+    .grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px 16px;
+      width: 175px;
+      text-align: center;
+      box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+      transition: all 0.2s;
+    }
+    .card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 16px -4px rgba(59, 130, 246, 0.15);
+    }
+    .card.recommended {
+      border-color: #f59e0b;
+      background: #fffdf5;
+    }
+    .card .preview-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 90px;
+      margin-bottom: 12px;
+    }
+    .card img {
+      width: 72px;
+      height: 72px;
+    }
+    .card .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: #e2e8f0;
+      color: #475569;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .card.recommended .badge {
+      background: #fef08a;
+      color: #854d0e;
+    }
+    .card h3 {
+      font-size: 16px;
+      margin: 4px 0 6px;
+    }
+    .card p {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.45;
+    }
+    .pair-preview {
+      margin-top: 36px;
+      background: white;
+      border-radius: 14px;
+      padding: 20px 24px;
+      border: 1px solid #cbd5e1;
+      max-width: 650px;
+    }
+    .pair-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .pair-row img {
+      width: 40px;
+      height: 40px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔄 크기조절 화살표 스타일을 적용한 R4 샘플 비교</h1>
+  <p class="desc">초록색 크기조절 핸들과 완전히 동일한 화살표 촉 스타일·선 두께(3.0px)·곡선 설계를 R4 원형 순환 루프에 이식한 샘플들입니다.</p>
+
+  <div class="reference-box">
+    <img src="resize_sample_1.svg" alt="기준 크기조절 핸들">
+    <div>
+      <div style="font-size:14px; color:#16a34a; font-weight:bold;">[기준] 크기조절 핸들 (초록색 배경)</div>
+      <div style="font-size:12px; color:#475569; margin-top:2px;">두께 3.0px 검정 선 + 꺾임 화살촉 (완벽 일치 기준점)</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- K1 -->
+    <div class="card recommended">
+      <span class="badge">강력 추천 (1:1 일치)</span>
+      <div class="preview-box">
+        <img src="rotate_sample_k1.svg" alt="R4-K1">
+      </div>
+      <h3>샘플 K1</h3>
+      <p><b>두께 3.0px 표준</b><br>크기조절 화살표와 1:1 완벽 일치하는 선 두께 및 촉 크기</p>
+    </div>
+
+    <!-- K2 -->
+    <div class="card">
+      <span class="badge">깊은 원호</span>
+      <div class="preview-box">
+        <img src="rotate_sample_k2.svg" alt="R4-K2">
+      </div>
+      <h3>샘플 K2</h3>
+      <p><b>150도 깊은 원호</b><br>두께 3.0px 유지, 원호가 더 길어 더 둥근 원 느낌</p>
+    </div>
+
+    <!-- K3 -->
+    <div class="card">
+      <span class="badge">슬림형</span>
+      <div class="preview-box">
+        <img src="rotate_sample_k3.svg" alt="R4-K3">
+      </div>
+      <h3>샘플 K3</h3>
+      <p><b>두께 2.8px 슬림</b><br>약간 더 가늘고 날렵한 느낌</p>
+    </div>
+
+    <!-- K4 -->
+    <div class="card">
+      <span class="badge">볼드형</span>
+      <div class="preview-box">
+        <img src="rotate_sample_k4.svg" alt="R4-K4">
+      </div>
+      <h3>샘플 K4</h3>
+      <p><b>두께 3.2px 볼드</b><br>아주 약간 더 또렷하고 두꺼운 선</p>
+    </div>
+
+    <!-- K5 -->
+    <div class="card">
+      <span class="badge">넓은 반지름</span>
+      <div class="preview-box">
+        <img src="rotate_sample_k5.svg" alt="R4-K5">
+      </div>
+      <h3>샘플 K5</h3>
+      <p><b>넓은 회전 반경</b><br>두께 3.0px, 원 바깥쪽으로 조금 더 확장된 루프</p>
+    </div>
+  </div>
+
+  <div class="pair-preview">
+    <h3 style="margin: 0 0 10px; font-size: 15px;">🔍 각도기 핸들 나란히 놓았을 때의 조합 미리보기</h3>
+    <div class="pair-row">
+      <img src="rotate_sample_k1.svg" alt="K1">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">K1 (3.0px) + 크기조절 (3.0px) : 선 두께와 화살촉 느낌이 완벽한 페어를 이룸</span>
+    </div>
+    <div class="pair-row">
+      <img src="rotate_sample_k2.svg" alt="K2">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">K2 (3.0px 깊은 원호) + 크기조절 (3.0px) : 원형감이 강조되는 조합</span>
+    </div>
+  </div>
+</body>
+</html>

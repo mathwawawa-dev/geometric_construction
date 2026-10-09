@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.04_20261010_023000_선택도구미선택선분끝점직접조절및R4회전샘플제작'
+const VERSION = 'v0.3.05_20261010_023400_각도기회전핸들사용자제안양방향순환SVG적용'
 
 export default function App() {
   const canvasRef = useRef(null)
