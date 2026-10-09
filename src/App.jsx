@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.97_20261010_015100_각도기회전화살표refX7수정'
+const VERSION = 'v0.2.98_20261010_015200_각도기회전화살표벌어짐각확대'
 
 export default function App() {
   const canvasRef = useRef(null)

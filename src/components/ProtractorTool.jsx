@@ -268,7 +268,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
                   markerUnits="userSpaceOnUse"
                 >
                   <path
-                    d="M 2 2 L 11 6.5 L 2 11"
+                    d="M 2 0.5 L 11 6.5 L 2 12.5"
                     fill="none"
                     stroke="#1e293b"
                     strokeWidth="3.2"
@@ -286,7 +286,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
                   markerUnits="userSpaceOnUse"
                 >
                   <path
-                    d="M 2 2 L 11 6.5 L 2 11"
+                    d="M 2 0.5 L 11 6.5 L 2 12.5"
                     fill="none"
                     stroke="#1e293b"
                     strokeWidth="3.2"
