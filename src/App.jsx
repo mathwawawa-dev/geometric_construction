@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.73_20261009_223000_Shift직선포인터일치'
+const VERSION = 'v0.2.74_20261009_223800_각도기투명화및숫자배치개선'
 
 export default function App() {
   const canvasRef = useRef(null)
