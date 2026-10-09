@@ -86,13 +86,23 @@ function isPointInsideRuler(pos, ruler) {
   return false
 }
 
-// 점의 중심 및 직선/곡선의 '두께 중심축(위-아래 정중앙)' 자석 스냅 함수
-function snapToPointCenters(pos, shapes, snapRadius = 16) {
+function getProtractorCenter(protractor) {
+  if (!protractor || !protractor.visible) return null
+  return { x: protractor.cx, y: protractor.cy }
+}
+
+// 점의 중심 및 직선/곡선의 '두께 중심축(위-아래 정중앙)' 자석 스냅 함수 + 각도기 중심점(점1) 스냅
+function snapToPointCenters(pos, shapes, snapRadius = 16, protractor = null) {
+  // 각도기 점1(중심점) 우선 스냅
+  const pCenter = getProtractorCenter(protractor)
+  if (pCenter && Math.hypot(pos.x - pCenter.x, pos.y - pCenter.y) <= snapRadius) {
+    return { pos: pCenter, snappedPoint: true }
+  }
   const center = snapToShapesCenter(pos, shapes, snapRadius)
   return center ? { pos: center, snappedPoint: true } : { pos, snappedPoint: false }
 }
 
-export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, highlightMode, stampMode, shapes, snapEnabled = true }) {
+export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, protractor, highlightMode, stampMode, shapes, snapEnabled = true }) {
   const draftCanvasRef = useRef(null)
   const isDrawing = useRef(false)
   const snapLock = useRef(null)
@@ -130,6 +140,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   //   (shapes 변경 시 handleMove가 재생성되지 않아 mouseup 후 freeze 방지)
   const shapesRef = useRef(shapes)
   shapesRef.current = shapes  // 매 렌더마다 즉시 동기화 (useEffect 불필요)
+
+  const protractorRef = useRef(protractor)
+  protractorRef.current = protractor
 
   // 텍스트 도구 상태
   const [textEditor, setTextEditor] = useState(null)
@@ -215,15 +228,17 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     // 자 내부 여부 실시간 업데이트 (커서 변경용) - 그리는 중에는 업데이트하지 않음 (스냅 위치에 커서 고정)
     if (!isDrawing.current) {
       setIsInsideRuler(activeTool === 'pen' && isPointInsideRuler(rawPos, ruler))
-      // 손 커서 감지: 선분 끝점 또는 단일점(점 개체)에 가까울 때만 활성
+      // 손 커서 감지: 선분 끝점, 각도기 중심점(점1), 또는 단일점(점 개체)에 가까울 때만 활성
       // 선분 몸통·스트로크 몸통은 제외 (지오지브라 방식)
       const CURSOR_R = 12
       const nearEndpoint = !!snapToSegmentEndpoint(rawPos, shapesRef.current, CURSOR_R)
+      const pCenter = getProtractorCenter(protractorRef.current)
+      const nearProtractorCenter = pCenter ? Math.hypot(rawPos.x - pCenter.x, rawPos.y - pCenter.y) <= CURSOR_R : false
       const nearDot = shapesRef.current.some(s =>
         s.type === 'stroke' && s.points?.length === 1 &&
         Math.hypot(rawPos.x - s.points[0].x, rawPos.y - s.points[0].y) <= CURSOR_R
       )
-      const near = nearEndpoint || nearDot
+      const near = nearEndpoint || nearProtractorCenter || nearDot
       if (near !== isNearShapeRef.current) {
         isNearShapeRef.current = near
         setIsNearShape(near)
@@ -241,7 +256,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         lock = rLock
         finalPos = rulerSnapped
         if (!lock) {
-          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
+          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current, 16, protractorRef.current)
           finalPos = pointRes.pos
         }
         // 자 lock 상태 갱신 (lock이 유지되는 동안 계속 경계 추적)
@@ -272,7 +287,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         lock = rLock
         finalPos = rulerSnapped
         if (!lock) {
-          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
+          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current, 16, protractorRef.current)
           finalPos = pointRes.pos
         }
       }
@@ -289,9 +304,14 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         }
       }
 
-      // 선분 끝점 항상-스냅: snapEnabled 무관, 12px 반경 내 선분 끝점에 흡착 (커서 감지 반경과 동일)
-      const epSnap = snapToSegmentEndpoint(rawPos, shapesRef.current, 12)
-      if (epSnap) finalPos = epSnap
+      // 선분 끝점 및 각도기 중심(점1) 항상-스냅: 12px 반경 내 흡착
+      const pCenter = getProtractorCenter(protractorRef.current)
+      if (pCenter && Math.hypot(rawPos.x - pCenter.x, rawPos.y - pCenter.y) <= 12) {
+        finalPos = pCenter
+      } else {
+        const epSnap = snapToSegmentEndpoint(rawPos, shapesRef.current, 12)
+        if (epSnap) finalPos = epSnap
+      }
 
       if (lineStart) {
         const draftCanvas = draftCanvasRef.current
@@ -327,7 +347,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       if (isSnapActive) {
         const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
         if (!rLock) {
-          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
+          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current, 16, protractorRef.current)
           if (pointRes.snappedPoint) foundSnapPos = pointRes.pos
         } else {
           foundSnapPos = rulerSnapped
@@ -462,9 +482,14 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           }
         }
 
-        // 선분 끝점 항상-스냅 (12px, 최우선)
-        const ep2 = snapToSegmentEndpoint(rawPos, shapesRef.current, 12)
-        if (ep2) finalPos = ep2
+        // 선분 끝점 및 각도기 중심(점1) 항상-스냅 (12px, 최우선)
+        const pCenter = getProtractorCenter(protractorRef.current)
+        if (pCenter && Math.hypot(rawPos.x - pCenter.x, rawPos.y - pCenter.y) <= 12) {
+          finalPos = pCenter
+        } else {
+          const ep2 = snapToSegmentEndpoint(rawPos, shapesRef.current, 12)
+          if (ep2) finalPos = ep2
+        }
 
         // 두 번째 클릭 시 선분 완성
         const shape = {
@@ -484,9 +509,14 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
         }
       } else {
-        // 첫 번째 클릭 시 시작 — 선분 끝점 항상-스냅 (12px)
-        const ep1 = snapToSegmentEndpoint(rawPos, shapesRef.current, 12)
-        if (ep1) finalPos = ep1
+        // 첫 번째 클릭 시 시작 — 선분 끝점 및 각도기 중심(점1) 항상-스냅 (12px)
+        const pCenter = getProtractorCenter(protractorRef.current)
+        if (pCenter && Math.hypot(rawPos.x - pCenter.x, rawPos.y - pCenter.y) <= 12) {
+          finalPos = pCenter
+        } else {
+          const ep1 = snapToSegmentEndpoint(rawPos, shapesRef.current, 12)
+          if (ep1) finalPos = ep1
+        }
         setLineStart({ x: finalPos.x, y: finalPos.y })
         isDrawing.current = true
         startPoint.current = { x: finalPos.x, y: finalPos.y }
@@ -504,7 +534,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             const { pos: rSnap, lock: rL } = calcRulerSnap(upPos, ruler, null)
             finalUpPos = rSnap
             if (!rL) {
-              const pr = snapToPointCenters(rSnap, shapesRef.current)
+              const pr = snapToPointCenters(rSnap, shapesRef.current, 16, protractorRef.current)
               finalUpPos = pr.pos
             }
           }
@@ -523,9 +553,14 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             }
           }
 
-          // 선분 끝점 항상-스냅 (12px, 최우선)
-          const epDrag = snapToSegmentEndpoint(upPos, shapesRef.current, 12)
-          if (epDrag) finalUpPos = epDrag
+          // 선분 끝점 및 각도기 중심(점1) 항상-스냅 (12px, 최우선)
+          const pCenterUp = getProtractorCenter(protractorRef.current)
+          if (pCenterUp && Math.hypot(upPos.x - pCenterUp.x, upPos.y - pCenterUp.y) <= 12) {
+            finalUpPos = pCenterUp
+          } else {
+            const epDrag = snapToSegmentEndpoint(upPos, shapesRef.current, 12)
+            if (epDrag) finalUpPos = epDrag
+          }
           
           const d = Math.hypot(finalUpPos.x - startPoint.current.x, finalUpPos.y - startPoint.current.y)
           if (d > 5) {
@@ -612,7 +647,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       lock = rLock
       finalPos = rulerSnapped
       if (!lock) {
-        const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
+        const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current, 16, protractorRef.current)
         finalPos = pointRes.pos
         isPointSnapped = pointRes.snappedPoint
       }

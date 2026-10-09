@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.84_20261009_232000_각도기초기크기2배확대'
+const VERSION = 'v0.2.85_20261009_232900_각도기중심점스냅추가'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -651,6 +651,7 @@ export default function App() {
               stampMode={stampMode}
               shapes={state.shapes}
               snapEnabled={snapEnabled}
+              protractor={state.protractor}
             />
             <SelectionLayer
               active={state.drawMode === 'select'}
