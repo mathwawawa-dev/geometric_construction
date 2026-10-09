@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.05_20261010_023400_각도기회전핸들사용자제안양방향순환SVG적용'
+const VERSION = 'v0.3.06_20261010_023600_각도기회전핸들R4원형순환화살표이전버전복구'
 
 export default function App() {
   const canvasRef = useRef(null)

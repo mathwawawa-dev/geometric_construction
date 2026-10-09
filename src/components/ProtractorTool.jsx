@@ -255,52 +255,82 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
             onMouseDown={onPointerDown('rotate')}
             onTouchStart={onPointerDown('rotate')}
           >
-            {/* 회전 핸들 — 사용자 48x48 SVG 1:1 스케일 적용 */}
-            <g transform={`scale(${S / 48})`}>
-              {/* 원형 배경 */}
+            {/* R4 양방향 2중 원형 순환 화살표 임베딩 */}
+            <svg
+              x={0}
+              y={0}
+              width={S}
+              height={S}
+              viewBox="0 0 100 100"
+              overflow="visible"
+            >
+              {/* 배경 원 */}
               <circle
-                cx="24"
-                cy="24"
-                r="22"
+                cx="50"
+                cy="50"
+                r="45"
                 fill="#fef08a"
                 stroke="#ca8a04"
-                strokeWidth="2.5"
+                strokeWidth="5"
               />
-              {/* 회전 화살표: 위쪽 곡선과 화살촉 */}
+
+              <defs>
+                <marker
+                  id="arr4A"
+                  markerWidth="14"
+                  markerHeight="14"
+                  refX="7"
+                  refY="6.5"
+                  orient="auto"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <path
+                    d="M 2 0.5 L 11 6.5 L 2 12.5"
+                    fill="none"
+                    stroke="black"
+                    strokeWidth="3.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </marker>
+                <marker
+                  id="arr4B"
+                  markerWidth="14"
+                  markerHeight="14"
+                  refX="7"
+                  refY="6.5"
+                  orient="auto"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <path
+                    d="M 2 0.5 L 11 6.5 L 2 12.5"
+                    fill="none"
+                    stroke="black"
+                    strokeWidth="3.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </marker>
+              </defs>
+
+              {/* 2개의 대칭 130도 원호로 이루어진 완전한 회전 원 */}
               <path
-                d="M 10.5 21 C 10.5 14.5, 15.5 10, 22 10 C 26 10, 29 11.5, 31.5 14"
+                d="M 50 20 A 30 30 0 0 1 80 50"
                 fill="none"
-                stroke="#171717"
-                strokeWidth="3"
+                stroke="black"
+                strokeWidth="5"
                 strokeLinecap="round"
-                strokeLinejoin="round"
+                markerEnd="url(#arr4A)"
               />
               <path
-                d="M 25.5 14.5 L 32 14.5 L 32 8"
+                d="M 50 80 A 30 30 0 0 1 20 50"
                 fill="none"
-                stroke="#171717"
-                strokeWidth="3"
+                stroke="black"
+                strokeWidth="5"
                 strokeLinecap="round"
-                strokeLinejoin="round"
+                markerEnd="url(#arr4B)"
               />
-              {/* 반대 방향 회전 화살표 */}
-              <path
-                d="M 37.5 27 C 37.5 33.5, 32.5 38, 26 38 C 22 38, 19 36.5, 16.5 34"
-                fill="none"
-                stroke="#171717"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M 22.5 33.5 L 16 33.5 L 16 40"
-                fill="none"
-                stroke="#171717"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </g>
+            </svg>
           </g>
         )
       })()}
