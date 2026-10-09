@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.93_20261010_014100_각도기회전핸들SVG일치보정'
+const VERSION = 'v0.2.94_20261010_014200_각도기회전핸들두께강화'
 
 export default function App() {
   const canvasRef = useRef(null)

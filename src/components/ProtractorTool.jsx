@@ -262,8 +262,8 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
               <defs>
                 <marker
                   id="rotateArrowStart"
-                  markerWidth="13"
-                  markerHeight="13"
+                  markerWidth="14"
+                  markerHeight="14"
                   refX="9"
                   refY="6.5"
                   orient="auto-start-reverse"
@@ -273,15 +273,15 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
                     d="M 2 2 L 11 6.5 L 2 11"
                     fill="none"
                     stroke="#000000"
-                    strokeWidth="2.2"
+                    strokeWidth="3.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                 </marker>
                 <marker
                   id="rotateArrowEnd"
-                  markerWidth="13"
-                  markerHeight="13"
+                  markerWidth="14"
+                  markerHeight="14"
                   refX="9"
                   refY="6.5"
                   orient="auto"
@@ -291,7 +291,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
                     d="M 2 2 L 11 6.5 L 2 11"
                     fill="none"
                     stroke="#000000"
-                    strokeWidth="2.2"
+                    strokeWidth="3.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
@@ -301,7 +301,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
                 d="M 45 18 C 76 30, 76 70, 45 82"
                 fill="none"
                 stroke="#000000"
-                strokeWidth="3.5"
+                strokeWidth="5.5"
                 strokeLinecap="round"
                 markerStart="url(#rotateArrowStart)"
                 markerEnd="url(#rotateArrowEnd)"
