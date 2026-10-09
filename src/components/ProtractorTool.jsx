@@ -74,6 +74,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
   const R_in_label = radius * 0.685   // 안쪽 숫자 (선2와의 여백 절반으로 축소)
   const R_out_label = radius * 0.735  // 바깥쪽 숫자 (안쪽 숫자와의 여백 절반으로 축소)
   const R_tick_inner = radius * 0.785 // 분홍색 선 (선1, 바깥쪽 숫자와의 여백 절반으로 축소)
+  const R_tick_1deg = radius * 0.85   // 작은 눈금(1°)의 끝에 위치하는 호선
   const R_outer = radius * 0.885      // 가장 바깥쪽 눈금 끝 (눈금 폭 비율 유지)
   const R_hub = radius * 0.16         // 사진의 중심 반원 허브
 
@@ -105,6 +106,14 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           fill="rgba(255, 255, 255, 0.01)"
           stroke="#333"
           strokeWidth="1.2"
+        />
+
+        {/* 작은 눈금(1°)의 끝을 받쳐주는 호선 */}
+        <path
+          d={`M ${cx - R_tick_1deg} ${cy} A ${R_tick_1deg} ${R_tick_1deg} 0 0 1 ${cx + R_tick_1deg} ${cy}`}
+          fill="none"
+          stroke="#333"
+          strokeWidth="1"
         />
 
         {/* 숫자 아래 안쪽 큰 호선 (선2, R_inner) */}
@@ -145,14 +154,15 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
           stroke="#333" strokeWidth="1.2"
         />
 
-        {/* 눈금 (R_outer에서 시작하여 안쪽으로) */}
+        {/* 눈금 (R_outer에서 시작하여 안쪽으로: 1°는 R_tick_1deg에 도달, 5°와 10°는 더 길게 안쪽으로 뻗음) */}
         {ticks.map((i) => {
           const tickRad = Math.PI - (i * Math.PI) / 180
           const is10 = i % 10 === 0
           const is5  = i % 5 === 0
-          // 10도는 R_tick_inner까지 전체 도달, 5도는 65%, 1도는 35% 길이
-          const tickSpan = R_outer - R_tick_inner
-          const len = is10 ? tickSpan : is5 ? tickSpan * 0.65 : tickSpan * 0.35
+          // 1° 눈금 깊이: R_outer - R_tick_1deg
+          const baseDepth = R_outer - R_tick_1deg
+          // 10도는 바깥 숫자 직전(R_tick_inner)까지 도달, 5도는 중간, 1도는 R_tick_1deg까지
+          const len = is10 ? (R_outer - R_tick_inner) : is5 ? (baseDepth * 1.8) : baseDepth
           return (
             <line key={i}
               x1={aX(R_outer, tickRad)}       y1={aY(R_outer, tickRad)}

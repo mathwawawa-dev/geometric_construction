@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.78_20261009_225700_각도기숫자방사형복원및선겹침방지'
+const VERSION = 'v0.2.79_20261009_230100_작은눈금끝호선배치'
 
 export default function App() {
   const canvasRef = useRef(null)
