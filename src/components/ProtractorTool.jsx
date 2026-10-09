@@ -57,17 +57,25 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
         const nr = Math.hypot(p.x - cx, p.y - cy)
         setProtractor({ radius: Math.max(60, nr) })
       } else if (dragging.current === 'rotate') {
-        const currentMouseAngle = Math.atan2(p.y - cy, p.x - cx)
-        let delta = currentMouseAngle - startMouseAngleRef.current
-        // 정규화 (-PI ~ PI)
-        while (delta > Math.PI) delta -= 2 * Math.PI
-        while (delta < -Math.PI) delta += 2 * Math.PI
+        if (me.shiftKey) {
+          // 절대 각도 5의 배수 스냅 (5°, 10°, 15° ...)
+          const currentAngle = Math.atan2(p.y - cy, p.x - cx)
+          const deg = currentAngle * (180 / Math.PI)
+          const snappedDeg = Math.round(deg / 5) * 5
+          setProtractor({ angle: snappedDeg * (Math.PI / 180) })
+        } else {
+          // 시작 각도 기준 상대 회전 (기본 1°, Ctrl 누르면 5° 단위)
+          const currentMouseAngle = Math.atan2(p.y - cy, p.x - cx)
+          let delta = currentMouseAngle - startMouseAngleRef.current
+          while (delta > Math.PI) delta -= 2 * Math.PI
+          while (delta < -Math.PI) delta += 2 * Math.PI
 
-        const deltaDeg = delta * (180 / Math.PI)
-        const step = me.shiftKey ? 5 : 1
-        const snappedDeltaDeg = Math.round(deltaDeg / step) * step
-        const newAngle = startAngleRef.current + snappedDeltaDeg * (Math.PI / 180)
-        setProtractor({ angle: newAngle })
+          const deltaDeg = delta * (180 / Math.PI)
+          const step = me.ctrlKey ? 5 : 1
+          const snappedDeltaDeg = Math.round(deltaDeg / step) * step
+          const newAngle = startAngleRef.current + snappedDeltaDeg * (Math.PI / 180)
+          setProtractor({ angle: newAngle })
+        }
       }
     }
     const onUp = () => {

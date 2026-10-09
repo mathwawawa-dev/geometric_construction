@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.88_20261009_234400_각도기회전시작각기준Shift5도스냅'
+const VERSION = 'v0.2.89_20261009_234600_각도기회전Ctrl상대5도Shift절대5도배수'
 
 export default function App() {
   const canvasRef = useRef(null)
