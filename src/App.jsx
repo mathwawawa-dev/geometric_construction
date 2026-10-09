@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.82_20261009_231400_각도기숫자위치안쪽미세조정'
+const VERSION = 'v0.2.83_20261009_231700_각도기바깥숫자극미량안쪽이동'
 
 export default function App() {
   const canvasRef = useRef(null)

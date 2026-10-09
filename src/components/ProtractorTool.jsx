@@ -71,8 +71,8 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
   const degAngle = angle * (180 / Math.PI)
 
   const R_inner = radius * 0.68       // 안쪽 큰 호선
-  const R_in_label = radius * 0.71    // 안쪽 숫자 (좀 더 안쪽으로)
-  const R_out_label = radius * 0.775  // 바깥쪽 숫자 (눈금선과 겹치지 않게 좀 더 안쪽으로)
+  const R_in_label = radius * 0.71    // 안쪽 숫자
+  const R_out_label = radius * 0.767  // 바깥쪽 숫자 (안쪽으로 극미량 이동)
   const R_tick_1deg = radius * 0.84   // 작은 눈금(1°)의 끝에 위치하는 호선
   const R_outer = radius * 0.885      // 가장 바깥쪽 눈금 끝
   const R_hub = radius * 0.16         // 사진의 중심 반원 허브
