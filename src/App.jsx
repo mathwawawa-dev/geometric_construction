@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.81_20261009_231100_눈금바깥숫자여백축소'
+const VERSION = 'v0.2.82_20261009_231400_각도기숫자위치안쪽미세조정'
 
 export default function App() {
   const canvasRef = useRef(null)
