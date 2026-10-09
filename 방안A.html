@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>방안 A: 표준 각도 스냅 (15° / 45° 단위)</title>
+  <style>
+    body { margin: 0; padding: 20px; font-family: sans-serif; background: #f8fafc; }
+    h2 { margin: 0 0 8px 0; color: #1e293b; }
+    p { margin: 0 0 16px 0; color: #64748b; font-size: 14px; }
+    canvas { background: white; border: 2px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); cursor: crosshair; }
+    .badge { display: inline-block; padding: 4px 8px; background: #e0f2fe; color: #0369a1; border-radius: 4px; font-weight: bold; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h2>방안 A: 45° / 15° 단위 각도 스냅 (포토샵/피그마 스타일)</h2>
+  <p><span class="badge">체험 방법</span> 캔버스 위에서 <strong>Shift 키를 누른 채</strong> 마우스를 드래그해보세요. (가장 가까운 15도/45도 선에 착 달라붙으며, 선의 길이는 마우스 거리와 동기화됩니다)</p>
+  <canvas id="cv" width="800" height="500"></canvas>
+
+  <script>
+    const cv = document.getElementById('cv');
+    const ctx = cv.getContext('2d');
+    let isDrawing = false;
+    let p0 = null;
+    let lines = [];
+
+    cv.addEventListener('mousedown', (e) => {
+      const rect = cv.getBoundingClientRect();
+      p0 = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      isDrawing = true;
+    });
+
+    cv.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      const rect = cv.getBoundingClientRect();
+      const raw = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+
+      redraw();
+
+      let targetPos = raw;
+      if (e.shiftKey) {
+        // 방안 A: 현재 마우스 각도를 15도(또는 45도) 단위로 스냅
+        const dx = raw.x - p0.x;
+        const dy = raw.y - p0.y;
+        const dist = Math.hypot(dx, dy);
+        const angle = Math.atan2(dy, dx);
+        
+        const SNAP_STEP = Math.PI / 12; // 15도 단위 (45도는 Math.PI / 4)
+        const snappedAngle = Math.round(angle / SNAP_STEP) * SNAP_STEP;
+        
+        targetPos = {
+          x: p0.x + dist * Math.cos(snappedAngle),
+          y: p0.y + dist * Math.sin(snappedAngle)
+        };
+      }
+
+      // 현재 그리는 선
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(targetPos.x, targetPos.y);
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // 마우스 포인터 위치 표시 (빨간 점) 및 연결 가이드선
+      if (e.shiftKey) {
+        ctx.beginPath();
+        ctx.moveTo(targetPos.x, targetPos.y);
+        ctx.lineTo(raw.x, raw.y);
+        ctx.strokeStyle = '#ef4444';
+        ctx.setLineDash([3, 3]);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.beginPath();
+        ctx.arc(raw.x, raw.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#ef4444';
+        ctx.fill();
+      }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!isDrawing) return;
+      isDrawing = false;
+      const rect = cv.getBoundingClientRect();
+      const raw = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      let targetPos = raw;
+      if (e.shiftKey) {
+        const dx = raw.x - p0.x;
+        const dy = raw.y - p0.y;
+        const dist = Math.hypot(dx, dy);
+        const angle = Math.atan2(dy, dx);
+        const SNAP_STEP = Math.PI / 12;
+        const snappedAngle = Math.round(angle / SNAP_STEP) * SNAP_STEP;
+        targetPos = {
+          x: p0.x + dist * Math.cos(snappedAngle),
+          y: p0.y + dist * Math.sin(snappedAngle)
+        };
+      }
+      lines.push({ p0, p1: targetPos });
+      redraw();
+    });
+
+    function redraw() {
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      lines.forEach(l => {
+        ctx.beginPath();
+        ctx.moveTo(l.p0.x, l.p0.y);
+        ctx.lineTo(l.p1.x, l.p1.y);
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      });
+    }
+  </script>
+</body>
+</html>

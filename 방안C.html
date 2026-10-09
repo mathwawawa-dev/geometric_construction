@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>방안 C: 스마트 수평/수직 자석 스냅 + 자유 직선 절충</title>
+  <style>
+    body { margin: 0; padding: 20px; font-family: sans-serif; background: #f8fafc; }
+    h2 { margin: 0 0 8px 0; color: #1e293b; }
+    p { margin: 0 0 16px 0; color: #64748b; font-size: 14px; }
+    canvas { background: white; border: 2px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); cursor: crosshair; }
+    .badge { display: inline-block; padding: 4px 8px; background: #fef3c7; color: #b45309; border-radius: 4px; font-weight: bold; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h2>방안 C: 스마트 수평/수직 자석 스냅 + 자유 직선</h2>
+  <p><span class="badge">체험 방법</span> <strong>Shift 키를 누른 채</strong> 마우스를 드래그해보세요. (수평/수직/45도 근처 약 6도 이내에서는 자석처럼 완벽한 수평/수직선이 되고, 그 외 각도에서는 마우스 끝점을 그대로 100% 추종합니다)</p>
+  <canvas id="cv" width="800" height="500"></canvas>
+
+  <script>
+    const cv = document.getElementById('cv');
+    const ctx = cv.getContext('2d');
+    let isDrawing = false;
+    let p0 = null;
+    let lines = [];
+
+    cv.addEventListener('mousedown', (e) => {
+      const rect = cv.getBoundingClientRect();
+      p0 = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      isDrawing = true;
+    });
+
+    function calcTargetPos(raw, isShift) {
+      if (!isShift) return raw;
+      const dx = raw.x - p0.x;
+      const dy = raw.y - p0.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 4) return raw;
+
+      const angle = Math.atan2(dy, dx);
+      // 수평, 수직, 45도 기준 (45도 단위)
+      const STEP = Math.PI / 4; 
+      const snapped = Math.round(angle / STEP) * STEP;
+      const diff = Math.abs(angle - snapped);
+
+      // 기준 각도와 오차가 7도(약 0.12 라디안) 이내이면 완벽한 기준선으로 자석 스냅
+      if (diff < 0.12) {
+        return {
+          x: p0.x + dist * Math.cos(snapped),
+          y: p0.y + dist * Math.sin(snapped),
+          isSnapped: true
+        };
+      }
+      // 그 외 각도는 마우스 포인터를 100% 그대로 추종하는 자유 직선
+      return { x: raw.x, y: raw.y, isSnapped: false };
+    }
+
+    cv.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      const rect = cv.getBoundingClientRect();
+      const raw = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+
+      redraw();
+
+      const res = calcTargetPos(raw, e.shiftKey);
+
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(res.x, res.y);
+      ctx.strokeStyle = res.isSnapped ? '#d97706' : '#9333ea';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(res.x, res.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = res.isSnapped ? '#d97706' : '#9333ea';
+      ctx.fill();
+
+      // 안내 텍스트
+      ctx.font = '12px sans-serif';
+      ctx.fillStyle = '#64748b';
+      ctx.fillText(res.isSnapped ? '자석 스냅 활성화됨 (수평/수직/대각)' : '자유 직선 (포인터 1:1 일치)', res.x + 10, res.y - 10);
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!isDrawing) return;
+      isDrawing = false;
+      const rect = cv.getBoundingClientRect();
+      const raw = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      const res = calcTargetPos(raw, e.shiftKey);
+      lines.push({ p0, p1: res, isSnapped: res.isSnapped });
+      redraw();
+    });
+
+    function redraw() {
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      lines.forEach(l => {
+        ctx.beginPath();
+        ctx.moveTo(l.p0.x, l.p0.y);
+        ctx.lineTo(l.p1.x, l.p1.y);
+        ctx.strokeStyle = l.isSnapped ? '#d97706' : '#9333ea';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      });
+    }
+  </script>
+</body>
+</html>

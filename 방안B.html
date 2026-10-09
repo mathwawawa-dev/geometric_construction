@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>방안 B: 자유 직선 (마우스 포인터 100% 일치)</title>
+  <style>
+    body { margin: 0; padding: 20px; font-family: sans-serif; background: #f8fafc; }
+    h2 { margin: 0 0 8px 0; color: #1e293b; }
+    p { margin: 0 0 16px 0; color: #64748b; font-size: 14px; }
+    canvas { background: white; border: 2px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); cursor: crosshair; }
+    .badge { display: inline-block; padding: 4px 8px; background: #dcfce7; color: #15803d; border-radius: 4px; font-weight: bold; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h2>방안 B: 자유 직선 (마우스 커서와 끝점이 무조건 100% 일치)</h2>
+  <p><span class="badge">체험 방법</span> 캔버스 위에서 <strong>Shift 키를 누른 채</strong> 마우스를 드래그해보세요. (시작점부터 현재 마우스 포인터 끝까지 언제나 오차 0px로 완벽히 일치하는 직선)</p>
+  <canvas id="cv" width="800" height="500"></canvas>
+
+  <script>
+    const cv = document.getElementById('cv');
+    const ctx = cv.getContext('2d');
+    let isDrawing = false;
+    let p0 = null;
+    let lines = [];
+
+    cv.addEventListener('mousedown', (e) => {
+      const rect = cv.getBoundingClientRect();
+      p0 = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      isDrawing = true;
+    });
+
+    cv.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      const rect = cv.getBoundingClientRect();
+      const raw = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+
+      redraw();
+
+      // 방안 B: Shift를 누르면 시작점 ~ 현재 마우스 위치까지 곧바로 직선 연결 (끝점이 항상 포인터와 일치)
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(raw.x, raw.y);
+      ctx.strokeStyle = '#16a34a';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // 마우스 포인터 강조
+      ctx.beginPath();
+      ctx.arc(raw.x, raw.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#16a34a';
+      ctx.fill();
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!isDrawing) return;
+      isDrawing = false;
+      const rect = cv.getBoundingClientRect();
+      const raw = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      lines.push({ p0, p1: raw });
+      redraw();
+    });
+
+    function redraw() {
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      lines.forEach(l => {
+        ctx.beginPath();
+        ctx.moveTo(l.p0.x, l.p0.y);
+        ctx.lineTo(l.p1.x, l.p1.y);
+        ctx.strokeStyle = '#16a34a';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      });
+    }
+  </script>
+</body>
+</html>

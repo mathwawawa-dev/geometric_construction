@@ -250,23 +250,12 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
 
       if (isPointInsideRuler(finalPos, ruler)) return
 
-      // Shift: 직선 드로잉 (각도 고정)
+      // Shift: 직선 드로잉 (방안 B: 포인터 100% 일치 자유 직선)
       const isShift = e.shiftKey || isShiftDrawing.current
       if (isShift && !lock) {
         const p0 = startPoint.current
         const p1 = finalPos
-        const d = Math.hypot(p1.x - p0.x, p1.y - p0.y)
-        if (initialAngle.current === null && d >= 6) {
-          initialAngle.current = Math.atan2(p1.y - p0.y, p1.x - p0.x)
-        }
-        if (initialAngle.current !== null) {
-          const ang = initialAngle.current
-          const ux = Math.cos(ang), uy = Math.sin(ang)
-          const proj = (p1.x - p0.x) * ux + (p1.y - p0.y) * uy
-          currentStrokePoints.current = [p0, { x: p0.x + proj * ux, y: p0.y + proj * uy }]
-        } else {
-          currentStrokePoints.current = [p0, p1]
-        }
+        currentStrokePoints.current = [p0, p1]
         renderCurrentStroke()
         return
       }

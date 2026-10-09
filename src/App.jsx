@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.72_20261009_004200_각도기반원방향수정'
+const VERSION = 'v0.2.73_20261009_223000_Shift직선포인터일치'
 
 export default function App() {
   const canvasRef = useRef(null)
