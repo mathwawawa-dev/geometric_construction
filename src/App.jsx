@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.03_20261010_022800_선택도구선분끝점길이각도조절'
+const VERSION = 'v0.3.04_20261010_023000_선택도구미선택선분끝점직접조절및R4회전샘플제작'
 
 export default function App() {
   const canvasRef = useRef(null)

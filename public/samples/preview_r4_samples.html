@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>각도기 회전 핸들 R4 변형 샘플 비교</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+      background: #f1f5f9;
+      padding: 36px;
+      color: #0f172a;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    p.desc {
+      color: #64748b;
+      margin-top: 0;
+      margin-bottom: 28px;
+      font-size: 14px;
+    }
+    .reference-box {
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .reference-box img {
+      width: 48px;
+      height: 48px;
+    }
+    .grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px 16px;
+      width: 175px;
+      text-align: center;
+      box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+      transition: all 0.2s;
+    }
+    .card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 16px -4px rgba(59, 130, 246, 0.15);
+    }
+    .card.current {
+      border-color: #f59e0b;
+      background: #fffbeb;
+    }
+    .card .preview-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+      margin-bottom: 12px;
+    }
+    .card img {
+      width: 80px;
+      height: 80px;
+    }
+    .card .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: #e2e8f0;
+      color: #475569;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .card.current .badge {
+      background: #fef08a;
+      color: #854d0e;
+    }
+    .card h3 {
+      font-size: 16px;
+      margin: 4px 0 6px;
+    }
+    .card p {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔄 각도기 회전 핸들 R4 변형 샘플</h1>
+  <p class="desc">R4(양방향 순환 루프)를 바탕으로 화살촉 형태, 원호 곡률, 두께 밸런스를 개선한 5가지 샘플입니다.</p>
+
+  <div class="reference-box">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <img src="resize_sample_1.svg" alt="크기조절 핸들">
+      <div>
+        <div style="font-size:12px; color:#16a34a; font-weight:bold;">현재 확정된 크기조절 핸들 (초록)</div>
+        <div style="font-size:11px; color:#64748b;">검정 3.0px 폴리라인 화살촉</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- 기존 R4 -->
+    <div class="card current">
+      <span class="badge">현재 적용중</span>
+      <div class="preview-box">
+        <img src="rotate_arc_4.svg" alt="R4 원본">
+      </div>
+      <h3>R4 (현재 버전)</h3>
+      <p>SVG marker 화살촉<br>두께 5px<br>두 원호 분리형</p>
+    </div>
+
+    <!-- R4-A -->
+    <div class="card">
+      <span class="badge">추천 1</span>
+      <div class="preview-box">
+        <img src="rotate_sample_4a.svg" alt="R4-A">
+      </div>
+      <h3>R4-A</h3>
+      <p><b>동일한 폴리라인 촉</b><br>크기조절 핸들과 화살촉 스타일 완벽 일치<br>(두께 4.5px)</p>
+    </div>
+
+    <!-- R4-B -->
+    <div class="card">
+      <span class="badge">추천 2</span>
+      <div class="preview-box">
+        <img src="rotate_sample_4b.svg" alt="R4-B">
+      </div>
+      <h3>R4-B</h3>
+      <p><b>깊은 원호 (140도)</b><br>원형 둘레를 더 많이 감싸는 볼드한 루프<br>(두께 5.0px)</p>
+    </div>
+
+    <!-- R4-C -->
+    <div class="card">
+      <span class="badge">삼각형 촉</span>
+      <div class="preview-box">
+        <img src="rotate_sample_4c.svg" alt="R4-C">
+      </div>
+      <h3>R4-C</h3>
+      <p><b>채워진 솔리드 촉</b><br>또렷한 세모 화살촉<br>시인성 극대화</p>
+    </div>
+
+    <!-- R4-D -->
+    <div class="card">
+      <span class="badge">300도 롱루프</span>
+      <div class="preview-box">
+        <img src="rotate_sample_4d.svg" alt="R4-D">
+      </div>
+      <h3>R4-D</h3>
+      <p><b>300도 단일 원형 화살표</b><br>원 하나를 거의 한 바퀴 감싸는 형태</p>
+    </div>
+
+    <!-- R4-E -->
+    <div class="card">
+      <span class="badge">슬림 밸런스</span>
+      <div class="preview-box">
+        <img src="rotate_sample_4e.svg" alt="R4-E">
+      </div>
+      <h3>R4-E</h3>
+      <p><b>슬림 모던 루프 (4.0px)</b><br>크기조절(3.0px)과 굵기 밸런스가 가장 자연스러움</p>
+    </div>
+  </div>
+</body>
+</html>

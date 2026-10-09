@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- 배경 원: 밝은 노랑 바탕, 황금색 테두리 -->
+  <circle cx="50" cy="50" r="45" fill="#fef08a" stroke="#ca8a04" stroke-width="3" />
+  
+  <!-- 상단 시계방향 원호 (중심 50,50, 반지름 28, -135도 ~ -15도: 120도) -->
+  <path d="M 30.2 30.2 A 28 28 0 0 1 77 42.7" fill="none" stroke="black" stroke-width="4.5" stroke-linecap="round" />
+  <!-- 상단 화살표 촉 (우측 끝에 시계방향 접선 방향 촉) -->
+  <polyline points="72,33 77,43 66,45" fill="none" stroke="black" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- 하단 시계방향 원호 (중심 50,50, 반지름 28, 45도 ~ 165도: 120도) -->
+  <path d="M 69.8 69.8 A 28 28 0 0 1 23 57.3" fill="none" stroke="black" stroke-width="4.5" stroke-linecap="round" />
+  <!-- 하단 화살표 촉 (좌측 끝에 시계방향 접선 방향 촉) -->
+  <polyline points="28,67 23,57 34,55" fill="none" stroke="black" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

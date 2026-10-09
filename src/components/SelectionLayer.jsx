@@ -13,6 +13,7 @@ export default function SelectionLayer({
 }) {
   const [marquee, setMarquee] = useState(null)
   const [editingText, setEditingText] = useState(null)
+  const [hoveringEndpoint, setHoveringEndpoint] = useState(false)
   const isDraggingShapes = useRef(false)
   const activeDragIds = useRef([])
   const dragStartPos = useRef({ x: 0, y: 0 })
@@ -117,22 +118,26 @@ export default function SelectionLayer({
     dragStartPos.current = pos
     lastPos.current = pos
 
-    // 0. 단일 선택된 선분의 끝점 핸들 근처를 클릭했는지 확인 (우선순위 최고)
+    // 0. 선분의 끝점 핸들 근처를 클릭했는지 확인 (우선순위 최고)
+    // (선택된 선분이든, 아직 선택되지 않은 선분이든 끝점을 잡고 바로 조절 가능)
+    const HANDLE_RADIUS = 15
+    let foundEndpoint = null
+
+    // 0-1. 현재 선택된 선분에서 먼저 확인
     if (selectedIds.length === 1) {
       const selectedShape = shapes.find((s) => s.id === selectedIds[0])
       if (selectedShape && selectedShape.type === 'segment') {
-        const HANDLE_RADIUS = 12
         const d1 = Math.hypot(pos.x - selectedShape.x1, pos.y - selectedShape.y1)
         const d2 = Math.hypot(pos.x - selectedShape.x2, pos.y - selectedShape.y2)
         if (d1 <= HANDLE_RADIUS) {
-          draggingEndpoint.current = {
+          foundEndpoint = {
             shapeId: selectedShape.id,
             endpoint: 'p1',
             fixedX: selectedShape.x2,
             fixedY: selectedShape.y2,
           }
         } else if (d2 <= HANDLE_RADIUS) {
-          draggingEndpoint.current = {
+          foundEndpoint = {
             shapeId: selectedShape.id,
             endpoint: 'p2',
             fixedX: selectedShape.x1,
@@ -140,6 +145,39 @@ export default function SelectionLayer({
           }
         }
       }
+    }
+
+    // 0-2. 선택된 선분이 아니더라도, 어떤 선분의 끝점을 직접 클릭했을 때도 즉시 선택 + 끝점 드래그 시작
+    if (!foundEndpoint) {
+      for (let i = shapes.length - 1; i >= 0; i--) {
+        const s = shapes[i]
+        if (s.type !== 'segment') continue
+        const d1 = Math.hypot(pos.x - s.x1, pos.y - s.y1)
+        const d2 = Math.hypot(pos.x - s.x2, pos.y - s.y2)
+        if (d1 <= HANDLE_RADIUS) {
+          foundEndpoint = {
+            shapeId: s.id,
+            endpoint: 'p1',
+            fixedX: s.x2,
+            fixedY: s.y2,
+          }
+          setSelectedIds([s.id])
+          break
+        } else if (d2 <= HANDLE_RADIUS) {
+          foundEndpoint = {
+            shapeId: s.id,
+            endpoint: 'p2',
+            fixedX: s.x1,
+            fixedY: s.y1,
+          }
+          setSelectedIds([s.id])
+          break
+        }
+      }
+    }
+
+    if (foundEndpoint) {
+      draggingEndpoint.current = foundEndpoint
     }
 
     if (!draggingEndpoint.current) {
@@ -246,6 +284,24 @@ export default function SelectionLayer({
     window.addEventListener('touchend', onPointerUp)
   }
 
+  const handleMouseMoveSVG = (e) => {
+    if (!active || draggingEndpoint.current || isDraggingShapes.current) return
+    const pos = getSVGPos(e)
+    const HANDLE_RADIUS = 15
+    let nearEndpoint = false
+    for (let i = shapes.length - 1; i >= 0; i--) {
+      const s = shapes[i]
+      if (s.type !== 'segment') continue
+      if (Math.hypot(pos.x - s.x1, pos.y - s.y1) <= HANDLE_RADIUS || Math.hypot(pos.x - s.x2, pos.y - s.y2) <= HANDLE_RADIUS) {
+        nearEndpoint = true
+        break
+      }
+    }
+    if (nearEndpoint !== hoveringEndpoint) {
+      setHoveringEndpoint(nearEndpoint)
+    }
+  }
+
   if (!active && selectedIds.length === 0 && !editingText) return null
 
   return (
@@ -255,8 +311,17 @@ export default function SelectionLayer({
         className="absolute inset-0 w-full h-full"
         style={{
           pointerEvents: active ? 'all' : 'none',
-          cursor: active ? (isDraggingShapes.current ? 'grabbing' : 'default') : 'inherit',
+          cursor: active
+            ? draggingEndpoint.current
+              ? 'crosshair'
+              : isDraggingShapes.current
+              ? 'grabbing'
+              : hoveringEndpoint
+              ? 'crosshair'
+              : 'default'
+            : 'inherit',
         }}
+        onMouseMove={handleMouseMoveSVG}
         onMouseDown={handlePointerDown}
         onTouchStart={handlePointerDown}
         onDoubleClick={handleDoubleClick}

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="45" fill="#fef08a" stroke="#ca8a04" stroke-width="3" />
+  
+  <!-- 거의 한바퀴 전체를 도는 300도 단일 원형 화살표 (원형 감싸기 극대화) -->
+  <path d="M 40 22 A 30 30 0 1 1 26 38" fill="none" stroke="black" stroke-width="4.8" stroke-linecap="round" />
+  <!-- 접선 방향 화살촉 -->
+  <polyline points="33,26 26,38 38,45" fill="none" stroke="black" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
