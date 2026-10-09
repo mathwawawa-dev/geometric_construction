@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>원형 회전 핸들 샘플 비교</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; background: #f8fafc; padding: 40px; color: #1e293b; }
+    h1 { font-size: 22px; margin-bottom: 24px; }
+    .grid { display: flex; gap: 24px; flex-wrap: wrap; }
+    .card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      width: 170px;
+      text-align: center;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+    }
+    .card img { width: 96px; height: 96px; margin-bottom: 12px; }
+    .card h3 { font-size: 15px; margin: 0 0 6px; }
+    .card p { font-size: 12px; color: #64748b; margin: 0; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <h1>🔄 더 원처럼 보이는 회전 아이콘 샘플</h1>
+  <div class="grid">
+    <div class="card">
+      <img src="rotate_arc_1.svg" alt="R1">
+      <h3>샘플 R1</h3>
+      <p><b>180도 완전한 반원호</b><br>(상하 대칭 원호)</p>
+    </div>
+    <div class="card">
+      <img src="rotate_arc_2.svg" alt="R2">
+      <h3>샘플 R2</h3>
+      <p><b>200도 깊은 원호</b><br>(원형 느낌 강화)</p>
+    </div>
+    <div class="card">
+      <img src="rotate_arc_3.svg" alt="R3">
+      <h3>샘플 R3</h3>
+      <p><b>240도 넓은 원호</b><br>(원을 3/4 감쌈)</p>
+    </div>
+    <div class="card">
+      <img src="rotate_arc_4.svg" alt="R4">
+      <h3>샘플 R4</h3>
+      <p><b>양방향 2중 원형 순환</b><br>(완전한 원형 루프)</p>
+    </div>
+  </div>
+</body>
+</html>

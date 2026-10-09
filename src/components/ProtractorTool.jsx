@@ -255,7 +255,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
             onMouseDown={onPointerDown('rotate')}
             onTouchStart={onPointerDown('rotate')}
           >
-            {/* 사용자 작성 100x100 SVG 원본 그대로 임베딩 */}
+            {/* R4 양방향 2중 원형 순환 화살표 임베딩 */}
             <svg
               x={0}
               y={0}
@@ -264,7 +264,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
               viewBox="0 0 100 100"
               overflow="visible"
             >
-              {/* 배경 원 (노란색/주황색 계열 테마 유지) */}
+              {/* 배경 원 */}
               <circle
                 cx="50"
                 cy="50"
@@ -276,12 +276,12 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
 
               <defs>
                 <marker
-                  id="protRotateArrowStart"
+                  id="arr4A"
                   markerWidth="14"
                   markerHeight="14"
                   refX="7"
                   refY="6.5"
-                  orient="auto-start-reverse"
+                  orient="auto"
                   markerUnits="userSpaceOnUse"
                 >
                   <path
@@ -293,9 +293,8 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
                     strokeLinejoin="round"
                   />
                 </marker>
-
                 <marker
-                  id="protRotateArrowEnd"
+                  id="arr4B"
                   markerWidth="14"
                   markerHeight="14"
                   refX="7"
@@ -314,15 +313,22 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
                 </marker>
               </defs>
 
-              {/* 오른쪽으로 볼록한 수직 곡선 화살표 */}
+              {/* 2개의 대칭 130도 원호로 이루어진 완전한 회전 원 */}
               <path
-                d="M 45 18 C 76 30, 76 70, 45 82"
+                d="M 50 20 A 30 30 0 0 1 80 50"
                 fill="none"
                 stroke="black"
-                strokeWidth="5.5"
+                strokeWidth="5"
                 strokeLinecap="round"
-                markerStart="url(#protRotateArrowStart)"
-                markerEnd="url(#protRotateArrowEnd)"
+                markerEnd="url(#arr4A)"
+              />
+              <path
+                d="M 50 80 A 30 30 0 0 1 20 50"
+                fill="none"
+                stroke="black"
+                strokeWidth="5"
+                strokeLinecap="round"
+                markerEnd="url(#arr4B)"
               />
             </svg>
           </g>

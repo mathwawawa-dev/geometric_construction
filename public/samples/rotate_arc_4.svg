@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="45" fill="#fef08a" stroke="#ca8a04" stroke-width="3" />
+  <defs>
+    <marker id="arr4A" markerWidth="14" markerHeight="14" refX="7" refY="6.5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 2 0.5 L 11 6.5 L 2 12.5" fill="none" stroke="black" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr4B" markerWidth="14" markerHeight="14" refX="7" refY="6.5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 2 0.5 L 11 6.5 L 2 12.5" fill="none" stroke="black" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <!-- 완전한 원형 순환 화살표 (2개의 대칭 130도 원호로 이루어진 완전한 회전 원) -->
+  <path d="M 50 20 A 30 30 0 0 1 80 50" fill="none" stroke="black" stroke-width="5" stroke-linecap="round" marker-end="url(#arr4A)"/>
+  <path d="M 50 80 A 30 30 0 0 1 20 50" fill="none" stroke="black" stroke-width="5" stroke-linecap="round" marker-end="url(#arr4B)"/>
+</svg>
