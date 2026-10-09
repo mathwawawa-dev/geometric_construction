@@ -3,9 +3,9 @@ import { useRef, useCallback } from 'react'
 const HANDLE_R = 10
 const SNAP_DEG = 5
 
-function snapAngle(a) {
+function snapAngle(a, step = 1) {
   const deg = a * (180 / Math.PI)
-  const snapped = Math.round(deg / SNAP_DEG) * SNAP_DEG
+  const snapped = Math.round(deg / step) * step
   return snapped * (Math.PI / 180)
 }
 
@@ -50,7 +50,8 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
         const nr = Math.hypot(p.x - cx, p.y - cy)
         setProtractor({ radius: Math.max(60, nr) })
       } else if (dragging.current === 'rotate') {
-        const a = snapAngle(Math.atan2(p.y - cy, p.x - cx))
+        const step = me.shiftKey ? 5 : 1
+        const a = snapAngle(Math.atan2(p.y - cy, p.x - cx), step)
         setProtractor({ angle: a })
       }
     }

@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.86_20261009_233400_선분도구ShiftCtrl1도스냅추가'
+const VERSION = 'v0.2.87_20261009_234000_각도기회전1도및Shift5도스냅'
 
 export default function App() {
   const canvasRef = useRef(null)
