@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- 배경 원 -->
+  <circle cx="24" cy="24" r="22" fill="#fef9c3" stroke="#eab308" stroke-width="2.5"/>
+  <!-- 사진에 가장 근접: 한쪽 곡선만 크게, 위는 뾰족, 아래도 뾰족 -->
+  <!-- 메인 곡선 (중앙의 크고 부드러운 C 곡선) -->
+  <path d="M 22 9 C 10 16, 10 32, 22 39" fill="none" stroke="#a16207" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- 위 화살표 촉 -->
+  <polyline points="17,13 22,9 27,13" fill="none" stroke="#a16207" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 아래 화살표 촉 -->
+  <polyline points="17,35 22,39 27,35" fill="none" stroke="#a16207" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

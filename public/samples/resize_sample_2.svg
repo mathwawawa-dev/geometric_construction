@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- 배경 원 -->
+  <circle cx="24" cy="24" r="22" fill="#dcfce7" stroke="#16a34a" stroke-width="2.5" />
+  
+  <!-- 직사각형 확장/축소 팽창 아이콘 (Expand corner) -->
+  <!-- 안쪽 작은 사각형 -->
+  <rect x="13" y="21" width="14" height="14" rx="2" fill="none" stroke="#15803d" stroke-width="2.5" />
+  <!-- 확장 화살표 -->
+  <line x1="25" y1="23" x2="35" y2="13" stroke="#15803d" stroke-width="3" stroke-linecap="round" />
+  <polyline points="29,13 35,13 35,19" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

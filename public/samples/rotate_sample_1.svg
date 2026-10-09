@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- 원형 배경 및 테두리 -->
+  <circle cx="24" cy="24" r="22" fill="#fef08a" stroke="#ca8a04" stroke-width="2.5" />
+  
+  <!-- 회전 화살표 기호 (원호 화살표) -->
+  <g fill="none" stroke="#854d0e" stroke-width="3" stroke-linecap="round">
+    <!-- 상단 시계방향 호 -->
+    <path d="M 24 10 A 14 14 0 0 1 38 24" />
+    <!-- 하단 시계방향 호 -->
+    <path d="M 24 38 A 14 14 0 0 1 10 24" />
+  </g>
+  <!-- 상단 화살표 촉 -->
+  <polygon points="38,20 42,27 34,26" fill="#854d0e" />
+  <!-- 하단 화살표 촉 -->
+  <polygon points="10,28 6,21 14,22" fill="#854d0e" />
+</svg>

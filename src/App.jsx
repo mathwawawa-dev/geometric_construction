@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.2.91_20261009_235000_각도기초기크기95퍼센트축소'
+const VERSION = 'v0.2.92_20261010_013500_각도기핸들SVG아이콘적용'
 
 export default function App() {
   const canvasRef = useRef(null)

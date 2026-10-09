@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- 배경 원 -->
+  <circle cx="24" cy="24" r="22" fill="#fef9c3" stroke="#eab308" stroke-width="2.5"/>
+  <!-- 위로 향하는 곡선 화살표 (왼쪽) -->
+  <path d="M 19 34 C 16 28, 16 20, 19 14" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round"/>
+  <!-- 위 화살표 촉 -->
+  <polyline points="14,17 19,14 22,19" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 아래로 향하는 곡선 화살표 (오른쪽) -->
+  <path d="M 29 14 C 32 20, 32 28, 29 34" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round"/>
+  <!-- 아래 화살표 촉 -->
+  <polyline points="34,31 29,34 26,29" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>회전 핸들 최종 샘플</title>
+  <style>
+    body { font-family: sans-serif; background: #f8fafc; padding: 40px; }
+    .row { display: flex; gap: 40px; align-items: center; flex-wrap: wrap; }
+    .box { text-align: center; }
+    .box p { font-size: 13px; color: #555; margin: 8px 0 0; }
+    /* 실제 핸들처럼 노란 배경 원 위에 표시 */
+    .handle-preview {
+      width: 52px; height: 52px;
+      background: #fef08a;
+      border: 2.5px solid #eab308;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto;
+    }
+    .handle-preview img { width: 34px; height: 34px; }
+    h2 { margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+  <h2>🔄 최종 회전 핸들 샘플</h2>
+  <div class="row">
+    <div class="box">
+      <img src="rotate_final.svg" width="120" height="120">
+      <p>기본 SVG (흰 배경)</p>
+    </div>
+    <div class="box">
+      <div class="handle-preview">
+        <img src="rotate_final.svg">
+      </div>
+      <p>실제 핸들 크기 미리보기<br>(노란 원 위)</p>
+    </div>
+    <div class="box">
+      <p style="font-size:14px">참고 사진</p>
+      <img src="../../.gemini/antigravity/brain/3c459c2a-68a3-4071-8c16-1cb0db534541/.user_uploaded/media_1791563294827.png"
+           width="80" onerror="this.alt='(참고사진)'; this.removeAttribute('src')">
+    </div>
+  </div>
+</body>
+</html>

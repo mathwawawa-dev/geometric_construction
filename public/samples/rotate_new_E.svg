@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <circle cx="24" cy="24" r="22" fill="#fef9c3" stroke="#eab308" stroke-width="2.5"/>
+  <!--
+    사진 분석:
+    - 아래쪽: 좌하 방향으로 화살촉
+    - 위쪽: 우상 방향으로 화살촉
+    - 선이 살짝 S자로 휨
+    경로: 좌하(16,38) → 우상(32,10) with S-curve
+  -->
+  <path d="M 17 37 C 13 28, 35 20, 31 11"
+        fill="none" stroke="#a16207" stroke-width="3.5" stroke-linecap="round"
+        marker-start="url(#arr)" marker-end="url(#arr)"/>
+  <defs>
+    <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+      <path d="M 6 0 L 0 3 L 6 6" fill="none" stroke="#a16207" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+</svg>

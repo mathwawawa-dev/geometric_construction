@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <circle cx="24" cy="24" r="22" fill="#fef9c3" stroke="#eab308" stroke-width="2.5"/>
+  <defs>
+    <marker id="up3" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto">
+      <polyline points="1,7 4,1 7,7" fill="none" stroke="#a16207" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="dn3" markerWidth="8" markerHeight="8" refX="4" refY="1" orient="auto-start-reverse">
+      <polyline points="1,1 4,7 7,1" fill="none" stroke="#a16207" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <!-- S형: 위는 오른쪽, 아래는 왼쪽으로 불룩 (사진과 동일한 S자 방향) -->
+  <path d="M 24 10 C 35 16, 13 32, 24 38"
+        fill="none" stroke="#a16207" stroke-width="3.5" stroke-linecap="round"
+        marker-start="url(#up3)" marker-end="url(#dn3)"/>
+</svg>

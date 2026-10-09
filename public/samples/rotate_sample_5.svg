@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- 배경 원 -->
+  <circle cx="24" cy="24" r="22" fill="#fef9c3" stroke="#eab308" stroke-width="2.5"/>
+  <!-- 하나의 이어진 S형 경로: 아래→위(왼쪽), 위→아래(오른쪽) -->
+  <!-- 왼쪽: 아래에서 위로 -->
+  <path d="M 21 37 C 15 30, 15 18, 21 11" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round"/>
+  <!-- 오른쪽: 위에서 아래로 -->
+  <path d="M 27 11 C 33 18, 33 30, 27 37" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round"/>
+  <!-- 위쪽 가로 연결선 -->
+  <line x1="21" y1="11" x2="27" y2="11" stroke="#a16207" stroke-width="3" stroke-linecap="round"/>
+  <!-- 아래쪽 가로 연결선 -->
+  <line x1="21" y1="37" x2="27" y2="37" stroke="#a16207" stroke-width="3" stroke-linecap="round"/>
+  <!-- 위 왼쪽 화살표 촉 -->
+  <polyline points="16,16 21,11 26,16" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 아래 오른쪽 화살표 촉 -->
+  <polyline points="22,32 27,37 32,32" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <!--
+      화살촉 tip이 경로 끝점에 딱 붙도록: refX를 tip 좌표(8)로 설정
+      markerUnits="strokeWidth"를 userSpaceOnUse로 변경해 크기 고정
+    -->
+    <marker id="arrowStart" markerWidth="13" markerHeight="13"
+            refX="9" refY="6.5" orient="auto-start-reverse"
+            markerUnits="userSpaceOnUse">
+      <path d="M 2 2 L 11 6.5 L 2 11"
+            fill="none" stroke="black" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrowEnd" markerWidth="13" markerHeight="13"
+            refX="9" refY="6.5" orient="auto"
+            markerUnits="userSpaceOnUse">
+      <path d="M 2 2 L 11 6.5 L 2 11"
+            fill="none" stroke="black" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <!-- ) 형 우측 볼록 수직 곡선 -->
+  <path d="M 45 18 C 76 30, 76 70, 45 82"
+        fill="none"
+        stroke="black"
+        stroke-width="3.5"
+        stroke-linecap="round"
+        marker-start="url(#arrowStart)"
+        marker-end="url(#arrowEnd)"/>
+</svg>

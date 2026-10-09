@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <circle cx="24" cy="24" r="22" fill="#fef9c3" stroke="#eab308" stroke-width="2.5"/>
+  <!-- 가운데 세로 S형 곡선: 더 완만하게 -->
+  <path d="M 24 10 C 14 17, 34 31, 24 38" fill="none" stroke="#a16207" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- 위 화살표 촉 (V형) -->
+  <polyline points="19,15 24,10 29,15" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 아래 화살표 촉 (V형) -->
+  <polyline points="19,33 24,38 29,33" fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <circle cx="24" cy="24" r="22" fill="#fef9c3" stroke="#eab308" stroke-width="2.5"/>
+  <!-- S형 곡선 본체 -->
+  <path d="M 17 37 C 11 27, 37 21, 31 11"
+        fill="none" stroke="#a16207" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- 아래 화살촉: 좌하 방향 (선의 시작 접선 방향 = 아래쪽 왼쪽) -->
+  <polyline points="23,37 17,37 18,31"
+        fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 위 화살촉: 우상 방향 (선의 끝 접선 방향) -->
+  <polyline points="25,17 31,11 37,13"
+        fill="none" stroke="#a16207" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

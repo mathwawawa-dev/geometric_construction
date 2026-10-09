@@ -243,27 +243,67 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
         })}
       </g>
 
-      {/* 회전 핸들 */}
-      <circle
-        cx={cx + radius * Math.cos(angle)}
-        cy={cy + radius * Math.sin(angle)}
-        r={HANDLE_R}
-        fill="#eab308" stroke="white" strokeWidth="2"
-        style={{ pointerEvents: 'all', cursor: 'crosshair' }}
-        onMouseDown={onPointerDown('rotate')}
-        onTouchStart={onPointerDown('rotate')}
-      />
+      {/* 회전 핸들 — 곡선 양방향 화살표 아이콘 */}
+      {(() => {
+        const hx = cx + radius * Math.cos(angle)
+        const hy = cy + radius * Math.sin(angle)
+        const S = 24 // 아이콘 크기(px)
+        return (
+          <g
+            transform={`translate(${hx - S / 2}, ${hy - S / 2})`}
+            style={{ pointerEvents: 'all', cursor: 'crosshair' }}
+            onMouseDown={onPointerDown('rotate')}
+            onTouchStart={onPointerDown('rotate')}
+          >
+            {/* 배경 원 */}
+            <circle cx={S/2} cy={S/2} r={S/2} fill="#fef08a" stroke="#ca8a04" strokeWidth="1.5"/>
+            {/* 곡선 양방향 화살표 아이콘 (viewBox 0 0 100 100 → S×S 스케일) */}
+            <g transform={`scale(${S/100})`}>
+              <defs>
+                <marker id="rS" markerWidth="13" markerHeight="13"
+                        refX="9" refY="6.5" orient="auto-start-reverse"
+                        markerUnits="userSpaceOnUse">
+                  <path d="M 2 2 L 11 6.5 L 2 11" fill="none" stroke="#854d0e" strokeWidth="2.2"
+                        strokeLinecap="round" strokeLinejoin="round"/>
+                </marker>
+                <marker id="rE" markerWidth="13" markerHeight="13"
+                        refX="9" refY="6.5" orient="auto"
+                        markerUnits="userSpaceOnUse">
+                  <path d="M 2 2 L 11 6.5 L 2 11" fill="none" stroke="#854d0e" strokeWidth="2.2"
+                        strokeLinecap="round" strokeLinejoin="round"/>
+                </marker>
+              </defs>
+              <path d="M 45 18 C 76 30, 76 70, 45 82"
+                    fill="none" stroke="#854d0e" strokeWidth="7"
+                    strokeLinecap="round"
+                    markerStart="url(#rS)" markerEnd="url(#rE)"/>
+            </g>
+          </g>
+        )
+      })()}
 
-      {/* 크기 조절 핸들 */}
-      <circle
-        cx={cx + radius * Math.cos(angle - Math.PI / 2)}
-        cy={cy + radius * Math.sin(angle - Math.PI / 2)}
-        r={HANDLE_R}
-        fill="#22c55e" stroke="white" strokeWidth="2"
-        style={{ pointerEvents: 'all', cursor: 'nwse-resize' }}
-        onMouseDown={onPointerDown('resize')}
-        onTouchStart={onPointerDown('resize')}
-      />
+      {/* 크기 조절 핸들 — 대각선 양방향 화살표 아이콘 */}
+      {(() => {
+        const hx = cx + radius * Math.cos(angle - Math.PI / 2)
+        const hy = cy + radius * Math.sin(angle - Math.PI / 2)
+        const S = 24
+        return (
+          <g
+            transform={`translate(${hx - S / 2}, ${hy - S / 2})`}
+            style={{ pointerEvents: 'all', cursor: 'nwse-resize' }}
+            onMouseDown={onPointerDown('resize')}
+            onTouchStart={onPointerDown('resize')}
+          >
+            {/* 배경 원 (viewBox 0 0 48 48 → S×S 스케일) */}
+            <g transform={`scale(${S/48})`}>
+              <circle cx="24" cy="24" r="22" fill="#dcfce7" stroke="#16a34a" strokeWidth="2.5"/>
+              <line x1="14" y1="34" x2="34" y2="14" stroke="#15803d" strokeWidth="3.5" strokeLinecap="round"/>
+              <polyline points="22,34 14,34 14,26" fill="none" stroke="#15803d" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="26,14 34,14 34,22" fill="none" stroke="#15803d" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </g>
+          </g>
+        )
+      })()}
     </svg>
   )
 }
