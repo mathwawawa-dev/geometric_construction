@@ -8,11 +8,36 @@ const drawModes = [
   { id: 'select', icon: '↖️', label: '선택 (S)' },
 ]
 
+// 수학 작도용 컴퍼스(제도기) SVG 아이콘
+const CompassIcon = () => (
+  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2v3" />
+    <circle cx="12" cy="7" r="2" />
+    <path d="M10.5 8.5L5 21" />
+    <path d="M13.5 8.5L19 21" />
+    <path d="M7.5 14h9" />
+    <circle cx="12" cy="14" r="1.2" fill="currentColor" />
+  </svg>
+)
+
+// 수학 반원 각도기 SVG 아이콘
+const ProtractorIcon = () => (
+  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 18h18" />
+    <path d="M21 18a9 9 0 0 0-18 0" />
+    <path d="M8 18a4 4 0 0 1 8 0" />
+    <circle cx="12" cy="18" r="1" fill="currentColor" />
+    <path d="M12 9v2.5" />
+    <path d="M5.6 11.6l1.8 1.8" />
+    <path d="M18.4 11.6l-1.8 1.8" />
+  </svg>
+)
+
 // 도구 토글 버튼 (독립적으로 on/off, 동시에 여러 개 활성 가능)
 const toolDefs = [
-  { id: 'compass',    icon: '🧭', label: '컴퍼스' },
-  { id: 'ruler',      icon: '📏', label: '자' },
-  { id: 'protractor', icon: '📐', label: '각도기' },
+  { id: 'compass',    icon: <CompassIcon />,    label: '컴퍼스' },
+  { id: 'ruler',      icon: <span>📏</span>,    label: '자' },
+  { id: 'protractor', icon: <ProtractorIcon />, label: '각도기' },
 ]
 
 // 넘버스탬프 목록 ①~⑮
@@ -216,11 +241,11 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
             title={`${t.label} ${isOn ? '숨기기' : '표시'}`}
             className={`w-12 h-12 rounded-xl border flex flex-col items-center justify-center text-xl transition-colors
               ${isOn
-                ? 'bg-emerald-50 border-emerald-500 ring-1 ring-emerald-500 shadow'
-                : 'bg-white hover:bg-gray-100 border-gray-200'
+                ? 'bg-emerald-50 border-emerald-500 ring-1 ring-emerald-500 shadow text-emerald-700'
+                : 'bg-white hover:bg-gray-100 border-gray-200 text-gray-700'
               }`}
           >
-            <span>{t.icon}</span>
+            <span className="flex items-center justify-center w-6 h-6">{t.icon}</span>
             <span className="text-[9px] text-gray-500 leading-none mt-0.5">{t.label}</span>
           </button>
         )

@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.27_20261014_234100_사이드바도장텍스트제거'
+const VERSION = 'v0.3.28_20261014_234300_컴퍼스및각도기작도용SVG아이콘교체'
 
 export default function App() {
   const canvasRef = useRef(null)

@@ -6,10 +6,10 @@
 | drawModeBtn_text | 텍스트 도구 버튼 | 버튼 | src/components/Sidebar.jsx |
 | drawModeBtn_line | 선분 도구 버튼 | 버튼 | src/components/Sidebar.jsx |
 | drawModeBtn_select | 선택 도구 버튼 | 버튼 | src/components/Sidebar.jsx |
-| stampBtn_number | 번호 도장 버튼 (①~⑩) | 버튼 | src/components/Sidebar.jsx |
-| toolToggleBtn_compass | 컴퍼스 토글 버튼 | 버튼 | src/components/Sidebar.jsx |
+| stampWidget_number | 번호 도장 단일 스마트 위젯 (①~⑮, 휠/화살표 조절, 우클릭 팝오버) | 위젯 | src/components/Sidebar.jsx |
+| toolToggleBtn_compass | 컴퍼스 토글 버튼 (수학 작도 제도기 SVG) | 버튼 | src/components/Sidebar.jsx |
 | toolToggleBtn_ruler | 자 토글 버튼 | 버튼 | src/components/Sidebar.jsx |
-| toolToggleBtn_protractor | 각도기 토글 버튼 | 버튼 | src/components/Sidebar.jsx |
+| toolToggleBtn_protractor | 각도기 토글 버튼 (수학 반원 각도기 SVG) | 버튼 | src/components/Sidebar.jsx |
 | bgUploadBtn | 배경 이미지 업로드 버튼 | 버튼 | src/components/Sidebar.jsx |
 | bgLockBtn | 배경 이미지 잠금 버튼 | 버튼 | src/components/Sidebar.jsx |
 | bgOpacitySlider | 배경 이미지 불투명도 조절 슬라이더 | 슬라이더 | src/components/Sidebar.jsx |
