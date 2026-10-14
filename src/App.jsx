@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.11_20261014_122100_넘버스탬프마우스포인터복원'
+const VERSION = 'v0.3.12_20261014_132100_넘버스탬프포인터실제크기일치'
 
 export default function App() {
   const canvasRef = useRef(null)

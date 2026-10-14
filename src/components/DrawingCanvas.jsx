@@ -764,8 +764,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         // 넘버 도장 활성화 시 마우스 커서를 해당 넘버 도장 문자로 표시 (중앙 24 24 기준)
         const encodedChar = encodeURIComponent(stampMode)
         const encodedColor = encodeURIComponent(strokeColor)
-        const stampCursorSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Ctext x='24' y='24' font-size='38' font-family='serif' font-weight='bold' fill='${encodedColor}' opacity='0.8' text-anchor='middle' dominant-baseline='central'%3E${encodedChar}%3C/text%3E%3C/svg%3E`
-        return `url("${stampCursorSvg}") 24 24, crosshair`
+        const stampCursorSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='53' height='53' viewBox='0 0 53 53'%3E%3Ctext x='26.5' y='26.5' font-size='53' font-family='serif' font-weight='bold' fill='${encodedColor}' opacity='0.8' text-anchor='middle' dominant-baseline='central'%3E${encodedChar}%3C/text%3E%3C/svg%3E`
+        return `url("${stampCursorSvg}") 26 26, crosshair`
       }
       return (snapEnabled || ctrlActive) ? penSnapCursor : penSvgCursor
     }
