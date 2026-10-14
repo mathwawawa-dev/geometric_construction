@@ -54,11 +54,11 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
     setDrawMode('pen')
   }
 
-  // 사이드바 위젯 위 휠 스크롤로 번호 변경
+  // 사이드바 위젯 위 휠 스크롤로 번호 변경 (휠 up: 증가, 휠 down: 감소)
   const handleWidgetWheel = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    const delta = e.deltaY < 0 ? -1 : 1
+    const delta = e.deltaY < 0 ? 1 : -1
     changeStampBy(delta)
   }
 
@@ -125,15 +125,15 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
               : 'bg-white hover:bg-orange-50/50 border border-gray-200 text-gray-700'
           }`}
         >
-          {/* 이전 번호 ▲ */}
+          {/* 다음 번호(증가) ▲ */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation()
-              changeStampBy(-1)
+              changeStampBy(1)
             }}
-            disabled={STAMPS.indexOf(currentStamp) === 0}
-            title="이전 번호"
+            disabled={STAMPS.indexOf(currentStamp) === STAMPS.length - 1}
+            title="다음 번호 (+1)"
             className="w-full text-[10px] text-gray-400 hover:text-orange-600 disabled:opacity-20 flex items-center justify-center py-0.5 leading-none transition-colors"
           >
             ▲
@@ -149,15 +149,15 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
             {currentStamp}
           </button>
 
-          {/* 다음 번호 ▼ */}
+          {/* 이전 번호(감소) ▼ */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation()
-              changeStampBy(1)
+              changeStampBy(-1)
             }}
-            disabled={STAMPS.indexOf(currentStamp) === STAMPS.length - 1}
-            title="다음 번호"
+            disabled={STAMPS.indexOf(currentStamp) === 0}
+            title="이전 번호 (-1)"
             className="w-full text-[10px] text-gray-400 hover:text-orange-600 disabled:opacity-20 flex items-center justify-center py-0.5 leading-none transition-colors"
           >
             ▼

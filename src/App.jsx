@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.23_20261014_232800_사이드바넘버스탬프단일스마트위젯개편'
+const VERSION = 'v0.3.24_20261014_233300_스탬프휠방향및화살표증감방향반전'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -305,11 +305,11 @@ export default function App() {
         const idx = STAMPS.indexOf(cur)
         if (idx >= 0) {
           if (e.deltaY < 0) {
-            // 휠 위로: 이전 번호 (최소 ①)
-            if (idx > 0) setStampMode(STAMPS[idx - 1])
-          } else if (e.deltaY > 0) {
-            // 휠 아래로: 다음 번호 (최대 ⑮)
+            // 휠 위로 (up): 다음 번호 증가 (최대 ⑮)
             if (idx < STAMPS.length - 1) setStampMode(STAMPS[idx + 1])
+          } else if (e.deltaY > 0) {
+            // 휠 아래로 (down): 이전 번호 감소 (최소 ①)
+            if (idx > 0) setStampMode(STAMPS[idx - 1])
           }
         }
         return
