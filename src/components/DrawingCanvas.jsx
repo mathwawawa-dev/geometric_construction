@@ -137,7 +137,7 @@ function StampCursorCanvas({ stampMode, strokeColor }) {
   )
 }
 
-export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, protractor, highlightMode, stampMode, shapes, snapEnabled = true, zoom = 1 }) {
+export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, protractor, highlightMode, stampMode, shapes, snapEnabled = true, zoom = 1, onStampPlaced }) {
   const draftCanvasRef = useRef(null)
   const isDrawing = useRef(false)
   const snapLock = useRef(null)
@@ -676,6 +676,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         fontSize,
       }
       onAddShape?.(shape)
+      onStampPlaced?.(stampMode)
       return
     }
 
@@ -769,7 +770,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     window.addEventListener('mouseup', onWindowUp)
     window.addEventListener('touchmove', onWindowMove, { passive: false })
     window.addEventListener('touchend', onWindowUp)
-  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode, renderCurrentStroke, textEditor, commitText, snapEnabled])
+  }, [activeTool, canvasRef, onDrawEnd, onAddShape, ruler, handleMove, strokeColor, strokeWidth, highlightMode, hlWidth, hlAlpha, stampMode, renderCurrentStroke, textEditor, commitText, snapEnabled, onStampPlaced])
 
   useEffect(() => {
     const canvas = canvasRef.current

@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback, useState, startTransition } from 'react
 import { useAppState } from './store/useAppState'
 import { useHistory } from './hooks/useHistory'
 import Toolbar from './components/Toolbar'
-import Sidebar from './components/Sidebar'
+import Sidebar, { STAMPS } from './components/Sidebar'
 import DrawingCanvas from './components/DrawingCanvas'
 import BackgroundLayer from './components/BackgroundLayer'
 import CompassTool from './components/CompassTool'
@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.21_20261014_215900_스탬프폰트크기두단계축소'
+const VERSION = 'v0.3.22_20261014_232200_스탬프15확장및자동증분휠제어'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -52,6 +52,16 @@ export default function App() {
   // 형광펜 / 넘버스탬프 모드
   const [highlightMode, setHighlightMode] = useState(false)
   const [stampMode, setStampMode] = useState(null)
+  const stampModeRef = useRef(stampMode)
+  useEffect(() => { stampModeRef.current = stampMode }, [stampMode])
+
+  // 스탬프 날인 후 다음 번호로 자동 증가 (⑮ 도달 시 ⑮ 유지)
+  const handleStampPlaced = useCallback((currentChar) => {
+    const idx = STAMPS.indexOf(currentChar)
+    if (idx >= 0 && idx < STAMPS.length - 1) {
+      setStampMode(STAMPS[idx + 1])
+    }
+  }, [])
 
   // 자석(스냅) ON/OFF 상태 (기본값 OFF - 컴퍼스는 별도 ON 유지)
   const [snapEnabled, setSnapEnabled] = useState(false)
@@ -288,6 +298,23 @@ export default function App() {
     if (!el) return
     const onWheel = (e) => {
       e.preventDefault()
+
+      // 도장 모드 상태에서는 마우스 휠이 화면 배율을 변경하지 않고 도장 번호 변경
+      if (stampModeRef.current) {
+        const cur = stampModeRef.current
+        const idx = STAMPS.indexOf(cur)
+        if (idx >= 0) {
+          if (e.deltaY < 0) {
+            // 휠 위로: 이전 번호 (최소 ①)
+            if (idx > 0) setStampMode(STAMPS[idx - 1])
+          } else if (e.deltaY > 0) {
+            // 휠 아래로: 다음 번호 (최대 ⑮)
+            if (idx < STAMPS.length - 1) setStampMode(STAMPS[idx + 1])
+          }
+        }
+        return
+      }
+
       const rect = el.getBoundingClientRect()
       // 컨테이너 내 마우스 좌표
       const mx = e.clientX - rect.left
@@ -653,6 +680,7 @@ export default function App() {
               snapEnabled={snapEnabled}
               protractor={state.protractor}
               zoom={zoom}
+              onStampPlaced={handleStampPlaced}
             />
             <SelectionLayer
               active={state.drawMode === 'select'}

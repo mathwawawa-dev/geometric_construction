@@ -15,8 +15,8 @@ const toolDefs = [
   { id: 'protractor', icon: '📐', label: '각도기' },
 ]
 
-// 넘버스탬프 목록 ①~⑩
-const STAMPS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩']
+// 넘버스탬프 목록 ①~⑮
+export const STAMPS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮']
 
 export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisible, background, setBackground, stampMode, setStampMode, onLineRightClick }) {
   const fileRef = useRef(null)
