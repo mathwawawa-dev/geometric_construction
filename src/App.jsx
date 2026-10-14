@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.35_20261015_001900_실행취소최대횟수30회증가'
+const VERSION = 'v0.3.36_20261015_003300_실행취소최대횟수20회조정'
 
 export default function App() {
   const canvasRef = useRef(null)
