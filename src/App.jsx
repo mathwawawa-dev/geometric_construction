@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.33_20261015_000300_실행취소최대횟수25회조정'
+const VERSION = 'v0.3.34_20261015_001000_실행취소시최신도형2개삭제버그수정'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -107,12 +107,13 @@ export default function App() {
     if (canvasRef.current) {
       const set = new Set(targetIds)
       const updated = stateRef.current.shapes.map(s => set.has(s.id) ? moveShape(s, dx, dy) : s)
+      stateRef.current.shapes = updated
       renderShapes(canvasRef.current.getContext('2d'), updated)
     }
   }, [moveShapes, selectedIds, canvasRef])
 
   const handleFinishMove = useCallback(() => {
-    setTimeout(() => saveSnapshot(), 0)
+    saveSnapshot()
   }, [saveSnapshot])
 
   const handleDeleteSelected = useCallback(() => {
@@ -121,25 +122,21 @@ export default function App() {
     if (canvasRef.current) {
       const set = new Set(selectedIds)
       const updated = stateRef.current.shapes.filter(s => !set.has(s.id))
+      stateRef.current.shapes = updated
       renderShapes(canvasRef.current.getContext('2d'), updated)
     }
     setSelectedIds([])
-    setTimeout(() => saveSnapshot(), 0)
+    saveSnapshot()
   }, [selectedIds, deleteShapes, canvasRef, saveSnapshot])
 
   const handleAddShape = useCallback((shape) => {
-    // renderShapes: 캔버스는 다음 프레임에 즉시 갱신
-    requestAnimationFrame(() => {
-      if (canvasRef.current) {
-        const updated = [...stateRef.current.shapes, shape]
-        renderShapes(canvasRef.current.getContext('2d'), updated)
-      }
-    })
-    // React 상태 업데이트는 낮은 우선순위로 지연 → mouseup 직후 mousemove가 먼저 처리됨
-    startTransition(() => {
-      addShape(shape)
-    })
-    setTimeout(() => saveSnapshot(), 0)
+    const updated = [...stateRef.current.shapes, shape]
+    stateRef.current.shapes = updated
+    if (canvasRef.current) {
+      renderShapes(canvasRef.current.getContext('2d'), updated)
+    }
+    addShape(shape)
+    saveSnapshot()
   }, [addShape, saveSnapshot, canvasRef])
 
 
@@ -148,9 +145,10 @@ export default function App() {
     updateShape(id, payload)
     if (canvasRef.current) {
       const updated = stateRef.current.shapes.map(s => s.id === id ? { ...s, ...payload } : s)
+      stateRef.current.shapes = updated
       renderShapes(canvasRef.current.getContext('2d'), updated)
     }
-    setTimeout(() => saveSnapshot(), 0)
+    saveSnapshot()
   }, [updateShape, canvasRef, saveSnapshot])
 
   // 줌/팬 상태
@@ -248,7 +246,7 @@ export default function App() {
 
           setDrawMode('select')
           setSelectedIds(newShapes.map(s => s.id))
-          setTimeout(() => saveSnapshot(), 0)
+          saveSnapshot()
         }
       }
 
@@ -382,7 +380,7 @@ export default function App() {
   }, [])
 
   const handleInteractionEnd = useCallback(() => {
-    setTimeout(() => saveSnapshot(), 0)
+    saveSnapshot()
   }, [saveSnapshot])
 
   const handleSave = useCallback(() => {

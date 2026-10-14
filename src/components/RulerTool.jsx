@@ -122,7 +122,6 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
   const drawLine = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    onDraw?.()
     const ctx = canvas.getContext('2d')
     ctx.beginPath()
     ctx.moveTo(x1, y1)
@@ -131,6 +130,7 @@ export default function RulerTool({ ruler, setRuler, canvasRef, strokeColor, str
     ctx.lineWidth = strokeWidth
     ctx.lineCap = 'round'
     ctx.stroke()
+    onDraw?.()
   }, [canvasRef, x1, y1, x2, y2, strokeColor, strokeWidth, onDraw])
 
   return (
