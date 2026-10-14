@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.10_20261014_120800_주황색상추가및버튼간격축소'
+const VERSION = 'v0.3.11_20261014_122100_넘버스탬프마우스포인터복원'
 
 export default function App() {
   const canvasRef = useRef(null)
