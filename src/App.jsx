@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.24_20261014_233300_스탬프휠방향및화살표증감방향반전'
+const VERSION = 'v0.3.25_20261014_233542_실행취소횟수30으로증가'
 
 export default function App() {
   const canvasRef = useRef(null)
