@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.18_20261014_190600_스탬프프리뷰폰트통일'
+const VERSION = 'v0.3.19_20261014_191000_스탬프프리뷰캔버스렌더링'
 
 export default function App() {
   const canvasRef = useRef(null)

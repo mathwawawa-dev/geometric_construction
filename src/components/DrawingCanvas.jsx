@@ -109,6 +109,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const currentStrokePoints = useRef([])
   const lastMousePos = useRef({ x: -9999, y: -9999 })
   const fakeCursorRef = useRef(null)
+  const stampPreviewCanvasRef = useRef(null)  // 스탬프 프리뷰용 canvas (canvas API로 동일 렌더링)
   const [isHovering, setIsHovering] = useState(false)
   const [isInsideRuler, setIsInsideRuler] = useState(false)
   const [isNearShape, setIsNearShape] = useState(false)
@@ -160,6 +161,23 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
     }
   }, [activeTool])
+
+  // 스탬프 프리뷰: stampMode/strokeColor 변경 시 canvas API로 동일하게 다시 그림
+  useEffect(() => {
+    const c = stampPreviewCanvasRef.current
+    if (!c || !stampMode) return
+    const SIZE = 80
+    c.width = SIZE
+    c.height = SIZE
+    const ctx = c.getContext('2d')
+    ctx.clearRect(0, 0, SIZE, SIZE)
+    ctx.font = 'bold 53px serif'
+    ctx.fillStyle = strokeColor
+    ctx.globalAlpha = 0.75
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(stampMode, SIZE / 2, SIZE / 2)
+  }, [stampMode, strokeColor])
 
   // 형광펜 굵기/투명도
   const hlWidth = Math.max(strokeWidth * 6, 20)
@@ -881,20 +899,16 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             display: lastMousePos.current.x > -100 ? 'block' : 'none',
           }}
         >
-          <div
+          <canvas
+            ref={stampPreviewCanvasRef}
+            width={80}
+            height={80}
             style={{
               transform: 'translate(-50%, -50%)',
-              fontSize: 53,
-              fontFamily: 'serif',
-              fontWeight: 'bold',
-              lineHeight: 1,
-              userSelect: 'none',
-              opacity: 0.75,
-              color: strokeColor,
+              display: 'block',
+              pointerEvents: 'none',
             }}
-          >
-            {stampMode}
-          </div>
+          />
         </div>
       )}
     </div>
