@@ -617,19 +617,21 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }
       const ctx = canvas.getContext('2d')
       const fontSize = 44
+      // serif 글꼴 둥근 숫자 글리프: em-box 수학 중앙 vs 시각 중심 오차 보정 (아래로 10%)
+      const yOffset = Math.round(fontSize * 0.10)
       ctx.save()
       ctx.font = `bold ${fontSize}px serif`
       ctx.fillStyle = strokeColor
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(stampMode, finalPos.x, finalPos.y)
+      ctx.fillText(stampMode, finalPos.x, finalPos.y + yOffset)
       ctx.restore()
       const shape = {
         id: 'st_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
         type: 'stamp',
         char: stampMode,
         x: finalPos.x,
-        y: finalPos.y,
+        y: finalPos.y + yOffset,
         color: strokeColor,
         fontSize,
       }

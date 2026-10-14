@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.14_20261014_133200_넘버스탬프포인터실제크기정밀일치'
+const VERSION = 'v0.3.15_20261014_133700_넘버스탬프시각중심오차보정'
 
 export default function App() {
   const canvasRef = useRef(null)
