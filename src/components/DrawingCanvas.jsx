@@ -102,6 +102,39 @@ function snapToPointCenters(pos, shapes, snapRadius = 16, protractor = null) {
   return center ? { pos: center, snappedPoint: true } : { pos, snappedPoint: false }
 }
 
+function StampCursorCanvas({ stampMode, strokeColor }) {
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const c = canvasRef.current
+    if (!c || !stampMode) return
+    const SIZE = 80
+    c.width = SIZE
+    c.height = SIZE
+    const ctx = c.getContext('2d')
+    ctx.clearRect(0, 0, SIZE, SIZE)
+    ctx.font = 'bold 53px serif'
+    ctx.fillStyle = strokeColor
+    ctx.globalAlpha = 0.75
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(stampMode, SIZE / 2, SIZE / 2)
+  }, [stampMode, strokeColor])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={80}
+      height={80}
+      style={{
+        transform: 'translate(-50%, -50%)',
+        display: 'block',
+        pointerEvents: 'none',
+      }}
+    />
+  )
+}
+
 export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, protractor, highlightMode, stampMode, shapes, snapEnabled = true, zoom = 1 }) {
   const draftCanvasRef = useRef(null)
   const isDrawing = useRef(false)
@@ -109,7 +142,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const currentStrokePoints = useRef([])
   const lastMousePos = useRef({ x: -9999, y: -9999 })
   const fakeCursorRef = useRef(null)
-  const stampPreviewCanvasRef = useRef(null)  // 스탬프 프리뷰용 canvas (canvas API로 동일 렌더링)
   const [isHovering, setIsHovering] = useState(false)
   const [isInsideRuler, setIsInsideRuler] = useState(false)
   const [isNearShape, setIsNearShape] = useState(false)
@@ -161,23 +193,6 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       draftCanvas.getContext('2d').clearRect(0, 0, draftCanvas.width, draftCanvas.height)
     }
   }, [activeTool])
-
-  // 스탬프 프리뷰: stampMode/strokeColor 변경 시 canvas API로 동일하게 다시 그림
-  useEffect(() => {
-    const c = stampPreviewCanvasRef.current
-    if (!c || !stampMode) return
-    const SIZE = 80
-    c.width = SIZE
-    c.height = SIZE
-    const ctx = c.getContext('2d')
-    ctx.clearRect(0, 0, SIZE, SIZE)
-    ctx.font = 'bold 53px serif'
-    ctx.fillStyle = strokeColor
-    ctx.globalAlpha = 0.75
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(stampMode, SIZE / 2, SIZE / 2)
-  }, [stampMode, strokeColor])
 
   // 형광펜 굵기/투명도
   const hlWidth = Math.max(strokeWidth * 6, 20)
@@ -899,16 +914,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             display: lastMousePos.current.x > -100 ? 'block' : 'none',
           }}
         >
-          <canvas
-            ref={stampPreviewCanvasRef}
-            width={80}
-            height={80}
-            style={{
-              transform: 'translate(-50%, -50%)',
-              display: 'block',
-              pointerEvents: 'none',
-            }}
-          />
+          <StampCursorCanvas stampMode={stampMode} strokeColor={strokeColor} />
         </div>
       )}
     </div>

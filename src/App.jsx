@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.19_20261014_191000_스탬프프리뷰캔버스렌더링'
+const VERSION = 'v0.3.20_20261014_191600_스탬프프리뷰캔버스독립컴포넌트및빌드반영'
 
 export default function App() {
   const canvasRef = useRef(null)

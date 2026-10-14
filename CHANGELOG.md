@@ -2,6 +2,7 @@
 
 | 버전 | 주요 변경 내역 |
 |------|--------------|
+| v0.3.20_20261014_191600_스탬프프리뷰캔버스독립컴포넌트및빌드반영 | 스탬프 프리뷰를 StampCursorCanvas 독립 컴포넌트로 분리하여 마운트 시 즉시 캔버스 API(bold 53px serif)로 렌더링하도록 개선하고, 단일 HTML 번들(작도보드_실행.html)을 최신 빌드로 갱신하여 폰트 100% 일치 반영 |
 | v0.3.19_20261014_191000_스탬프프리뷰캔버스렌더링 | DOM div 텍스트 오버레이 → 실제 <canvas> 엘리먼트로 교체; Canvas API(bold 53px serif)로 직접 그려 찍힌 도장과 완전 동일한 폰트 렌더링 보장 |
 | v0.3.18_20261014_190600_스탬프프리뷰폰트통일 | DOM 오버레이에 fontFamily:'serif', fontWeight:'bold' 추가 → Canvas 'bold 53px serif'와 완전 동일; 외부 div translate(rawPos), 내부 div translate(-50%,-50%) 중심 정렬 |
 | v0.3.17_20261014_164300_0201버전스탬프DOM및폰트완전복원 | v0.2.01 당시의 스탬프 렌더링 코드와 100% 동일하게 복원: fontSize 53px 환원, DOM 오버레이 translate(x-27px, y-27px) 및 내부 div(lineHeight:1, translate 변형 제거) 구조를 복원하여 포인터와 실제 찍히는 도장 위치/크기 완벽 일치 |
