@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" width="240" height="272" fill="none">
+  <!-- 상단 손잡이 (검정 캡) -->
+  <rect x="13.2" y="0.8" width="3.6" height="6.8" rx="1.8" fill="#0f172a" />
+  <rect x="14.2" y="2.2" width="1.6" height="3.8" rx="0.8" fill="#334155" />
+
+  <!-- 힌지 원형 관절 -->
+  <circle cx="15" cy="8" r="3.8" fill="#0f172a" stroke="#334155" stroke-width="0.8" />
+  <circle cx="15" cy="8" r="1.5" fill="#475569" />
+  <circle cx="15" cy="8" r="0.8" fill="#94a3b8" />
+
+  <!-- 왼쪽 침핀 다리 (어두운 메탈 바디) -->
+  <line x1="14.4" y1="9.2" x2="5.5" y2="25" stroke="#475569" stroke-width="2.6" stroke-linecap="round" />
+  <line x1="14.4" y1="9.2" x2="5.5" y2="25" stroke="#94a3b8" stroke-width="1" stroke-linecap="round" />
+
+  <!-- 침핀 홀더 (검정 캡) -->
+  <line x1="5.5" y1="25" x2="4" y2="28.5" stroke="#0f172a" stroke-width="3.4" stroke-linecap="butt" />
+  <!-- 금속 바늘 -->
+  <line x1="4" y1="28.5" x2="2.7" y2="31.8" stroke="#64748b" stroke-width="1" stroke-linecap="round" />
+  <!-- 침핀 끝 빨간 볼 -->
+  <circle cx="1.8" cy="33" r="1.6" fill="#dc2626" />
+
+  <!-- 오른쪽 연필 다리 (어두운 메탈 바디) -->
+  <line x1="15.6" y1="9.2" x2="23.5" y2="25" stroke="#475569" stroke-width="2.6" stroke-linecap="round" />
+  <line x1="15.6" y1="9.2" x2="23.5" y2="25" stroke="#94a3b8" stroke-width="1" stroke-linecap="round" />
+
+  <!-- 오른쪽 관절 조인트 및 수평 클램프 팔 -->
+  <circle cx="23.5" cy="25" r="1.9" fill="#0f172a" />
+  <line x1="23.5" y1="25" x2="26.2" y2="25" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+
+  <!-- 연필 클램프 칼라 -->
+  <rect x="25.2" y="23.5" width="2.4" height="3" rx="0.6" fill="#0f172a" />
+
+  <!-- 연필 본체 -->
+  <!-- 분홍색 지우개 -->
+  <rect x="25.4" y="18.8" width="2" height="2.2" rx="0.5" fill="#f9a8a8" />
+  <!-- 은색 페룰 밴드 -->
+  <rect x="25.4" y="21" width="2" height="1.1" fill="#9ca3af" />
+  <!-- 노란 연필 바디 -->
+  <rect x="25.4" y="22.1" width="2" height="5.4" fill="#f59e0b" />
+  <!-- 깎인 나무 부분 -->
+  <polygon points="25.4,27.5 27.4,27.5 26.4,30" fill="#d97706" />
+  <!-- 흑연 심 -->
+  <polygon points="26,29.6 26.8,29.6 26.4,31.2" fill="#0f172a" />
+</svg>

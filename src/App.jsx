@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.30_20261014_235200_사이드바컴퍼스아이콘다리색어둡게및비율조정'
+const VERSION = 'v0.3.31_20261014_235500_각도기및컴퍼스사이드바SVG파일저장'
 
 export default function App() {
   const canvasRef = useRef(null)
