@@ -1,4 +1,5 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
+import { snapToSegmentEndpoint } from '../utils/shapeUtils'
 
 const HANDLE_R = 10
 const SNAP_DEG = 5
@@ -9,10 +10,14 @@ function snapAngle(a, step = 1) {
   return snapped * (Math.PI / 180)
 }
 
-export default function ProtractorTool({ protractor, setProtractor, onInteractionEnd }) {
+export default function ProtractorTool({ protractor, setProtractor, onInteractionEnd, shapes = [] }) {
   const svgRef = useRef(null)
   const dragging = useRef(null)
   const dragOffset = useRef({ dx: 0, dy: 0 })
+  const shapesRef = useRef(shapes)
+  useEffect(() => {
+    shapesRef.current = shapes
+  }, [shapes])
 
   const { cx, cy, radius, angle } = protractor
 
@@ -52,7 +57,14 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
       me.preventDefault()
       const p = getSVGPos(me)
       if (dragging.current === 'center') {
-        setProtractor({ cx: p.x - dragOffset.current.dx, cy: p.y - dragOffset.current.dy })
+        const rawTargetX = p.x - dragOffset.current.dx
+        const rawTargetY = p.y - dragOffset.current.dy
+        const ep = snapToSegmentEndpoint({ x: rawTargetX, y: rawTargetY }, shapesRef.current, 16)
+        if (ep) {
+          setProtractor({ cx: ep.x, cy: ep.y })
+        } else {
+          setProtractor({ cx: rawTargetX, cy: rawTargetY })
+        }
       } else if (dragging.current === 'resize') {
         const nr = Math.hypot(p.x - cx, p.y - cy)
         setProtractor({ radius: Math.max(60, nr) })

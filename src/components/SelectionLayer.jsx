@@ -10,6 +10,7 @@ export default function SelectionLayer({
   onFinishMove,
   onDeleteSelected,
   onUpdateShape,
+  protractor,
 }) {
   const [marquee, setMarquee] = useState(null)
   const [editingText, setEditingText] = useState(null)
@@ -232,8 +233,18 @@ export default function SelectionLayer({
         }
 
         if (endpoint === 'p1') {
+          // 각도기 활성화 시 점1(중심점) 우선 스냅
+          if (protractor?.visible && Math.hypot(targetX - protractor.cx, targetY - protractor.cy) <= 16) {
+            targetX = protractor.cx
+            targetY = protractor.cy
+          }
           onUpdateShape?.(shapeId, { x1: targetX, y1: targetY })
         } else {
+          // 각도기 활성화 시 점1(중심점) 우선 스냅
+          if (protractor?.visible && Math.hypot(targetX - protractor.cx, targetY - protractor.cy) <= 16) {
+            targetX = protractor.cx
+            targetY = protractor.cy
+          }
           onUpdateShape?.(shapeId, { x2: targetX, y2: targetY })
         }
       } else if (isDraggingShapes.current && activeDragIds.current.length > 0) {

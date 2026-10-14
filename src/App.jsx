@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.07_20261010_031800_각도기회전및크기조절핸들화살촉2단위축소반영'
+const VERSION = 'v0.3.08_20261014_115500_각도기중심점1선분끝점스냅구현'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -662,6 +662,7 @@ export default function App() {
               onFinishMove={handleFinishMove}
               onDeleteSelected={handleDeleteSelected}
               onUpdateShape={handleUpdateShape}
+              protractor={state.protractor}
             />
             {state.compass.visible && (
               <CompassTool
@@ -695,6 +696,7 @@ export default function App() {
                 protractor={state.protractor}
                 setProtractor={setProtractor}
                 onInteractionEnd={handleInteractionEnd}
+                shapes={state.shapes}
               />
             )}
           </div>

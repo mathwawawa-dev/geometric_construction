@@ -464,7 +464,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         const { pos: rulerSnapped, lock: rLock } = calcRulerSnap(rawPos, ruler, null)
         finalPos = rulerSnapped
         if (!rLock) {
-          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current)
+          const pointRes = snapToPointCenters(rulerSnapped, shapesRef.current, 16, protractorRef.current)
           finalPos = pointRes.pos
         }
       }
