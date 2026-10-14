@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 
 // 드로잉 모드 버튼 (캔버스 인터랙션)
 const drawModes = [
@@ -20,6 +20,57 @@ export const STAMPS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','�
 
 export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisible, background, setBackground, stampMode, setStampMode, onLineRightClick }) {
   const fileRef = useRef(null)
+  const [lastStamp, setLastStamp] = useState('①')
+  const [showPicker, setShowPicker] = useState(false)
+  const pickerRef = useRef(null)
+
+  // 외부(날인/휠 등)에서 stampMode가 바뀔 때 마지막 번호 기억
+  useEffect(() => {
+    if (stampMode) setLastStamp(stampMode)
+  }, [stampMode])
+
+  // 팝오버 외부 클릭 시 닫기
+  useEffect(() => {
+    if (!showPicker) return
+    const handleClickOutside = (e) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target)) {
+        setShowPicker(false)
+      }
+    }
+    window.addEventListener('mousedown', handleClickOutside)
+    return () => window.removeEventListener('mousedown', handleClickOutside)
+  }, [showPicker])
+
+  const currentStamp = stampMode || lastStamp || '①'
+
+  // 스탬프 번호 n단계 변경
+  const changeStampBy = (delta) => {
+    const idx = STAMPS.indexOf(currentStamp)
+    if (idx < 0) return
+    const nextIdx = Math.max(0, Math.min(STAMPS.length - 1, idx + delta))
+    const nextStamp = STAMPS[nextIdx]
+    setLastStamp(nextStamp)
+    setStampMode(nextStamp)
+    setDrawMode('pen')
+  }
+
+  // 사이드바 위젯 위 휠 스크롤로 번호 변경
+  const handleWidgetWheel = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const delta = e.deltaY < 0 ? -1 : 1
+    changeStampBy(delta)
+  }
+
+  // 메인 스탬프 토글
+  const handleToggleStamp = () => {
+    if (stampMode) {
+      setStampMode(null)
+    } else {
+      setStampMode(lastStamp)
+      setDrawMode('pen')
+    }
+  }
 
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0]
@@ -58,27 +109,100 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
 
       <div className="w-10 border-t border-gray-300 my-1" />
 
-      {/* ─── 넘버스탬프 ─── */}
+      {/* ─── 넘버스탬프 (단일 스마트 위젯) ─── */}
       <span className="text-[9px] text-gray-400 leading-none">도장</span>
-      <div className="flex flex-col gap-1">
-        {STAMPS.map((ch) => (
+      <div className="relative flex flex-col items-center">
+        <div
+          onWheel={handleWidgetWheel}
+          onContextMenu={(e) => {
+            e.preventDefault()
+            setShowPicker(prev => !prev)
+          }}
+          title={`넘버스탬프 ${currentStamp}\n• 클릭: 켜기/끄기\n• 휠/화살표: 번호 변경\n• 우클릭: 전체 번호 목록`}
+          className={`w-12 rounded-xl flex flex-col items-center justify-between p-1 transition-all select-none ${
+            stampMode
+              ? 'bg-orange-100 ring-2 ring-orange-400 text-orange-700 shadow'
+              : 'bg-white hover:bg-orange-50/50 border border-gray-200 text-gray-700'
+          }`}
+        >
+          {/* 이전 번호 ▲ */}
           <button
-            key={ch}
-            title={`넘버스탬프 ${ch}`}
-            onClick={() => {
-              const next = stampMode === ch ? null : ch
-              setStampMode(next)
-              if (next) setDrawMode('pen')
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              changeStampBy(-1)
             }}
-            className={`w-12 h-8 rounded-lg text-base font-bold flex items-center justify-center transition-all ${
-              stampMode === ch
-                ? 'bg-orange-100 ring-2 ring-orange-400 text-orange-700'
-                : 'bg-white hover:bg-orange-50 border border-gray-200 text-gray-700'
-            }`}
+            disabled={STAMPS.indexOf(currentStamp) === 0}
+            title="이전 번호"
+            className="w-full text-[10px] text-gray-400 hover:text-orange-600 disabled:opacity-20 flex items-center justify-center py-0.5 leading-none transition-colors"
           >
-            {ch}
+            ▲
           </button>
-        ))}
+
+          {/* 중앙 현재 번호 (클릭 시 토글) */}
+          <button
+            type="button"
+            onClick={handleToggleStamp}
+            title={`클릭하여 도장 ${stampMode ? '끄기' : '켜기'}`}
+            className="w-full text-center text-xl font-bold leading-tight py-0.5 hover:scale-105 active:scale-95 transition-transform"
+          >
+            {currentStamp}
+          </button>
+
+          {/* 다음 번호 ▼ */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              changeStampBy(1)
+            }}
+            disabled={STAMPS.indexOf(currentStamp) === STAMPS.length - 1}
+            title="다음 번호"
+            className="w-full text-[10px] text-gray-400 hover:text-orange-600 disabled:opacity-20 flex items-center justify-center py-0.5 leading-none transition-colors"
+          >
+            ▼
+          </button>
+        </div>
+
+        {/* 퀵 셀렉터 팝오버 (우클릭 시 표시) */}
+        {showPicker && (
+          <div
+            ref={pickerRef}
+            className="absolute left-14 top-0 z-50 bg-white rounded-xl shadow-xl border border-gray-200 p-2 w-44"
+          >
+            <div className="text-[10px] text-gray-500 font-semibold mb-1.5 px-1 flex justify-between items-center">
+              <span>도장 번호 선택</span>
+              <button
+                type="button"
+                onClick={() => setShowPicker(false)}
+                className="text-gray-400 hover:text-gray-700 text-xs font-bold leading-none"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="grid grid-cols-5 gap-1">
+              {STAMPS.map((ch) => (
+                <button
+                  key={ch}
+                  type="button"
+                  onClick={() => {
+                    setLastStamp(ch)
+                    setStampMode(ch)
+                    setDrawMode('pen')
+                    setShowPicker(false)
+                  }}
+                  className={`h-8 rounded-lg text-sm font-bold flex items-center justify-center transition-all ${
+                    currentStamp === ch && stampMode
+                      ? 'bg-orange-500 text-white shadow'
+                      : 'bg-gray-50 hover:bg-orange-100 text-gray-700'
+                  }`}
+                >
+                  {ch}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="w-10 border-t border-gray-300 my-1" />

@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.22_20261014_232200_스탬프15확장및자동증분휠제어'
+const VERSION = 'v0.3.23_20261014_232800_사이드바넘버스탬프단일스마트위젯개편'
 
 export default function App() {
   const canvasRef = useRef(null)
