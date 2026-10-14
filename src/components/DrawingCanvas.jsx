@@ -108,6 +108,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const snapLock = useRef(null)
   const currentStrokePoints = useRef([])
   const lastMousePos = useRef({ x: -9999, y: -9999 })
+  const fakeCursorRef = useRef(null)
+  const [isHovering, setIsHovering] = useState(false)
   const [isInsideRuler, setIsInsideRuler] = useState(false)
   const [isNearShape, setIsNearShape] = useState(false)
   const isNearShapeRef = useRef(false)  // re-render 최소화용 ref
@@ -224,6 +226,11 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     if (!canvas) return
     const rawPos = getPos(e, canvas)
     lastMousePos.current = rawPos
+
+    if (activeTool === 'pen' && stampMode && fakeCursorRef.current) {
+      fakeCursorRef.current.style.transform = `translate(${rawPos.x}px, ${rawPos.y}px)`
+      fakeCursorRef.current.style.display = 'block'
+    }
 
     // 자 내부 여부 실시간 업데이트 (커서 변경용) - 그리는 중에는 업데이트하지 않음 (스냅 위치에 커서 고정)
     if (!isDrawing.current) {
@@ -617,21 +624,19 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
       }
       const ctx = canvas.getContext('2d')
       const fontSize = 44
-      // serif 글꼴 둥근 숫자 글리프: em-box 수학 중앙 vs 시각 중심 오차 보정 (아래로 10%)
-      const yOffset = Math.round(fontSize * 0.10)
       ctx.save()
       ctx.font = `bold ${fontSize}px serif`
       ctx.fillStyle = strokeColor
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(stampMode, finalPos.x, finalPos.y + yOffset)
+      ctx.fillText(stampMode, finalPos.x, finalPos.y)
       ctx.restore()
       const shape = {
         id: 'st_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
         type: 'stamp',
         char: stampMode,
         x: finalPos.x,
-        y: finalPos.y + yOffset,
+        y: finalPos.y,
         color: strokeColor,
         fontSize,
       }
@@ -770,19 +775,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
   const getCursorStyle = () => {
     if (activeTool === 'pen') {
       if (isInsideRuler) return 'grab'
-      if (stampMode) {
-        // 넘버 도장 활성화 시 마우스 커서를 해당 넘버 도장 문자로 표시 (잘림 방지 viewBox 패딩 및 줌 스케일 반영)
-        const encodedChar = encodeURIComponent(stampMode)
-        const encodedColor = encodeURIComponent(strokeColor)
-        const baseSize = 44
-        // viewBox 패딩(64) 대비 폰트 크기(50) 비율 보상 → 화면상 문자 크기 = 44 * zoom px
-        const cursorW = Math.round(baseSize * (zoom || 1) * 64 / 50)
-        const cursorH = cursorW
-        const hotspot = Math.round(cursorW / 2)
-        // viewBox를 0 0 64 64로 충분히 확보하여 글리프 외곽/하단이 잘리지 않도록 배치
-        const stampCursorSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${cursorW}' height='${cursorH}' viewBox='0 0 64 64'%3E%3Ctext x='32' y='32' font-size='50' font-family='serif' font-weight='bold' fill='${encodedColor}' opacity='0.85' text-anchor='middle' dominant-baseline='central'%3E${encodedChar}%3C/text%3E%3C/svg%3E`
-        return `url("${stampCursorSvg}") ${hotspot} ${hotspot}, crosshair`
-      }
+      if (stampMode) return 'none'
       return (snapEnabled || ctrlActive) ? penSnapCursor : penSvgCursor
     }
     if (activeTool === 'line') {
@@ -794,9 +787,27 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     return 'default'
   }
 
+  const isStampMode = activeTool === 'pen' && !!stampMode
+
   return (
     <div
       className="absolute inset-0 w-full h-full"
+      onMouseEnter={(e) => {
+        setIsHovering(true)
+        const canvas = canvasRef.current
+        if (canvas) {
+          const p = getPos(e, canvas)
+          lastMousePos.current = p
+          if (fakeCursorRef.current) {
+            fakeCursorRef.current.style.transform = `translate(${p.x}px, ${p.y}px)`
+            fakeCursorRef.current.style.display = 'block'
+          }
+        }
+      }}
+      onMouseLeave={() => {
+        setIsHovering(false)
+        if (fakeCursorRef.current) fakeCursorRef.current.style.display = 'none'
+      }}
       onMouseMove={handleMove}
       onTouchMove={handleMove}
       onMouseDown={startDraw}
@@ -853,6 +864,37 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
               boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
             }}
           />
+        </div>
+      )}
+
+      {/* 넘버스탬프 프리뷰 오버레이 (0.2.01 동일 원리: 캔버스 내부 좌표계 기준 1:1 정렬) */}
+      {isStampMode && isHovering && !isInsideRuler && (
+        <div
+          ref={fakeCursorRef}
+          className="absolute top-0 left-0 pointer-events-none"
+          style={{
+            zIndex: 9999,
+            willChange: 'transform',
+            transform: lastMousePos.current.x > -100
+              ? `translate(${lastMousePos.current.x}px, ${lastMousePos.current.y}px)`
+              : 'none',
+            display: lastMousePos.current.x > -100 ? 'block' : 'none',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 44,
+              fontFamily: 'serif',
+              fontWeight: 'bold',
+              color: strokeColor,
+              opacity: 0.8,
+              lineHeight: 1,
+              userSelect: 'none',
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            {stampMode}
+          </div>
         </div>
       )}
     </div>

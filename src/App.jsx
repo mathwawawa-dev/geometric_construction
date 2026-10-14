@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.15_20261014_133700_넘버스탬프시각중심오차보정'
+const VERSION = 'v0.3.16_20261014_163200_넘버스탬프방안A_DOM프리뷰적용'
 
 export default function App() {
   const canvasRef = useRef(null)
