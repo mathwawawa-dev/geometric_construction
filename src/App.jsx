@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.13_20261014_132800_넘버스탬프하단잘림해결및클릭위치일치'
+const VERSION = 'v0.3.14_20261014_133200_넘버스탬프포인터실제크기정밀일치'
 
 export default function App() {
   const canvasRef = useRef(null)

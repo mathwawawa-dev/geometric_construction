@@ -773,8 +773,9 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         const encodedChar = encodeURIComponent(stampMode)
         const encodedColor = encodeURIComponent(strokeColor)
         const baseSize = 44
-        const cursorW = Math.round(baseSize * (zoom || 1))
-        const cursorH = Math.round(baseSize * (zoom || 1))
+        // viewBox 패딩(64) 대비 폰트 크기(50) 비율 보상 → 화면상 문자 크기 = 44 * zoom px
+        const cursorW = Math.round(baseSize * (zoom || 1) * 64 / 50)
+        const cursorH = cursorW
         const hotspot = Math.round(cursorW / 2)
         // viewBox를 0 0 64 64로 충분히 확보하여 글리프 외곽/하단이 잘리지 않도록 배치
         const stampCursorSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${cursorW}' height='${cursorH}' viewBox='0 0 64 64'%3E%3Ctext x='32' y='32' font-size='50' font-family='serif' font-weight='bold' fill='${encodedColor}' opacity='0.85' text-anchor='middle' dominant-baseline='central'%3E${encodedChar}%3C/text%3E%3C/svg%3E`
