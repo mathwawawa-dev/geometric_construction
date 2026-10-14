@@ -458,7 +458,7 @@ export function renderShapes(ctx, shapes) {
       ctx.textBaseline = 'top'
       ctx.fillText(s.text, s.x, s.y)
     } else if (s.type === 'stamp') {
-      ctx.font = `bold ${s.fontSize || 53}px serif`
+      ctx.font = `bold ${s.fontSize || 44}px serif`
       ctx.fillStyle = s.color || '#000000'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'

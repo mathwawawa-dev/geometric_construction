@@ -102,7 +102,7 @@ function snapToPointCenters(pos, shapes, snapRadius = 16, protractor = null) {
   return center ? { pos: center, snappedPoint: true } : { pos, snappedPoint: false }
 }
 
-export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, protractor, highlightMode, stampMode, shapes, snapEnabled = true }) {
+export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, strokeWidth, onDrawEnd, onAddShape, ruler, protractor, highlightMode, stampMode, shapes, snapEnabled = true, zoom = 1 }) {
   const draftCanvasRef = useRef(null)
   const isDrawing = useRef(false)
   const snapLock = useRef(null)
@@ -607,21 +607,29 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     // 넘버스탬프 클릭
     if (stampMode) {
       if (isPointInsideRuler(rawPos, ruler)) return
+      let finalPos = rawPos
+      if (latchedSnapPosRef.current) {
+        finalPos = latchedSnapPosRef.current
+        latchedSnapPosRef.current = null
+      } else if (snapEnabled || e.ctrlKey) {
+        const pointRes = snapToPointCenters(rawPos, shapesRef.current, 16, protractorRef.current)
+        if (pointRes.snappedPoint) finalPos = pointRes.pos
+      }
       const ctx = canvas.getContext('2d')
-      const fontSize = 53
+      const fontSize = 44
       ctx.save()
       ctx.font = `bold ${fontSize}px serif`
       ctx.fillStyle = strokeColor
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(stampMode, rawPos.x, rawPos.y)
+      ctx.fillText(stampMode, finalPos.x, finalPos.y)
       ctx.restore()
       const shape = {
         id: 'st_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
         type: 'stamp',
         char: stampMode,
-        x: rawPos.x,
-        y: rawPos.y,
+        x: finalPos.x,
+        y: finalPos.y,
         color: strokeColor,
         fontSize,
       }
@@ -761,11 +769,16 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     if (activeTool === 'pen') {
       if (isInsideRuler) return 'grab'
       if (stampMode) {
-        // 넘버 도장 활성화 시 마우스 커서를 해당 넘버 도장 문자로 표시 (중앙 24 24 기준)
+        // 넘버 도장 활성화 시 마우스 커서를 해당 넘버 도장 문자로 표시 (잘림 방지 viewBox 패딩 및 줌 스케일 반영)
         const encodedChar = encodeURIComponent(stampMode)
         const encodedColor = encodeURIComponent(strokeColor)
-        const stampCursorSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='53' height='53' viewBox='0 0 53 53'%3E%3Ctext x='26.5' y='26.5' font-size='53' font-family='serif' font-weight='bold' fill='${encodedColor}' opacity='0.8' text-anchor='middle' dominant-baseline='central'%3E${encodedChar}%3C/text%3E%3C/svg%3E`
-        return `url("${stampCursorSvg}") 26 26, crosshair`
+        const baseSize = 44
+        const cursorW = Math.round(baseSize * (zoom || 1))
+        const cursorH = Math.round(baseSize * (zoom || 1))
+        const hotspot = Math.round(cursorW / 2)
+        // viewBox를 0 0 64 64로 충분히 확보하여 글리프 외곽/하단이 잘리지 않도록 배치
+        const stampCursorSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${cursorW}' height='${cursorH}' viewBox='0 0 64 64'%3E%3Ctext x='32' y='32' font-size='50' font-family='serif' font-weight='bold' fill='${encodedColor}' opacity='0.85' text-anchor='middle' dominant-baseline='central'%3E${encodedChar}%3C/text%3E%3C/svg%3E`
+        return `url("${stampCursorSvg}") ${hotspot} ${hotspot}, crosshair`
       }
       return (snapEnabled || ctrlActive) ? penSnapCursor : penSvgCursor
     }

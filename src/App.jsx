@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.12_20261014_132100_넘버스탬프포인터실제크기일치'
+const VERSION = 'v0.3.13_20261014_132800_넘버스탬프하단잘림해결및클릭위치일치'
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -652,6 +652,7 @@ export default function App() {
               shapes={state.shapes}
               snapEnabled={snapEnabled}
               protractor={state.protractor}
+              zoom={zoom}
             />
             <SelectionLayer
               active={state.drawMode === 'select'}
