@@ -26,6 +26,37 @@ export function snapToSegmentEndpoint(pos, shapes, radius = 8) {
   return best  // null이면 근처에 끝점 없음
 }
 
+// 선분 끝점 뿐만 아니라 연필로 찍은 단일점(stroke points 1개)에도 스냅
+export function snapToEndpointOrDot(pos, shapes, radius = 16) {
+  let best = null
+  let bestDist = radius
+
+  for (const s of shapes) {
+    // 1. 선분 끝점
+    if (s.type === 'segment') {
+      const endpoints = [{ x: s.x1, y: s.y1 }, { x: s.x2, y: s.y2 }]
+      for (const ep of endpoints) {
+        const d = Math.hypot(pos.x - ep.x, pos.y - ep.y)
+        if (d <= bestDist) {
+          bestDist = d
+          best = ep
+        }
+      }
+    }
+    // 2. 연필로 찍은 점 (points.length === 1)
+    else if (s.points && s.points.length === 1) {
+      const pt = s.points[0]
+      const d = Math.hypot(pos.x - pt.x, pos.y - pt.y)
+      if (d <= bestDist) {
+        bestDist = d
+        best = { x: pt.x, y: pt.y }
+      }
+    }
+  }
+
+  return best
+}
+
 // 선분 위 최근접점 (선분의 두께 중심축 투영점)
 export function closestPointOnSegment(px, py, x1, y1, x2, y2) {
   const dx = x2 - x1

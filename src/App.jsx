@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.08_20261014_115500_각도기중심점1선분끝점스냅구현'
+const VERSION = 'v0.3.09_20261014_120500_각도기중심점1연필찍은점스냅추가'
 
 export default function App() {
   const canvasRef = useRef(null)

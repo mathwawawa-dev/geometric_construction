@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect } from 'react'
-import { snapToSegmentEndpoint } from '../utils/shapeUtils'
+import { snapToEndpointOrDot } from '../utils/shapeUtils'
 
 const HANDLE_R = 10
 const SNAP_DEG = 5
@@ -59,7 +59,7 @@ export default function ProtractorTool({ protractor, setProtractor, onInteractio
       if (dragging.current === 'center') {
         const rawTargetX = p.x - dragOffset.current.dx
         const rawTargetY = p.y - dragOffset.current.dy
-        const ep = snapToSegmentEndpoint({ x: rawTargetX, y: rawTargetY }, shapesRef.current, 16)
+        const ep = snapToEndpointOrDot({ x: rawTargetX, y: rawTargetY }, shapesRef.current, 16)
         if (ep) {
           setProtractor({ cx: ep.x, cy: ep.y })
         } else {
