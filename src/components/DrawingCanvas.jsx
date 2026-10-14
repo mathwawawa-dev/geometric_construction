@@ -228,7 +228,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     lastMousePos.current = rawPos
 
     if (activeTool === 'pen' && stampMode && fakeCursorRef.current) {
-      fakeCursorRef.current.style.transform = `translate(${rawPos.x}px, ${rawPos.y}px)`
+      fakeCursorRef.current.style.transform = `translate(${rawPos.x - 27}px, ${rawPos.y - 27}px)`
       fakeCursorRef.current.style.display = 'block'
     }
 
@@ -623,7 +623,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (pointRes.snappedPoint) finalPos = pointRes.pos
       }
       const ctx = canvas.getContext('2d')
-      const fontSize = 44
+      const fontSize = 53
       ctx.save()
       ctx.font = `bold ${fontSize}px serif`
       ctx.fillStyle = strokeColor
@@ -798,8 +798,8 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (canvas) {
           const p = getPos(e, canvas)
           lastMousePos.current = p
-          if (fakeCursorRef.current) {
-            fakeCursorRef.current.style.transform = `translate(${p.x}px, ${p.y}px)`
+          if (fakeCursorRef.current && stampMode) {
+            fakeCursorRef.current.style.transform = `translate(${p.x - 27}px, ${p.y - 27}px)`
             fakeCursorRef.current.style.display = 'block'
           }
         }
@@ -867,30 +867,27 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         </div>
       )}
 
-      {/* 넘버스탬프 프리뷰 오버레이 (0.2.01 동일 원리: 캔버스 내부 좌표계 기준 1:1 정렬) */}
+      {/* 넘버스탬프 프리뷰 오버레이 (v0.2.01 동일 구현: 53px 폰트 및 x-27, y-27 오프셋) */}
       {isStampMode && isHovering && !isInsideRuler && (
         <div
           ref={fakeCursorRef}
-          className="absolute top-0 left-0 pointer-events-none"
+          className="absolute top-0 left-0 pointer-events-none drop-shadow-md"
           style={{
             zIndex: 9999,
             willChange: 'transform',
             transform: lastMousePos.current.x > -100
-              ? `translate(${lastMousePos.current.x}px, ${lastMousePos.current.y}px)`
+              ? `translate(${lastMousePos.current.x - 27}px, ${lastMousePos.current.y - 27}px)`
               : 'none',
             display: lastMousePos.current.x > -100 ? 'block' : 'none',
           }}
         >
           <div
             style={{
-              fontSize: 44,
-              fontFamily: 'serif',
-              fontWeight: 'bold',
-              color: strokeColor,
-              opacity: 0.8,
+              fontSize: 53,
               lineHeight: 1,
               userSelect: 'none',
-              transform: 'translate(-50%, -50%)',
+              opacity: 0.75,
+              color: strokeColor,
             }}
           >
             {stampMode}

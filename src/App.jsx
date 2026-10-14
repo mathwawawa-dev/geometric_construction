@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.16_20261014_163200_넘버스탬프방안A_DOM프리뷰적용'
+const VERSION = 'v0.3.17_20261014_164300_0201버전스탬프DOM및폰트완전복원'
 
 export default function App() {
   const canvasRef = useRef(null)
