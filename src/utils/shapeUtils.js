@@ -313,7 +313,7 @@ export function getShapeBounds(shape) {
     }
   }
   if (shape.type === 'stamp') {
-    const half = (shape.fontSize || 53) * 0.6
+    const half = (shape.fontSize || 44) * 0.6
     return { minX: shape.x - half, maxX: shape.x + half, minY: shape.y - half, maxY: shape.y + half }
   }
   if (shape.type === 'text') {
@@ -387,7 +387,7 @@ export function isPointNearShape(px, py, shape, threshold = 8) {
     return Math.abs(d - shape.r) <= tolerance
   }
   if (shape.type === 'stamp') {
-    const half = (shape.fontSize || 53) * 0.6
+    const half = (shape.fontSize || 44) * 0.6
     return Math.abs(px - shape.x) < half && Math.abs(py - shape.y) < half
   }
   if (shape.type === 'text') {
@@ -458,7 +458,7 @@ export function renderShapes(ctx, shapes) {
       ctx.textBaseline = 'top'
       ctx.fillText(s.text, s.x, s.y)
     } else if (s.type === 'stamp') {
-      ctx.font = `bold ${s.fontSize || 53}px serif`
+      ctx.font = `bold ${s.fontSize || 44}px serif`
       ctx.fillStyle = s.color || '#000000'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'

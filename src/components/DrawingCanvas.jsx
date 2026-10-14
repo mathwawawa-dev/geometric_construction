@@ -102,6 +102,8 @@ function snapToPointCenters(pos, shapes, snapRadius = 16, protractor = null) {
   return center ? { pos: center, snappedPoint: true } : { pos, snappedPoint: false }
 }
 
+const STAMP_FONT_SIZE = 44
+
 function StampCursorCanvas({ stampMode, strokeColor }) {
   const canvasRef = useRef(null)
 
@@ -113,7 +115,7 @@ function StampCursorCanvas({ stampMode, strokeColor }) {
     c.height = SIZE
     const ctx = c.getContext('2d')
     ctx.clearRect(0, 0, SIZE, SIZE)
-    ctx.font = 'bold 53px serif'
+    ctx.font = `bold ${STAMP_FONT_SIZE}px serif`
     ctx.fillStyle = strokeColor
     ctx.globalAlpha = 0.75
     ctx.textAlign = 'center'
@@ -656,7 +658,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         if (pointRes.snappedPoint) finalPos = pointRes.pos
       }
       const ctx = canvas.getContext('2d')
-      const fontSize = 53
+      const fontSize = STAMP_FONT_SIZE
       ctx.save()
       ctx.font = `bold ${fontSize}px serif`
       ctx.fillStyle = strokeColor

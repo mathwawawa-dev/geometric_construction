@@ -2,6 +2,7 @@
 
 | 버전 | 주요 변경 내역 |
 |------|--------------|
+| v0.3.21_20261014_215900_스탬프폰트크기두단계축소 | 스탬프 폰트 크기를 두 단계 축소(53px → 44px)하고, StampCursorCanvas 프리뷰와 startDraw 날인 로직이 공유하는 STAMP_FONT_SIZE 상수를 도입하여 포인터와 실제 도장 크기/폰트를 100% 동일하게 일치 |
 | v0.3.20_20261014_191600_스탬프프리뷰캔버스독립컴포넌트및빌드반영 | 스탬프 프리뷰를 StampCursorCanvas 독립 컴포넌트로 분리하여 마운트 시 즉시 캔버스 API(bold 53px serif)로 렌더링하도록 개선하고, 단일 HTML 번들(작도보드_실행.html)을 최신 빌드로 갱신하여 폰트 100% 일치 반영 |
 | v0.3.19_20261014_191000_스탬프프리뷰캔버스렌더링 | DOM div 텍스트 오버레이 → 실제 <canvas> 엘리먼트로 교체; Canvas API(bold 53px serif)로 직접 그려 찍힌 도장과 완전 동일한 폰트 렌더링 보장 |
 | v0.3.18_20261014_190600_스탬프프리뷰폰트통일 | DOM 오버레이에 fontFamily:'serif', fontWeight:'bold' 추가 → Canvas 'bold 53px serif'와 완전 동일; 외부 div translate(rawPos), 내부 div translate(-50%,-50%) 중심 정렬 |

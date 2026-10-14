@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.20_20261014_191600_스탬프프리뷰캔버스독립컴포넌트및빌드반영'
+const VERSION = 'v0.3.21_20261014_215900_스탬프폰트크기두단계축소'
 
 export default function App() {
   const canvasRef = useRef(null)
