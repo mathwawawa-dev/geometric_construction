@@ -1,106 +1,228 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 18" width="280" height="180" fill="none">
-  <defs>
-    <!-- 그림자 필터 (선택적 사용) -->
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="0.5" stdDeviation="0.5" flood-color="#000" flood-opacity="0.15" />
-    </filter>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="8 3 184 96" width="368" height="192" fill="none">
+  <!-- 반원 아크릴 바디 채우기 -->
+  <path d="M 11.50 95 A 88.5 88.5 0 0 1 188.50 95 Z" fill="#ffffff" fill-opacity="0.8" />
 
-  <!-- ========================================== -->
-  <!-- 1. 반원 아크릴 바디                         -->
-  <!-- ========================================== -->
-  <path d="M 2 16 A 12 12 0 0 1 26 16 Z" fill="#ffffff" fill-opacity="0.85" />
+  <!-- 반원 외곽 호 (R_outer) -->
+  <path d="M 11.50 95 A 88.5 88.5 0 0 1 188.50 95" stroke="#333" stroke-width="1.2" fill="none" />
 
-  <!-- ========================================== -->
-  <!-- 2. 10도 단위 방사선 (중앙 구멍 ~ 눈금 안쪽) -->
-  <!-- ========================================== -->
-  <g id="radial-lines">
-    <line x1="11.20" y1="16.00" x2="4.00" y2="16.00" stroke="#64748b" stroke-width="0.45" />
-    <line x1="11.24" y1="15.51" x2="4.15" y2="14.26" stroke="#64748b" stroke-width="0.45" />
-    <line x1="11.37" y1="15.04" x2="4.60" y2="12.58" stroke="#64748b" stroke-width="0.45" />
-    <line x1="11.58" y1="14.60" x2="5.34" y2="11.00" stroke="#64748b" stroke-width="0.45" />
-    <line x1="11.86" y1="14.20" x2="6.34" y2="9.57" stroke="#64748b" stroke-width="0.45" />
-    <line x1="12.20" y1="13.86" x2="7.57" y2="8.34" stroke="#64748b" stroke-width="0.45" />
-    <line x1="12.60" y1="13.58" x2="9.00" y2="7.34" stroke="#64748b" stroke-width="0.45" />
-    <line x1="13.04" y1="13.37" x2="10.58" y2="6.60" stroke="#64748b" stroke-width="0.45" />
-    <line x1="13.51" y1="13.24" x2="12.26" y2="6.15" stroke="#64748b" stroke-width="0.45" />
-    <!-- 90도 수직 기준선 -->
-    <line x1="14.00" y1="13.20" x2="14.00" y2="6.00" stroke="#1e293b" stroke-width="0.8" />
-    <line x1="14.49" y1="13.24" x2="15.74" y2="6.15" stroke="#64748b" stroke-width="0.45" />
-    <line x1="14.96" y1="13.37" x2="17.42" y2="6.60" stroke="#64748b" stroke-width="0.45" />
-    <line x1="15.40" y1="13.58" x2="19.00" y2="7.34" stroke="#64748b" stroke-width="0.45" />
-    <line x1="15.80" y1="13.86" x2="20.43" y2="8.34" stroke="#64748b" stroke-width="0.45" />
-    <line x1="16.14" y1="14.20" x2="21.66" y2="9.57" stroke="#64748b" stroke-width="0.45" />
-    <line x1="16.42" y1="14.60" x2="22.66" y2="11.00" stroke="#64748b" stroke-width="0.45" />
-    <line x1="16.63" y1="15.04" x2="23.40" y2="12.58" stroke="#64748b" stroke-width="0.45" />
-    <line x1="16.76" y1="15.51" x2="23.85" y2="14.26" stroke="#64748b" stroke-width="0.45" />
-    <line x1="16.80" y1="16.00" x2="24.00" y2="16.00" stroke="#64748b" stroke-width="0.45" />
+  <!-- 1° 눈금 끝 받치는 호선 (R_tick_1deg) -->
+  <path d="M 16.00 95 A 84 84 0 0 1 184.00 95" stroke="#333" stroke-width="1" fill="none" />
+
+  <!-- 안쪽 큰 호선 (R_inner) -->
+  <path d="M 32.00 95 A 68 68 0 0 1 168.00 95" stroke="#333" stroke-width="1.2" fill="none" />
+
+  <!-- 중심 반원 허브 (R_hub) -->
+  <path d="M 84.00 95 A 16 16 0 0 1 116.00 95 Z" fill="#ffffff" stroke="#333" stroke-width="1.2" />
+
+  <!-- 기준 지름 수평선 (R_inner 구간) -->
+  <line x1="32.00" y1="95" x2="168.00" y2="95" stroke="#333" stroke-width="1.2" />
+
+  <!-- 중앙 90° 수직선 (중심부터 R_inner까지) -->
+  <line x1="100" y1="95" x2="100" y2="27" stroke="#333" stroke-width="1.2" />
+
+  <!-- 10° 단위 방사선 (R_hub ~ R_inner) -->
+  <g id="radial-lines" stroke="#555" stroke-width="1">
+    <line x1="84.24" y1="92.22" x2="33.03" y2="83.19" />
+    <line x1="84.96" y1="89.53" x2="36.10" y2="71.74" />
+    <line x1="86.14" y1="87.00" x2="41.11" y2="61.00" />
+    <line x1="87.74" y1="84.72" x2="47.91" y2="51.29" />
+    <line x1="89.72" y1="82.74" x2="56.29" y2="42.91" />
+    <line x1="92.00" y1="81.14" x2="66.00" y2="36.11" />
+    <line x1="94.53" y1="79.96" x2="76.74" y2="31.10" />
+    <line x1="97.22" y1="79.24" x2="88.19" y2="28.03" />
+    <line x1="100.00" y1="79.00" x2="100.00" y2="27.00" />
+    <line x1="102.78" y1="79.24" x2="111.81" y2="28.03" />
+    <line x1="105.47" y1="79.96" x2="123.26" y2="31.10" />
+    <line x1="108.00" y1="81.14" x2="134.00" y2="36.11" />
+    <line x1="110.28" y1="82.74" x2="143.71" y2="42.91" />
+    <line x1="112.26" y1="84.72" x2="152.09" y2="51.29" />
+    <line x1="113.86" y1="87.00" x2="158.89" y2="61.00" />
+    <line x1="115.04" y1="89.53" x2="163.90" y2="71.74" />
+    <line x1="115.76" y1="92.22" x2="166.97" y2="83.19" />
   </g>
 
-  <!-- ========================================== -->
-  <!-- 3. 5도 단위 미세 눈금 틱                    -->
-  <!-- ========================================== -->
-  <g id="sub-ticks">
-    <line x1="2.05" y1="14.95" x2="3.24" y2="15.06" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="2.41" y1="12.89" x2="3.57" y2="13.20" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="3.12" y1="10.93" x2="4.21" y2="11.44" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="4.17" y1="9.12" x2="5.15" y2="9.81" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="5.51" y1="7.51" x2="6.36" y2="8.36" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="7.12" y1="6.17" x2="7.81" y2="7.15" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="8.93" y1="5.12" x2="9.44" y2="6.21" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="10.89" y1="4.41" x2="11.20" y2="5.57" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="12.95" y1="4.05" x2="13.06" y2="5.24" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="15.05" y1="4.05" x2="14.94" y2="5.24" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="17.11" y1="4.41" x2="16.80" y2="5.57" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="19.07" y1="5.12" x2="18.56" y2="6.21" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="20.88" y1="6.17" x2="20.19" y2="7.15" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="22.49" y1="7.51" x2="21.64" y2="8.36" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="23.83" y1="9.12" x2="22.85" y2="9.81" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="24.88" y1="10.93" x2="23.79" y2="11.44" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="25.59" y1="12.89" x2="24.43" y2="13.20" stroke="#94a3b8" stroke-width="0.4" />
-    <line x1="25.95" y1="14.95" x2="24.76" y2="15.06" stroke="#94a3b8" stroke-width="0.4" />
+  <!-- 눈금선 (0°~180°, 1° 간격, 10°/5° 가중 길이) -->
+  <g id="tick-lines">
+    <line x1="11.50" y1="95.00" x2="19.60" y2="95.00" stroke="#222" stroke-width="1.3" />
+    <line x1="11.51" y1="93.46" x2="16.01" y2="93.53" stroke="#222" stroke-width="0.6" />
+    <line x1="11.55" y1="91.91" x2="16.05" y2="92.07" stroke="#222" stroke-width="0.6" />
+    <line x1="11.62" y1="90.37" x2="16.12" y2="90.60" stroke="#222" stroke-width="0.6" />
+    <line x1="11.72" y1="88.83" x2="16.20" y2="89.14" stroke="#222" stroke-width="0.6" />
+    <line x1="11.84" y1="87.29" x2="18.11" y2="87.84" stroke="#222" stroke-width="0.9" />
+    <line x1="11.98" y1="85.75" x2="16.46" y2="86.22" stroke="#222" stroke-width="0.6" />
+    <line x1="12.16" y1="84.21" x2="16.63" y2="84.76" stroke="#222" stroke-width="0.6" />
+    <line x1="12.36" y1="82.68" x2="16.82" y2="83.31" stroke="#222" stroke-width="0.6" />
+    <line x1="12.59" y1="81.16" x2="17.03" y2="81.86" stroke="#222" stroke-width="0.6" />
+    <line x1="12.84" y1="79.63" x2="20.82" y2="81.04" stroke="#222" stroke-width="1.3" />
+    <line x1="13.13" y1="78.11" x2="17.54" y2="78.97" stroke="#222" stroke-width="0.6" />
+    <line x1="13.43" y1="76.60" x2="17.84" y2="77.54" stroke="#222" stroke-width="0.6" />
+    <line x1="13.77" y1="75.09" x2="18.15" y2="76.10" stroke="#222" stroke-width="0.6" />
+    <line x1="14.13" y1="73.59" x2="18.50" y2="74.68" stroke="#222" stroke-width="0.6" />
+    <line x1="14.52" y1="72.09" x2="20.60" y2="73.73" stroke="#222" stroke-width="0.9" />
+    <line x1="14.93" y1="70.61" x2="19.25" y2="71.85" stroke="#222" stroke-width="0.6" />
+    <line x1="15.37" y1="69.13" x2="19.67" y2="70.44" stroke="#222" stroke-width="0.6" />
+    <line x1="15.83" y1="67.65" x2="20.11" y2="69.04" stroke="#222" stroke-width="0.6" />
+    <line x1="16.32" y1="66.19" x2="20.58" y2="67.65" stroke="#222" stroke-width="0.6" />
+    <line x1="16.84" y1="64.73" x2="24.45" y2="67.50" stroke="#222" stroke-width="1.3" />
+    <line x1="17.38" y1="63.28" x2="21.58" y2="64.90" stroke="#222" stroke-width="0.6" />
+    <line x1="17.94" y1="61.85" x2="22.12" y2="63.53" stroke="#222" stroke-width="0.6" />
+    <line x1="18.54" y1="60.42" x2="22.68" y2="62.18" stroke="#222" stroke-width="0.6" />
+    <line x1="19.15" y1="59.00" x2="23.26" y2="60.83" stroke="#222" stroke-width="0.6" />
+    <line x1="19.79" y1="57.60" x2="25.50" y2="60.26" stroke="#222" stroke-width="0.9" />
+    <line x1="20.46" y1="56.20" x2="24.50" y2="58.18" stroke="#222" stroke-width="0.6" />
+    <line x1="21.15" y1="54.82" x2="25.16" y2="56.86" stroke="#222" stroke-width="0.6" />
+    <line x1="21.86" y1="53.45" x2="25.83" y2="55.56" stroke="#222" stroke-width="0.6" />
+    <line x1="22.60" y1="52.09" x2="26.53" y2="54.28" stroke="#222" stroke-width="0.6" />
+    <line x1="23.36" y1="50.75" x2="30.37" y2="54.80" stroke="#222" stroke-width="1.3" />
+    <line x1="24.14" y1="49.42" x2="28.00" y2="51.74" stroke="#222" stroke-width="0.6" />
+    <line x1="24.95" y1="48.10" x2="28.76" y2="50.49" stroke="#222" stroke-width="0.6" />
+    <line x1="25.78" y1="46.80" x2="29.55" y2="49.25" stroke="#222" stroke-width="0.6" />
+    <line x1="26.63" y1="45.51" x2="30.36" y2="48.03" stroke="#222" stroke-width="0.6" />
+    <line x1="27.51" y1="44.24" x2="32.67" y2="47.85" stroke="#222" stroke-width="0.9" />
+    <line x1="28.40" y1="42.98" x2="32.04" y2="45.63" stroke="#222" stroke-width="0.6" />
+    <line x1="29.32" y1="41.74" x2="32.91" y2="44.45" stroke="#222" stroke-width="0.6" />
+    <line x1="30.26" y1="40.51" x2="33.81" y2="43.28" stroke="#222" stroke-width="0.6" />
+    <line x1="31.22" y1="39.31" x2="34.72" y2="42.14" stroke="#222" stroke-width="0.6" />
+    <line x1="32.21" y1="38.11" x2="38.41" y2="43.32" stroke="#222" stroke-width="1.3" />
+    <line x1="33.21" y1="36.94" x2="36.60" y2="39.89" stroke="#222" stroke-width="0.6" />
+    <line x1="34.23" y1="35.78" x2="37.58" y2="38.79" stroke="#222" stroke-width="0.6" />
+    <line x1="35.28" y1="34.64" x2="38.57" y2="37.71" stroke="#222" stroke-width="0.6" />
+    <line x1="36.34" y1="33.52" x2="39.58" y2="36.65" stroke="#222" stroke-width="0.6" />
+    <line x1="37.42" y1="32.42" x2="41.88" y2="36.88" stroke="#222" stroke-width="0.9" />
+    <line x1="38.52" y1="31.34" x2="41.65" y2="34.58" stroke="#222" stroke-width="0.6" />
+    <line x1="39.64" y1="30.28" x2="42.71" y2="33.57" stroke="#222" stroke-width="0.6" />
+    <line x1="40.78" y1="29.23" x2="43.79" y2="32.58" stroke="#222" stroke-width="0.6" />
+    <line x1="41.94" y1="28.21" x2="44.89" y2="31.60" stroke="#222" stroke-width="0.6" />
+    <line x1="43.11" y1="27.21" x2="48.32" y2="33.41" stroke="#222" stroke-width="1.3" />
+    <line x1="44.31" y1="26.22" x2="47.14" y2="29.72" stroke="#222" stroke-width="0.6" />
+    <line x1="45.51" y1="25.26" x2="48.28" y2="28.81" stroke="#222" stroke-width="0.6" />
+    <line x1="46.74" y1="24.32" x2="49.45" y2="27.91" stroke="#222" stroke-width="0.6" />
+    <line x1="47.98" y1="23.40" x2="50.63" y2="27.04" stroke="#222" stroke-width="0.6" />
+    <line x1="49.24" y1="22.51" x2="52.85" y2="27.67" stroke="#222" stroke-width="0.9" />
+    <line x1="50.51" y1="21.63" x2="53.03" y2="25.36" stroke="#222" stroke-width="0.6" />
+    <line x1="51.80" y1="20.78" x2="54.25" y2="24.55" stroke="#222" stroke-width="0.6" />
+    <line x1="53.10" y1="19.95" x2="55.49" y2="23.76" stroke="#222" stroke-width="0.6" />
+    <line x1="54.42" y1="19.14" x2="56.74" y2="23.00" stroke="#222" stroke-width="0.6" />
+    <line x1="55.75" y1="18.36" x2="59.80" y2="25.37" stroke="#222" stroke-width="1.3" />
+    <line x1="57.09" y1="17.60" x2="59.28" y2="21.53" stroke="#222" stroke-width="0.6" />
+    <line x1="58.45" y1="16.86" x2="60.56" y2="20.83" stroke="#222" stroke-width="0.6" />
+    <line x1="59.82" y1="16.15" x2="61.86" y2="20.16" stroke="#222" stroke-width="0.6" />
+    <line x1="61.20" y1="15.46" x2="63.18" y2="19.50" stroke="#222" stroke-width="0.6" />
+    <line x1="62.60" y1="14.79" x2="65.26" y2="20.50" stroke="#222" stroke-width="0.9" />
+    <line x1="64.00" y1="14.15" x2="65.83" y2="18.26" stroke="#222" stroke-width="0.6" />
+    <line x1="65.42" y1="13.54" x2="67.18" y2="17.68" stroke="#222" stroke-width="0.6" />
+    <line x1="66.85" y1="12.94" x2="68.53" y2="17.12" stroke="#222" stroke-width="0.6" />
+    <line x1="68.28" y1="12.38" x2="69.90" y2="16.58" stroke="#222" stroke-width="0.6" />
+    <line x1="69.73" y1="11.84" x2="72.50" y2="19.45" stroke="#222" stroke-width="1.3" />
+    <line x1="71.19" y1="11.32" x2="72.65" y2="15.58" stroke="#222" stroke-width="0.6" />
+    <line x1="72.65" y1="10.83" x2="74.04" y2="15.11" stroke="#222" stroke-width="0.6" />
+    <line x1="74.13" y1="10.37" x2="75.44" y2="14.67" stroke="#222" stroke-width="0.6" />
+    <line x1="75.61" y1="9.93" x2="76.85" y2="14.25" stroke="#222" stroke-width="0.6" />
+    <line x1="77.09" y1="9.52" x2="78.73" y2="15.60" stroke="#222" stroke-width="0.9" />
+    <line x1="78.59" y1="9.13" x2="79.68" y2="13.50" stroke="#222" stroke-width="0.6" />
+    <line x1="80.09" y1="8.77" x2="81.10" y2="13.15" stroke="#222" stroke-width="0.6" />
+    <line x1="81.60" y1="8.43" x2="82.54" y2="12.84" stroke="#222" stroke-width="0.6" />
+    <line x1="83.11" y1="8.13" x2="83.97" y2="12.54" stroke="#222" stroke-width="0.6" />
+    <line x1="84.63" y1="7.84" x2="86.04" y2="15.82" stroke="#222" stroke-width="1.3" />
+    <line x1="86.16" y1="7.59" x2="86.86" y2="12.03" stroke="#222" stroke-width="0.6" />
+    <line x1="87.68" y1="7.36" x2="88.31" y2="11.82" stroke="#222" stroke-width="0.6" />
+    <line x1="89.21" y1="7.16" x2="89.76" y2="11.63" stroke="#222" stroke-width="0.6" />
+    <line x1="90.75" y1="6.98" x2="91.22" y2="11.46" stroke="#222" stroke-width="0.6" />
+    <line x1="92.29" y1="6.84" x2="92.84" y2="13.11" stroke="#222" stroke-width="0.9" />
+    <line x1="93.83" y1="6.72" x2="94.14" y2="11.20" stroke="#222" stroke-width="0.6" />
+    <line x1="95.37" y1="6.62" x2="95.60" y2="11.12" stroke="#222" stroke-width="0.6" />
+    <line x1="96.91" y1="6.55" x2="97.07" y2="11.05" stroke="#222" stroke-width="0.6" />
+    <line x1="98.46" y1="6.51" x2="98.53" y2="11.01" stroke="#222" stroke-width="0.6" />
+    <line x1="100.00" y1="6.50" x2="100.00" y2="14.60" stroke="#222" stroke-width="1.3" />
+    <line x1="101.54" y1="6.51" x2="101.47" y2="11.01" stroke="#222" stroke-width="0.6" />
+    <line x1="103.09" y1="6.55" x2="102.93" y2="11.05" stroke="#222" stroke-width="0.6" />
+    <line x1="104.63" y1="6.62" x2="104.40" y2="11.12" stroke="#222" stroke-width="0.6" />
+    <line x1="106.17" y1="6.72" x2="105.86" y2="11.20" stroke="#222" stroke-width="0.6" />
+    <line x1="107.71" y1="6.84" x2="107.16" y2="13.11" stroke="#222" stroke-width="0.9" />
+    <line x1="109.25" y1="6.98" x2="108.78" y2="11.46" stroke="#222" stroke-width="0.6" />
+    <line x1="110.79" y1="7.16" x2="110.24" y2="11.63" stroke="#222" stroke-width="0.6" />
+    <line x1="112.32" y1="7.36" x2="111.69" y2="11.82" stroke="#222" stroke-width="0.6" />
+    <line x1="113.84" y1="7.59" x2="113.14" y2="12.03" stroke="#222" stroke-width="0.6" />
+    <line x1="115.37" y1="7.84" x2="113.96" y2="15.82" stroke="#222" stroke-width="1.3" />
+    <line x1="116.89" y1="8.13" x2="116.03" y2="12.54" stroke="#222" stroke-width="0.6" />
+    <line x1="118.40" y1="8.43" x2="117.46" y2="12.84" stroke="#222" stroke-width="0.6" />
+    <line x1="119.91" y1="8.77" x2="118.90" y2="13.15" stroke="#222" stroke-width="0.6" />
+    <line x1="121.41" y1="9.13" x2="120.32" y2="13.50" stroke="#222" stroke-width="0.6" />
+    <line x1="122.91" y1="9.52" x2="121.27" y2="15.60" stroke="#222" stroke-width="0.9" />
+    <line x1="124.39" y1="9.93" x2="123.15" y2="14.25" stroke="#222" stroke-width="0.6" />
+    <line x1="125.87" y1="10.37" x2="124.56" y2="14.67" stroke="#222" stroke-width="0.6" />
+    <line x1="127.35" y1="10.83" x2="125.96" y2="15.11" stroke="#222" stroke-width="0.6" />
+    <line x1="128.81" y1="11.32" x2="127.35" y2="15.58" stroke="#222" stroke-width="0.6" />
+    <line x1="130.27" y1="11.84" x2="127.50" y2="19.45" stroke="#222" stroke-width="1.3" />
+    <line x1="131.72" y1="12.38" x2="130.10" y2="16.58" stroke="#222" stroke-width="0.6" />
+    <line x1="133.15" y1="12.94" x2="131.47" y2="17.12" stroke="#222" stroke-width="0.6" />
+    <line x1="134.58" y1="13.54" x2="132.82" y2="17.68" stroke="#222" stroke-width="0.6" />
+    <line x1="136.00" y1="14.15" x2="134.17" y2="18.26" stroke="#222" stroke-width="0.6" />
+    <line x1="137.40" y1="14.79" x2="134.74" y2="20.50" stroke="#222" stroke-width="0.9" />
+    <line x1="138.80" y1="15.46" x2="136.82" y2="19.50" stroke="#222" stroke-width="0.6" />
+    <line x1="140.18" y1="16.15" x2="138.14" y2="20.16" stroke="#222" stroke-width="0.6" />
+    <line x1="141.55" y1="16.86" x2="139.44" y2="20.83" stroke="#222" stroke-width="0.6" />
+    <line x1="142.91" y1="17.60" x2="140.72" y2="21.53" stroke="#222" stroke-width="0.6" />
+    <line x1="144.25" y1="18.36" x2="140.20" y2="25.37" stroke="#222" stroke-width="1.3" />
+    <line x1="145.58" y1="19.14" x2="143.26" y2="23.00" stroke="#222" stroke-width="0.6" />
+    <line x1="146.90" y1="19.95" x2="144.51" y2="23.76" stroke="#222" stroke-width="0.6" />
+    <line x1="148.20" y1="20.78" x2="145.75" y2="24.55" stroke="#222" stroke-width="0.6" />
+    <line x1="149.49" y1="21.63" x2="146.97" y2="25.36" stroke="#222" stroke-width="0.6" />
+    <line x1="150.76" y1="22.51" x2="147.15" y2="27.67" stroke="#222" stroke-width="0.9" />
+    <line x1="152.02" y1="23.40" x2="149.37" y2="27.04" stroke="#222" stroke-width="0.6" />
+    <line x1="153.26" y1="24.32" x2="150.55" y2="27.91" stroke="#222" stroke-width="0.6" />
+    <line x1="154.49" y1="25.26" x2="151.72" y2="28.81" stroke="#222" stroke-width="0.6" />
+    <line x1="155.69" y1="26.22" x2="152.86" y2="29.72" stroke="#222" stroke-width="0.6" />
+    <line x1="156.89" y1="27.21" x2="151.68" y2="33.41" stroke="#222" stroke-width="1.3" />
+    <line x1="158.06" y1="28.21" x2="155.11" y2="31.60" stroke="#222" stroke-width="0.6" />
+    <line x1="159.22" y1="29.23" x2="156.21" y2="32.58" stroke="#222" stroke-width="0.6" />
+    <line x1="160.36" y1="30.28" x2="157.29" y2="33.57" stroke="#222" stroke-width="0.6" />
+    <line x1="161.48" y1="31.34" x2="158.35" y2="34.58" stroke="#222" stroke-width="0.6" />
+    <line x1="162.58" y1="32.42" x2="158.12" y2="36.88" stroke="#222" stroke-width="0.9" />
+    <line x1="163.66" y1="33.52" x2="160.42" y2="36.65" stroke="#222" stroke-width="0.6" />
+    <line x1="164.72" y1="34.64" x2="161.43" y2="37.71" stroke="#222" stroke-width="0.6" />
+    <line x1="165.77" y1="35.78" x2="162.42" y2="38.79" stroke="#222" stroke-width="0.6" />
+    <line x1="166.79" y1="36.94" x2="163.40" y2="39.89" stroke="#222" stroke-width="0.6" />
+    <line x1="167.79" y1="38.11" x2="161.59" y2="43.32" stroke="#222" stroke-width="1.3" />
+    <line x1="168.78" y1="39.31" x2="165.28" y2="42.14" stroke="#222" stroke-width="0.6" />
+    <line x1="169.74" y1="40.51" x2="166.19" y2="43.28" stroke="#222" stroke-width="0.6" />
+    <line x1="170.68" y1="41.74" x2="167.09" y2="44.45" stroke="#222" stroke-width="0.6" />
+    <line x1="171.60" y1="42.98" x2="167.96" y2="45.63" stroke="#222" stroke-width="0.6" />
+    <line x1="172.49" y1="44.24" x2="167.33" y2="47.85" stroke="#222" stroke-width="0.9" />
+    <line x1="173.37" y1="45.51" x2="169.64" y2="48.03" stroke="#222" stroke-width="0.6" />
+    <line x1="174.22" y1="46.80" x2="170.45" y2="49.25" stroke="#222" stroke-width="0.6" />
+    <line x1="175.05" y1="48.10" x2="171.24" y2="50.49" stroke="#222" stroke-width="0.6" />
+    <line x1="175.86" y1="49.42" x2="172.00" y2="51.74" stroke="#222" stroke-width="0.6" />
+    <line x1="176.64" y1="50.75" x2="169.63" y2="54.80" stroke="#222" stroke-width="1.3" />
+    <line x1="177.40" y1="52.09" x2="173.47" y2="54.28" stroke="#222" stroke-width="0.6" />
+    <line x1="178.14" y1="53.45" x2="174.17" y2="55.56" stroke="#222" stroke-width="0.6" />
+    <line x1="178.85" y1="54.82" x2="174.84" y2="56.86" stroke="#222" stroke-width="0.6" />
+    <line x1="179.54" y1="56.20" x2="175.50" y2="58.18" stroke="#222" stroke-width="0.6" />
+    <line x1="180.21" y1="57.60" x2="174.50" y2="60.26" stroke="#222" stroke-width="0.9" />
+    <line x1="180.85" y1="59.00" x2="176.74" y2="60.83" stroke="#222" stroke-width="0.6" />
+    <line x1="181.46" y1="60.42" x2="177.32" y2="62.18" stroke="#222" stroke-width="0.6" />
+    <line x1="182.06" y1="61.85" x2="177.88" y2="63.53" stroke="#222" stroke-width="0.6" />
+    <line x1="182.62" y1="63.28" x2="178.42" y2="64.90" stroke="#222" stroke-width="0.6" />
+    <line x1="183.16" y1="64.73" x2="175.55" y2="67.50" stroke="#222" stroke-width="1.3" />
+    <line x1="183.68" y1="66.19" x2="179.42" y2="67.65" stroke="#222" stroke-width="0.6" />
+    <line x1="184.17" y1="67.65" x2="179.89" y2="69.04" stroke="#222" stroke-width="0.6" />
+    <line x1="184.63" y1="69.13" x2="180.33" y2="70.44" stroke="#222" stroke-width="0.6" />
+    <line x1="185.07" y1="70.61" x2="180.75" y2="71.85" stroke="#222" stroke-width="0.6" />
+    <line x1="185.48" y1="72.09" x2="179.40" y2="73.73" stroke="#222" stroke-width="0.9" />
+    <line x1="185.87" y1="73.59" x2="181.50" y2="74.68" stroke="#222" stroke-width="0.6" />
+    <line x1="186.23" y1="75.09" x2="181.85" y2="76.10" stroke="#222" stroke-width="0.6" />
+    <line x1="186.57" y1="76.60" x2="182.16" y2="77.54" stroke="#222" stroke-width="0.6" />
+    <line x1="186.87" y1="78.11" x2="182.46" y2="78.97" stroke="#222" stroke-width="0.6" />
+    <line x1="187.16" y1="79.63" x2="179.18" y2="81.04" stroke="#222" stroke-width="1.3" />
+    <line x1="187.41" y1="81.16" x2="182.97" y2="81.86" stroke="#222" stroke-width="0.6" />
+    <line x1="187.64" y1="82.68" x2="183.18" y2="83.31" stroke="#222" stroke-width="0.6" />
+    <line x1="187.84" y1="84.21" x2="183.37" y2="84.76" stroke="#222" stroke-width="0.6" />
+    <line x1="188.02" y1="85.75" x2="183.54" y2="86.22" stroke="#222" stroke-width="0.6" />
+    <line x1="188.16" y1="87.29" x2="181.89" y2="87.84" stroke="#222" stroke-width="0.9" />
+    <line x1="188.28" y1="88.83" x2="183.80" y2="89.14" stroke="#222" stroke-width="0.6" />
+    <line x1="188.38" y1="90.37" x2="183.88" y2="90.60" stroke="#222" stroke-width="0.6" />
+    <line x1="188.45" y1="91.91" x2="183.95" y2="92.07" stroke="#222" stroke-width="0.6" />
+    <line x1="188.49" y1="93.46" x2="183.99" y2="93.53" stroke="#222" stroke-width="0.6" />
+    <line x1="188.50" y1="95.00" x2="180.40" y2="95.00" stroke="#222" stroke-width="1.3" />
   </g>
-
-  <!-- ========================================== -->
-  <!-- 4. 10도 단위 주요 눈금 틱                   -->
-  <!-- ========================================== -->
-  <g id="main-ticks">
-    <line x1="2.00" y1="16.00" x2="4.00" y2="16.00" stroke="#334155" stroke-width="0.7" />
-    <line x1="2.18" y1="13.92" x2="4.15" y2="14.26" stroke="#334155" stroke-width="0.7" />
-    <line x1="2.72" y1="11.90" x2="4.60" y2="12.58" stroke="#334155" stroke-width="0.7" />
-    <line x1="3.61" y1="10.00" x2="5.34" y2="11.00" stroke="#334155" stroke-width="0.7" />
-    <line x1="4.81" y1="8.29" x2="6.34" y2="9.57" stroke="#334155" stroke-width="0.7" />
-    <line x1="6.29" y1="6.81" x2="7.57" y2="8.34" stroke="#334155" stroke-width="0.7" />
-    <line x1="8.00" y1="5.61" x2="9.00" y2="7.34" stroke="#334155" stroke-width="0.7" />
-    <line x1="9.90" y1="4.72" x2="10.58" y2="6.60" stroke="#334155" stroke-width="0.7" />
-    <line x1="11.92" y1="4.18" x2="12.26" y2="6.15" stroke="#334155" stroke-width="0.7" />
-    <line x1="14.00" y1="4.00" x2="14.00" y2="6.00" stroke="#334155" stroke-width="0.8" />
-    <line x1="16.08" y1="4.18" x2="15.74" y2="6.15" stroke="#334155" stroke-width="0.7" />
-    <line x1="18.10" y1="4.72" x2="17.42" y2="6.60" stroke="#334155" stroke-width="0.7" />
-    <line x1="20.00" y1="5.61" x2="19.00" y2="7.34" stroke="#334155" stroke-width="0.7" />
-    <line x1="21.71" y1="6.81" x2="20.43" y2="8.34" stroke="#334155" stroke-width="0.7" />
-    <line x1="23.19" y1="8.29" x2="21.66" y2="9.57" stroke="#334155" stroke-width="0.7" />
-    <line x1="24.39" y1="10.00" x2="22.66" y2="11.00" stroke="#334155" stroke-width="0.7" />
-    <line x1="25.28" y1="11.90" x2="23.40" y2="12.58" stroke="#334155" stroke-width="0.7" />
-    <line x1="25.82" y1="13.92" x2="23.85" y2="14.26" stroke="#334155" stroke-width="0.7" />
-    <line x1="26.00" y1="16.00" x2="24.00" y2="16.00" stroke="#334155" stroke-width="0.7" />
-  </g>
-
-  <!-- ========================================== -->
-  <!-- 5. 반원 외곽 호선 및 눈금 밴드 안쪽 호선     -->
-  <!-- ========================================== -->
-  <!-- 외곽 반원 테두리 호 (반지름 12, 중심 14, 16) -->
-  <path d="M 2 16 A 12 12 0 0 1 26 16" stroke="#334155" stroke-width="1.1" stroke-linecap="round" />
-  <!-- 눈금 밴드 안쪽 호선 (반지름 10, 중심 14, 16) -->
-  <path d="M 4 16 A 10 10 0 0 1 24 16" stroke="#475569" stroke-width="0.7" />
-
-  <!-- ========================================== -->
-  <!-- 6. 바닥 중앙 반원 홀 및 바닥 기준선           -->
-  <!-- ========================================== -->
-  <!-- 바닥 중앙 반원 구멍 (반지름 2.8) -->
-  <path d="M 11.2 16 A 2.8 2.8 0 0 1 16.8 16" stroke="#334155" stroke-width="0.9" fill="#ffffff" />
-  <!-- 왼쪽 바닥 기준선 -->
-  <line x1="2" y1="16" x2="11.2" y2="16" stroke="#334155" stroke-width="1.1" stroke-linecap="round" />
-  <!-- 오른쪽 바닥 기준선 -->
-  <line x1="16.8" y1="16" x2="26" y2="16" stroke="#334155" stroke-width="1.1" stroke-linecap="round" />
 </svg>

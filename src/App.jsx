@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.31_20261014_235500_각도기및컴퍼스사이드바SVG파일저장'
+const VERSION = 'v0.3.32_20261015_000000_각도기도구실물그래픽공식동일반영SVG적용'
 
 export default function App() {
   const canvasRef = useRef(null)

@@ -56,91 +56,78 @@ const CompassIcon = () => (
   </svg>
 )
 
-// 각도기 눈금선 및 방사선 데이터 (10도 단위)
-const PROTRACTOR_TICKS = [
-  0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180
-].map(deg => {
-  const rad = (deg * Math.PI) / 180
-  const cos = Math.cos(rad)
-  const sin = Math.sin(rad)
-  return {
-    deg,
-    x1: (14 - 12 * cos).toFixed(2),
-    y1: (16 - 12 * sin).toFixed(2),
-    x2: (14 - 10 * cos).toFixed(2),
-    y2: (16 - 10 * sin).toFixed(2),
-    rx1: (14 - 2.8 * cos).toFixed(2),
-    ry1: (16 - 2.8 * sin).toFixed(2),
-  }
-})
+// 실제 각도기 도구(ProtractorTool.jsx)의 그래픽 공식과 100% 동일한 수치 (숫자만 제외)
+const P_CX = 100
+const P_CY = 95
+const P_R = 100
+const P_R_INNER = P_R * 0.68      // 68
+const P_R_TICK_1DEG = P_R * 0.84  // 84
+const P_R_OUTER = P_R * 0.885     // 88.5
+const P_R_HUB = P_R * 0.16        // 16
 
-// 각도기 미세 틱 데이터 (5도 단위)
-const PROTRACTOR_SUB_TICKS = [
-  5, 15, 25, 35, 45, 55, 65, 75, 85, 95, 105, 115, 125, 135, 145, 155, 165, 175
-].map(deg => {
-  const rad = (deg * Math.PI) / 180
-  const cos = Math.cos(rad)
-  const sin = Math.sin(rad)
-  return {
-    x1: (14 - 12 * cos).toFixed(2),
-    y1: (16 - 12 * sin).toFixed(2),
-    x2: (14 - 10.8 * cos).toFixed(2),
-    y2: (16 - 10.8 * sin).toFixed(2),
-  }
-})
+const P_TICKS = Array.from({ length: 181 }, (_, i) => i)
+const P_RADIAL_LINES = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170]
+const pAX = (r, rad) => (P_CX + r * Math.cos(rad)).toFixed(2)
+const pAY = (r, rad) => (P_CY - r * Math.sin(rad)).toFixed(2)
 
-// 실제 각도기 도구 그래픽을 축약한 정밀 미니어처 SVG
-const ProtractorIcon = () => (
-  <svg width="26" height="17" viewBox="0 0 28 18" fill="none" className="shrink-0 drop-shadow-sm">
-    {/* 반원 아크릴 바디 */}
-    <path d="M 2 16 A 12 12 0 0 1 26 16 Z" fill="#ffffff" fillOpacity="0.8" />
+// 실제 각도기 도구 그래픽을 100% 반영한 정밀 SVG (숫자 제외)
+const ProtractorIcon = () => {
+  const baseDepth = P_R_OUTER - P_R_TICK_1DEG
+  return (
+    <svg width="27" height="17" viewBox="8 3 184 96" fill="none" className="shrink-0 drop-shadow-sm">
+      {/* 반원 아크릴 바디 */}
+      <path d={`M ${(P_CX - P_R_OUTER).toFixed(2)} ${P_CY} A ${P_R_OUTER} ${P_R_OUTER} 0 0 1 ${(P_CX + P_R_OUTER).toFixed(2)} ${P_CY} Z`} fill="#ffffff" fillOpacity="0.8" />
 
-    {/* 10도 단위 방사선 */}
-    {PROTRACTOR_TICKS.map((t) => (
-      <line
-        key={`r-${t.deg}`}
-        x1={t.rx1} y1={t.ry1}
-        x2={t.x2} y2={t.y2}
-        stroke={t.deg === 90 ? '#1e293b' : '#64748b'}
-        strokeWidth={t.deg === 90 ? '0.8' : '0.45'}
-      />
-    ))}
+      {/* 반원 외곽 호 (R_outer) */}
+      <path d={`M ${(P_CX - P_R_OUTER).toFixed(2)} ${P_CY} A ${P_R_OUTER} ${P_R_OUTER} 0 0 1 ${(P_CX + P_R_OUTER).toFixed(2)} ${P_CY}`} stroke="#333" strokeWidth="1.2" />
 
-    {/* 5도 단위 미세 틱 */}
-    {PROTRACTOR_SUB_TICKS.map((t, idx) => (
-      <line
-        key={`st-${idx}`}
-        x1={t.x1} y1={t.y1}
-        x2={t.x2} y2={t.y2}
-        stroke="#94a3b8"
-        strokeWidth="0.4"
-      />
-    ))}
+      {/* 1° 눈금 끝 받치는 호선 (R_tick_1deg) */}
+      <path d={`M ${(P_CX - P_R_TICK_1DEG).toFixed(2)} ${P_CY} A ${P_R_TICK_1DEG} ${P_R_TICK_1DEG} 0 0 1 ${(P_CX + P_R_TICK_1DEG).toFixed(2)} ${P_CY}`} stroke="#333" strokeWidth="1" />
 
-    {/* 10도 단위 눈금 틱 */}
-    {PROTRACTOR_TICKS.map((t) => (
-      <line
-        key={`t-${t.deg}`}
-        x1={t.x1} y1={t.y1}
-        x2={t.x2} y2={t.y2}
-        stroke="#334155"
-        strokeWidth="0.7"
-      />
-    ))}
+      {/* 안쪽 큰 호선 (R_inner) */}
+      <path d={`M ${(P_CX - P_R_INNER).toFixed(2)} ${P_CY} A ${P_R_INNER} ${P_R_INNER} 0 0 1 ${(P_CX + P_R_INNER).toFixed(2)} ${P_CY}`} stroke="#333" strokeWidth="1.2" />
 
-    {/* 외곽 반원 테두리 호 */}
-    <path d="M 2 16 A 12 12 0 0 1 26 16" stroke="#334155" strokeWidth="1.1" strokeLinecap="round" />
-    {/* 눈금 안쪽 호선 */}
-    <path d="M 4 16 A 10 10 0 0 1 24 16" stroke="#475569" strokeWidth="0.7" />
+      {/* 중심 반원 허브 (R_hub) */}
+      <path d={`M ${(P_CX - P_R_HUB).toFixed(2)} ${P_CY} A ${P_R_HUB} ${P_R_HUB} 0 0 1 ${(P_CX + P_R_HUB).toFixed(2)} ${P_CY} Z`} fill="#ffffff" stroke="#333" strokeWidth="1.2" />
 
-    {/* 바닥 중앙 반원 구멍 */}
-    <path d="M 11.2 16 A 2.8 2.8 0 0 1 16.8 16" stroke="#334155" strokeWidth="0.9" fill="#ffffff" />
+      {/* 기준 지름 수평선 (R_inner 구간) */}
+      <line x1={(P_CX - P_R_INNER).toFixed(2)} y1={P_CY} x2={(P_CX + P_R_INNER).toFixed(2)} y2={P_CY} stroke="#333" strokeWidth="1.2" />
 
-    {/* 바닥 베이스 기준선 (양쪽) */}
-    <line x1="2" y1="16" x2="11.2" y2="16" stroke="#334155" strokeWidth="1.1" strokeLinecap="round" />
-    <line x1="16.8" y1="16" x2="26" y2="16" stroke="#334155" strokeWidth="1.1" strokeLinecap="round" />
-  </svg>
-)
+      {/* 중앙 90° 수직선 (중심부터 R_inner까지) */}
+      <line x1={P_CX} y1={P_CY} x2={P_CX} y2={P_CY - P_R_INNER} stroke="#333" strokeWidth="1.2" />
+
+      {/* 10° 단위 방사선 (R_hub ~ R_inner) */}
+      {P_RADIAL_LINES.map(deg => {
+        const tickRad = Math.PI - (deg * Math.PI) / 180
+        return (
+          <line
+            key={`r-${deg}`}
+            x1={pAX(P_R_HUB, tickRad)} y1={pAY(P_R_HUB, tickRad)}
+            x2={pAX(P_R_INNER, tickRad)} y2={pAY(P_R_INNER, tickRad)}
+            stroke="#555" strokeWidth="1"
+          />
+        )
+      })}
+
+      {/* 181개 눈금선 (0°~180°, 1° 간격, 10°/5° 가중 길이) */}
+      {P_TICKS.map(i => {
+        const tickRad = Math.PI - (i * Math.PI) / 180
+        const is10 = i % 10 === 0
+        const is5 = i % 5 === 0
+        const len = is10 ? baseDepth * 1.8 : is5 ? baseDepth * 1.4 : baseDepth
+        const sw = is10 ? 1.3 : is5 ? 0.9 : 0.6
+        return (
+          <line
+            key={`t-${i}`}
+            x1={pAX(P_R_OUTER, tickRad)} y1={pAY(P_R_OUTER, tickRad)}
+            x2={pAX(P_R_OUTER - len, tickRad)} y2={pAY(P_R_OUTER - len, tickRad)}
+            stroke="#222" strokeWidth={sw}
+          />
+        )
+      })}
+    </svg>
+  )
+}
 
 // 도구 토글 버튼 (독립적으로 on/off, 동시에 여러 개 활성 가능)
 const toolDefs = [
