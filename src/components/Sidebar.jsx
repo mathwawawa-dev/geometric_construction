@@ -8,51 +8,51 @@ const drawModes = [
   { id: 'select', icon: '↖️', label: '선택 (S)' },
 ]
 
-// 실제 컴퍼스 도구 그래픽을 축약한 정밀 미니어처 SVG
+// 실제 컴퍼스 도구 그래픽을 축약한 정밀 미니어처 SVG (어두운 메탈 다리 색상 적용)
 const CompassIcon = () => (
-  <svg width="22" height="26" viewBox="0 0 28 34" fill="none" className="shrink-0 drop-shadow-sm">
+  <svg width="24" height="27" viewBox="0 0 30 34" fill="none" className="shrink-0 drop-shadow-sm">
     {/* 상단 손잡이 (검정 캡) */}
-    <rect x="12.2" y="0.8" width="3.6" height="6.8" rx="1.8" fill="#1e293b" />
-    <rect x="13.2" y="2.2" width="1.6" height="3.8" rx="0.8" fill="#334155" />
+    <rect x="13.2" y="0.8" width="3.6" height="6.8" rx="1.8" fill="#0f172a" />
+    <rect x="14.2" y="2.2" width="1.6" height="3.8" rx="0.8" fill="#334155" />
 
     {/* 힌지 원형 관절 */}
-    <circle cx="14" cy="8.2" r="3.8" fill="#1e293b" stroke="#475569" strokeWidth="0.8" />
-    <circle cx="14" cy="8.2" r="1.5" fill="#64748b" />
-    <circle cx="14" cy="8.2" r="0.8" fill="#94a3b8" />
+    <circle cx="15" cy="8" r="3.8" fill="#0f172a" stroke="#334155" strokeWidth="0.8" />
+    <circle cx="15" cy="8" r="1.5" fill="#475569" />
+    <circle cx="15" cy="8" r="0.8" fill="#94a3b8" />
 
-    {/* 왼쪽 침핀 다리 (은색 메인 바디) */}
-    <line x1="13.5" y1="9.5" x2="6" y2="25.5" stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" />
-    <line x1="13.5" y1="9.5" x2="6" y2="25.5" stroke="#f8fafc" strokeWidth="0.9" strokeLinecap="round" />
+    {/* 왼쪽 침핀 다리 (어두운 메탈 바디) */}
+    <line x1="14.4" y1="9.2" x2="5.5" y2="25" stroke="#475569" strokeWidth="2.6" strokeLinecap="round" />
+    <line x1="14.4" y1="9.2" x2="5.5" y2="25" stroke="#94a3b8" strokeWidth="1" strokeLinecap="round" />
 
     {/* 침핀 홀더 (검정 캡) */}
-    <line x1="6" y1="25.5" x2="4.6" y2="29" stroke="#1e293b" strokeWidth="3.2" strokeLinecap="butt" />
+    <line x1="5.5" y1="25" x2="4" y2="28.5" stroke="#0f172a" strokeWidth="3.4" strokeLinecap="butt" />
     {/* 금속 바늘 */}
-    <line x1="4.6" y1="29" x2="3.4" y2="32" stroke="#94a3b8" strokeWidth="1" strokeLinecap="round" />
+    <line x1="4" y1="28.5" x2="2.7" y2="31.8" stroke="#64748b" strokeWidth="1" strokeLinecap="round" />
     {/* 침핀 끝 빨간 볼 */}
-    <circle cx="2.6" cy="33.2" r="1.5" fill="#dc2626" />
+    <circle cx="1.8" cy="33" r="1.6" fill="#dc2626" />
 
-    {/* 오른쪽 연필 다리 (은색 메인 바디) */}
-    <line x1="14.5" y1="9.5" x2="21.5" y2="25" stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" />
-    <line x1="14.5" y1="9.5" x2="21.5" y2="25" stroke="#f8fafc" strokeWidth="0.9" strokeLinecap="round" />
+    {/* 오른쪽 연필 다리 (어두운 메탈 바디) */}
+    <line x1="15.6" y1="9.2" x2="23.5" y2="25" stroke="#475569" strokeWidth="2.6" strokeLinecap="round" />
+    <line x1="15.6" y1="9.2" x2="23.5" y2="25" stroke="#94a3b8" strokeWidth="1" strokeLinecap="round" />
 
     {/* 오른쪽 관절 조인트 및 수평 클램프 팔 */}
-    <circle cx="21.5" cy="25" r="1.8" fill="#1e293b" />
-    <line x1="21.5" y1="25" x2="24.2" y2="25" stroke="#1e293b" strokeWidth="2.2" strokeLinecap="round" />
+    <circle cx="23.5" cy="25" r="1.9" fill="#0f172a" />
+    <line x1="23.5" y1="25" x2="26.2" y2="25" stroke="#0f172a" strokeWidth="2.2" strokeLinecap="round" />
 
     {/* 연필 클램프 칼라 */}
-    <rect x="23.2" y="23.5" width="2.4" height="3" rx="0.6" fill="#1e293b" />
+    <rect x="25.2" y="23.5" width="2.4" height="3" rx="0.6" fill="#0f172a" />
 
     {/* 연필 본체 */}
     {/* 분홍색 지우개 */}
-    <rect x="23.4" y="18.8" width="2" height="2.2" rx="0.5" fill="#f9a8a8" />
+    <rect x="25.4" y="18.8" width="2" height="2.2" rx="0.5" fill="#f9a8a8" />
     {/* 은색 페룰 밴드 */}
-    <rect x="23.4" y="21" width="2" height="1.1" fill="#9ca3af" />
+    <rect x="25.4" y="21" width="2" height="1.1" fill="#9ca3af" />
     {/* 노란 연필 바디 */}
-    <rect x="23.4" y="22.1" width="2" height="5.4" fill="#f5c518" />
+    <rect x="25.4" y="22.1" width="2" height="5.4" fill="#f59e0b" />
     {/* 깎인 나무 부분 */}
-    <polygon points="23.4,27.5 25.4,27.5 24.4,30" fill="#c8a96e" />
+    <polygon points="25.4,27.5 27.4,27.5 26.4,30" fill="#d97706" />
     {/* 흑연 심 */}
-    <polygon points="24,29.6 24.8,29.6 24.4,31.2" fill="#1c1917" />
+    <polygon points="26,29.6 26.8,29.6 26.4,31.2" fill="#0f172a" />
   </svg>
 )
 

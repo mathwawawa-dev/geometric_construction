@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.29_20261014_234800_컴퍼스각도기도구실물일치정밀미니어처SVG적용'
+const VERSION = 'v0.3.30_20261014_235200_사이드바컴퍼스아이콘다리색어둡게및비율조정'
 
 export default function App() {
   const canvasRef = useRef(null)
