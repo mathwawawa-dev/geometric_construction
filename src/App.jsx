@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.32_20261015_000000_각도기도구실물그래픽공식동일반영SVG적용'
+const VERSION = 'v0.3.33_20261015_000300_실행취소최대횟수25회조정'
 
 export default function App() {
   const canvasRef = useRef(null)
