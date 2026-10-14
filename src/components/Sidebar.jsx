@@ -8,28 +8,137 @@ const drawModes = [
   { id: 'select', icon: '↖️', label: '선택 (S)' },
 ]
 
-// 수학 작도용 컴퍼스(제도기) SVG 아이콘
+// 실제 컴퍼스 도구 그래픽을 축약한 정밀 미니어처 SVG
 const CompassIcon = () => (
-  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2v3" />
-    <circle cx="12" cy="7" r="2" />
-    <path d="M10.5 8.5L5 21" />
-    <path d="M13.5 8.5L19 21" />
-    <path d="M7.5 14h9" />
-    <circle cx="12" cy="14" r="1.2" fill="currentColor" />
+  <svg width="22" height="26" viewBox="0 0 28 34" fill="none" className="shrink-0 drop-shadow-sm">
+    {/* 상단 손잡이 (검정 캡) */}
+    <rect x="12.2" y="0.8" width="3.6" height="6.8" rx="1.8" fill="#1e293b" />
+    <rect x="13.2" y="2.2" width="1.6" height="3.8" rx="0.8" fill="#334155" />
+
+    {/* 힌지 원형 관절 */}
+    <circle cx="14" cy="8.2" r="3.8" fill="#1e293b" stroke="#475569" strokeWidth="0.8" />
+    <circle cx="14" cy="8.2" r="1.5" fill="#64748b" />
+    <circle cx="14" cy="8.2" r="0.8" fill="#94a3b8" />
+
+    {/* 왼쪽 침핀 다리 (은색 메인 바디) */}
+    <line x1="13.5" y1="9.5" x2="6" y2="25.5" stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" />
+    <line x1="13.5" y1="9.5" x2="6" y2="25.5" stroke="#f8fafc" strokeWidth="0.9" strokeLinecap="round" />
+
+    {/* 침핀 홀더 (검정 캡) */}
+    <line x1="6" y1="25.5" x2="4.6" y2="29" stroke="#1e293b" strokeWidth="3.2" strokeLinecap="butt" />
+    {/* 금속 바늘 */}
+    <line x1="4.6" y1="29" x2="3.4" y2="32" stroke="#94a3b8" strokeWidth="1" strokeLinecap="round" />
+    {/* 침핀 끝 빨간 볼 */}
+    <circle cx="2.6" cy="33.2" r="1.5" fill="#dc2626" />
+
+    {/* 오른쪽 연필 다리 (은색 메인 바디) */}
+    <line x1="14.5" y1="9.5" x2="21.5" y2="25" stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" />
+    <line x1="14.5" y1="9.5" x2="21.5" y2="25" stroke="#f8fafc" strokeWidth="0.9" strokeLinecap="round" />
+
+    {/* 오른쪽 관절 조인트 및 수평 클램프 팔 */}
+    <circle cx="21.5" cy="25" r="1.8" fill="#1e293b" />
+    <line x1="21.5" y1="25" x2="24.2" y2="25" stroke="#1e293b" strokeWidth="2.2" strokeLinecap="round" />
+
+    {/* 연필 클램프 칼라 */}
+    <rect x="23.2" y="23.5" width="2.4" height="3" rx="0.6" fill="#1e293b" />
+
+    {/* 연필 본체 */}
+    {/* 분홍색 지우개 */}
+    <rect x="23.4" y="18.8" width="2" height="2.2" rx="0.5" fill="#f9a8a8" />
+    {/* 은색 페룰 밴드 */}
+    <rect x="23.4" y="21" width="2" height="1.1" fill="#9ca3af" />
+    {/* 노란 연필 바디 */}
+    <rect x="23.4" y="22.1" width="2" height="5.4" fill="#f5c518" />
+    {/* 깎인 나무 부분 */}
+    <polygon points="23.4,27.5 25.4,27.5 24.4,30" fill="#c8a96e" />
+    {/* 흑연 심 */}
+    <polygon points="24,29.6 24.8,29.6 24.4,31.2" fill="#1c1917" />
   </svg>
 )
 
-// 수학 반원 각도기 SVG 아이콘
+// 각도기 눈금선 및 방사선 데이터 (10도 단위)
+const PROTRACTOR_TICKS = [
+  0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180
+].map(deg => {
+  const rad = (deg * Math.PI) / 180
+  const cos = Math.cos(rad)
+  const sin = Math.sin(rad)
+  return {
+    deg,
+    x1: (14 - 12 * cos).toFixed(2),
+    y1: (16 - 12 * sin).toFixed(2),
+    x2: (14 - 10 * cos).toFixed(2),
+    y2: (16 - 10 * sin).toFixed(2),
+    rx1: (14 - 2.8 * cos).toFixed(2),
+    ry1: (16 - 2.8 * sin).toFixed(2),
+  }
+})
+
+// 각도기 미세 틱 데이터 (5도 단위)
+const PROTRACTOR_SUB_TICKS = [
+  5, 15, 25, 35, 45, 55, 65, 75, 85, 95, 105, 115, 125, 135, 145, 155, 165, 175
+].map(deg => {
+  const rad = (deg * Math.PI) / 180
+  const cos = Math.cos(rad)
+  const sin = Math.sin(rad)
+  return {
+    x1: (14 - 12 * cos).toFixed(2),
+    y1: (16 - 12 * sin).toFixed(2),
+    x2: (14 - 10.8 * cos).toFixed(2),
+    y2: (16 - 10.8 * sin).toFixed(2),
+  }
+})
+
+// 실제 각도기 도구 그래픽을 축약한 정밀 미니어처 SVG
 const ProtractorIcon = () => (
-  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 18h18" />
-    <path d="M21 18a9 9 0 0 0-18 0" />
-    <path d="M8 18a4 4 0 0 1 8 0" />
-    <circle cx="12" cy="18" r="1" fill="currentColor" />
-    <path d="M12 9v2.5" />
-    <path d="M5.6 11.6l1.8 1.8" />
-    <path d="M18.4 11.6l-1.8 1.8" />
+  <svg width="26" height="17" viewBox="0 0 28 18" fill="none" className="shrink-0 drop-shadow-sm">
+    {/* 반원 아크릴 바디 */}
+    <path d="M 2 16 A 12 12 0 0 1 26 16 Z" fill="#ffffff" fillOpacity="0.8" />
+
+    {/* 10도 단위 방사선 */}
+    {PROTRACTOR_TICKS.map((t) => (
+      <line
+        key={`r-${t.deg}`}
+        x1={t.rx1} y1={t.ry1}
+        x2={t.x2} y2={t.y2}
+        stroke={t.deg === 90 ? '#1e293b' : '#64748b'}
+        strokeWidth={t.deg === 90 ? '0.8' : '0.45'}
+      />
+    ))}
+
+    {/* 5도 단위 미세 틱 */}
+    {PROTRACTOR_SUB_TICKS.map((t, idx) => (
+      <line
+        key={`st-${idx}`}
+        x1={t.x1} y1={t.y1}
+        x2={t.x2} y2={t.y2}
+        stroke="#94a3b8"
+        strokeWidth="0.4"
+      />
+    ))}
+
+    {/* 10도 단위 눈금 틱 */}
+    {PROTRACTOR_TICKS.map((t) => (
+      <line
+        key={`t-${t.deg}`}
+        x1={t.x1} y1={t.y1}
+        x2={t.x2} y2={t.y2}
+        stroke="#334155"
+        strokeWidth="0.7"
+      />
+    ))}
+
+    {/* 외곽 반원 테두리 호 */}
+    <path d="M 2 16 A 12 12 0 0 1 26 16" stroke="#334155" strokeWidth="1.1" strokeLinecap="round" />
+    {/* 눈금 안쪽 호선 */}
+    <path d="M 4 16 A 10 10 0 0 1 24 16" stroke="#475569" strokeWidth="0.7" />
+
+    {/* 바닥 중앙 반원 구멍 */}
+    <path d="M 11.2 16 A 2.8 2.8 0 0 1 16.8 16" stroke="#334155" strokeWidth="0.9" fill="#ffffff" />
+
+    {/* 바닥 베이스 기준선 (양쪽) */}
+    <line x1="2" y1="16" x2="11.2" y2="16" stroke="#334155" strokeWidth="1.1" strokeLinecap="round" />
+    <line x1="16.8" y1="16" x2="26" y2="16" stroke="#334155" strokeWidth="1.1" strokeLinecap="round" />
   </svg>
 )
 

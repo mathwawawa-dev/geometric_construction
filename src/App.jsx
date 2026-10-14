@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.28_20261014_234300_컴퍼스및각도기작도용SVG아이콘교체'
+const VERSION = 'v0.3.29_20261014_234800_컴퍼스각도기도구실물일치정밀미니어처SVG적용'
 
 export default function App() {
   const canvasRef = useRef(null)
