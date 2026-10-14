@@ -228,7 +228,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
     lastMousePos.current = rawPos
 
     if (activeTool === 'pen' && stampMode && fakeCursorRef.current) {
-      fakeCursorRef.current.style.transform = `translate(${rawPos.x - 27}px, ${rawPos.y - 27}px)`
+      fakeCursorRef.current.style.transform = `translate(${rawPos.x}px, ${rawPos.y}px)`
       fakeCursorRef.current.style.display = 'block'
     }
 
@@ -799,7 +799,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
           const p = getPos(e, canvas)
           lastMousePos.current = p
           if (fakeCursorRef.current && stampMode) {
-            fakeCursorRef.current.style.transform = `translate(${p.x - 27}px, ${p.y - 27}px)`
+            fakeCursorRef.current.style.transform = `translate(${p.x}px, ${p.y}px)`
             fakeCursorRef.current.style.display = 'block'
           }
         }
@@ -867,7 +867,7 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
         </div>
       )}
 
-      {/* 넘버스탬프 프리뷰 오버레이 (v0.2.01 동일 구현: 53px 폰트 및 x-27, y-27 오프셋) */}
+      {/* 넘버스탬프 프리뷰 오버레이: 외부 div = rawPos, 내부 div = translate(-50%,-50%)로 기하 중심 정렬 */}
       {isStampMode && isHovering && !isInsideRuler && (
         <div
           ref={fakeCursorRef}
@@ -876,14 +876,17 @@ export default function DrawingCanvas({ canvasRef, activeTool, strokeColor, stro
             zIndex: 9999,
             willChange: 'transform',
             transform: lastMousePos.current.x > -100
-              ? `translate(${lastMousePos.current.x - 27}px, ${lastMousePos.current.y - 27}px)`
+              ? `translate(${lastMousePos.current.x}px, ${lastMousePos.current.y}px)`
               : 'none',
             display: lastMousePos.current.x > -100 ? 'block' : 'none',
           }}
         >
           <div
             style={{
+              transform: 'translate(-50%, -50%)',
               fontSize: 53,
+              fontFamily: 'serif',
+              fontWeight: 'bold',
               lineHeight: 1,
               userSelect: 'none',
               opacity: 0.75,

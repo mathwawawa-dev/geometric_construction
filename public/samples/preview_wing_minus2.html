@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>크기조절 및 로테이션 핸들 - 날개 길이 2단위 축소 비교</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      padding: 32px;
+      margin: 0;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    p.subtitle {
+      color: #64748b;
+      margin-bottom: 28px;
+      font-size: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .card.highlight {
+      border: 2px solid #3b82f6;
+      background: #eff6ff;
+    }
+    .preview-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin: 16px 0;
+      padding: 16px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+    .badge.new {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    .label {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+    .desc {
+      font-size: 13px;
+      color: #64748b;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .scale-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .scale-label {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <h1>크기조절 & 로테이션 핸들 — 날개 길이 2단위 축소 샘플</h1>
+  <p class="subtitle">기존 크기 대비 날개(촉) 길이를 2단위씩 줄여 더 간결하고 단정한 비율을 확인합니다.</p>
+
+  <h2 style="font-size: 16px; margin: 24px 0 12px;">1. 크기조절 핸들 비교 (대각선 양방향)</h2>
+  <div class="grid">
+    <!-- 크기조절 기존 -->
+    <div class="card">
+      <span class="badge">기존 확정안</span>
+      <div class="label">날개 길이 8px</div>
+      <div class="desc">좌하단 8px / 우상단 8px</div>
+      <div class="preview-box">
+        <div class="scale-row">
+          <img src="resize_sample_1.svg" width="48" height="48" alt="기존 8px">
+          <span class="scale-label">실제 48px</span>
+        </div>
+        <div class="scale-row">
+          <img src="resize_sample_1.svg" width="24" height="24" alt="기존 24px">
+          <span class="scale-label">실제 24px(툴바/핸들)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 크기조절 신규 -2 -->
+    <div class="card highlight">
+      <span class="badge new">요청 반영 (-2단위)</span>
+      <div class="label">날개 길이 6px</div>
+      <div class="desc">좌하단 6px / 우상단 6px (2단위 축소)</div>
+      <div class="preview-box">
+        <div class="scale-row">
+          <img src="resize_wing_minus2.svg" width="48" height="48" alt="축소 6px">
+          <span class="scale-label">실제 48px</span>
+        </div>
+        <div class="scale-row">
+          <img src="resize_wing_minus2.svg" width="24" height="24" alt="축소 24px">
+          <span class="scale-label">실제 24px(툴바/핸들)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="font-size: 16px; margin: 24px 0 12px;">2. 로테이션 핸들 비교 (순환 원호)</h2>
+  <div class="grid">
+    <!-- 로테이션 기존 IN1 -->
+    <div class="card">
+      <span class="badge">기존 안쪽 수축안 (IN1)</span>
+      <div class="label">날개 길이 13.5px</div>
+      <div class="desc">반지름 27.5, 두께 6.2px, 날개 13.5px</div>
+      <div class="preview-box">
+        <div class="scale-row">
+          <img src="r4_inward_1.svg" width="64" height="64" alt="기존 13.5px">
+          <span class="scale-label">확대 64px</span>
+        </div>
+        <div class="scale-row">
+          <img src="r4_inward_1.svg" width="24" height="24" alt="기존 24px">
+          <span class="scale-label">실제 24px(툴바/핸들)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 로테이션 신규 -2 -->
+    <div class="card highlight">
+      <span class="badge new">요청 반영 (-2단위)</span>
+      <div class="label">날개 길이 11.5px</div>
+      <div class="desc">반지름 27.5, 두께 6.2px, 날개 11.5px (2단위 축소)</div>
+      <div class="preview-box">
+        <div class="scale-row">
+          <img src="r4_wing_minus2.svg" width="64" height="64" alt="축소 11.5px">
+          <span class="scale-label">확대 64px</span>
+        </div>
+        <div class="scale-row">
+          <img src="r4_wing_minus2.svg" width="24" height="24" alt="축소 24px">
+          <span class="scale-label">실제 24px(툴바/핸들)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

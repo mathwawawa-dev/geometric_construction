@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="45" fill="#fef08a" stroke="#ca8a04" stroke-width="3" />
+  
+  <!-- 원호 반지름 27.5로 안쪽 집중 배치 (몸통 두께 6.2px) -->
+  <path d="M 47.6 22.6 A 27.5 27.5 0 0 1 77.1 54.8" fill="none" stroke="black" stroke-width="6.2" stroke-linecap="round" />
+  <!-- 화살촉: 날개 13.5px, 원 안쪽으로 여유롭게 쏙 들어온 형태 -->
+  <path d="M 68.0 46.9 L 76.6 57.2 L 87.0 48.6" fill="none" stroke="black" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- 하단 원호 -->
+  <path d="M 52.4 77.4 A 27.5 27.5 0 0 1 22.9 45.2" fill="none" stroke="black" stroke-width="6.2" stroke-linecap="round" />
+  <path d="M 32.0 53.1 L 23.4 42.8 L 13.0 51.4" fill="none" stroke="black" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

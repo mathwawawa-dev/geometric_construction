@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>R4 원호 완벽 선대칭 화살촉 & 몸통 두께 강화 샘플 비교</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+      background: #f8fafc;
+      padding: 36px;
+      color: #0f172a;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    p.desc {
+      color: #64748b;
+      margin-top: 0;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .ref-container {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      display: inline-flex;
+    }
+    .ref-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ref-item img {
+      width: 50px;
+      height: 50px;
+    }
+    .grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px 16px;
+      width: 175px;
+      text-align: center;
+      box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+      transition: all 0.2s;
+    }
+    .card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 16px -4px rgba(59, 130, 246, 0.15);
+    }
+    .card.recommended {
+      border-color: #f59e0b;
+      background: #fffdf5;
+    }
+    .card .preview-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 95px;
+      margin-bottom: 12px;
+    }
+    .card img {
+      width: 80px;
+      height: 80px;
+    }
+    .card .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: #e2e8f0;
+      color: #475569;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .card.recommended .badge {
+      background: #fef08a;
+      color: #854d0e;
+    }
+    .card h3 {
+      font-size: 16px;
+      margin: 4px 0 6px;
+    }
+    .card p {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.45;
+    }
+    .guide-box {
+      margin-top: 32px;
+      background: white;
+      border-radius: 14px;
+      padding: 20px 24px;
+      border: 1px solid #cbd5e1;
+      max-width: 680px;
+    }
+    .pair-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .pair-row img {
+      width: 44px;
+      height: 44px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 완벽 선대칭 화살촉 & 볼드 몸통 두께 샘플</h1>
+  <p class="desc">화살촉 끝점(80, 50 및 20, 50)의 접선 축을 기준으로 양쪽 날개가 수학적으로 완전한 선대칭을 이루도록 좌표를 정밀 설계하고, 몸통 두께를 기존 5.0px에서 최대 7.5px까지 강화했습니다.</p>
+
+  <div class="ref-container">
+    <div class="ref-item">
+      <img src="rotate_arc_4.svg" alt="기존 R4">
+      <div>
+        <div style="font-size: 12px; color: #854d0e; font-weight: bold;">[기존] R4</div>
+        <div style="font-size: 11px; color: #64748b;">몸통 5.0px / 마커 촉 비대칭 느낌</div>
+      </div>
+    </div>
+    <div style="width: 1px; height: 36px; background: #e2e8f0;"></div>
+    <div class="ref-item">
+      <img src="resize_sample_1.svg" alt="크기조절 핸들">
+      <div>
+        <div style="font-size: 12px; color: #16a34a; font-weight: bold;">[기준] 크기조절 핸들</div>
+        <div style="font-size: 11px; color: #64748b;">반듯한 직각(90°) 대칭 화살촉</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- S1 -->
+    <div class="card recommended">
+      <span class="badge">강력 추천 (S1)</span>
+      <div class="preview-box">
+        <img src="r4_sym_1.svg" alt="S1">
+      </div>
+      <h3>샘플 S1</h3>
+      <p><b>몸통 6.2px + 촉 5.5px</b><br>완벽한 90도 선대칭<br>가장 균형 잡힌 두께감</p>
+    </div>
+
+    <!-- S2 -->
+    <div class="card">
+      <span class="badge">볼드 추천 (S2)</span>
+      <div class="preview-box">
+        <img src="r4_sym_2.svg" alt="S2">
+      </div>
+      <h3>샘플 S2</h3>
+      <p><b>몸통 7.0px + 촉 6.0px</b><br>더 굵고 존재감 확실한 몸통<br>시원하고 반듯한 대칭 촉</p>
+    </div>
+
+    <!-- S3 -->
+    <div class="card">
+      <span class="badge">와이드형 (S3)</span>
+      <div class="preview-box">
+        <img src="r4_sym_3.svg" alt="S3">
+      </div>
+      <h3>샘플 S3</h3>
+      <p><b>몸통 6.5px + 와이드 촉</b><br>화살촉 날개 폭을 넓혀<br>안정적인 선대칭 연출</p>
+    </div>
+
+    <!-- S4 -->
+    <div class="card">
+      <span class="badge">정돈형 (S4)</span>
+      <div class="preview-box">
+        <img src="r4_sym_4.svg" alt="S4">
+      </div>
+      <h3>샘플 S4</h3>
+      <p><b>몸통 6.0px + 슬림 촉</b><br>끝점과 촉 접점을 정돈하여<br>깔끔하고 군더더기 없음</p>
+    </div>
+
+    <!-- S5 -->
+    <div class="card">
+      <span class="badge">최대 볼드 (S5)</span>
+      <div class="preview-box">
+        <img src="r4_sym_5.svg" alt="S5">
+      </div>
+      <h3>샘플 S5</h3>
+      <p><b>몸통 7.5px + 촉 6.5px</b><br>매우 묵직하고 강력한 두께감</p>
+    </div>
+  </div>
+
+  <div class="guide-box">
+    <h3 style="margin: 0 0 10px; font-size: 15px;">🔍 크기조절 핸들과 나란히 비교</h3>
+    <div class="pair-row">
+      <img src="r4_sym_1.svg" alt="S1">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">S1 (몸통 6.2px, 완전 선대칭 촉) + 크기조절 : 화살촉 각도와 꺾임이 왜곡 없이 완벽 일치</span>
+    </div>
+    <div class="pair-row">
+      <img src="r4_sym_2.svg" alt="S2">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">S2 (몸통 7.0px 볼드) + 크기조절 : 두껍고 시원시원한 원형 회전 핸들</span>
+    </div>
+  </div>
+</body>
+</html>

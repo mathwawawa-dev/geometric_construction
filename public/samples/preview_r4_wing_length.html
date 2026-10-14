@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>크기조절 핸들 기준 화살촉 날개 길이 보완 샘플 비교</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+      background: #f8fafc;
+      padding: 36px;
+      color: #0f172a;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    p.desc {
+      color: #64748b;
+      margin-top: 0;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .ref-container {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      display: inline-flex;
+    }
+    .ref-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ref-item img {
+      width: 52px;
+      height: 52px;
+    }
+    .grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px 16px;
+      width: 175px;
+      text-align: center;
+      box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+      transition: all 0.2s;
+    }
+    .card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 16px -4px rgba(59, 130, 246, 0.15);
+    }
+    .card.recommended {
+      border-color: #f59e0b;
+      background: #fffdf5;
+    }
+    .card .preview-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 95px;
+      margin-bottom: 12px;
+    }
+    .card img {
+      width: 80px;
+      height: 80px;
+    }
+    .card .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: #e2e8f0;
+      color: #475569;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .card.recommended .badge {
+      background: #fef08a;
+      color: #854d0e;
+    }
+    .card h3 {
+      font-size: 16px;
+      margin: 4px 0 6px;
+    }
+    .card p {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.45;
+    }
+    .guide-box {
+      margin-top: 32px;
+      background: white;
+      border-radius: 14px;
+      padding: 20px 24px;
+      border: 1px solid #cbd5e1;
+      max-width: 680px;
+    }
+    .pair-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .pair-row img {
+      width: 44px;
+      height: 44px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🦅 크기조절 핸들의 날개 길이를 적용한 보완 샘플</h1>
+  <p class="desc">크기조절 핸들(48x48 뷰박스 내 날개 8px = 전체 지름 대비 1/6)의 비율을 100x100 뷰박스에 정확히 비례 환산하여, <b>화살촉 날개 길이를 약 14.0px ~ 16.7px</b>로 시원하게 연장한 샘플들입니다.</p>
+
+  <div class="ref-container">
+    <div class="ref-item">
+      <img src="resize_sample_1.svg" alt="크기조절 핸들">
+      <div>
+        <div style="font-size: 12px; color: #16a34a; font-weight: bold;">[기준] 크기조절 핸들</div>
+        <div style="font-size: 11px; color: #64748b;">날개 길이 8px (원 지름의 약 16.7%)</div>
+      </div>
+    </div>
+    <div style="width: 1px; height: 36px; background: #e2e8f0;"></div>
+    <div class="ref-item">
+      <img src="r4_step2_q2.svg" alt="이전 짧은 날개">
+      <div>
+        <div style="font-size: 12px; color: #854d0e; font-weight: bold;">[이전] 짧았던 날개</div>
+        <div style="font-size: 11px; color: #64748b;">날개 길이 10.0px (조금 아담했음)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- W2: 날개 14.0px (강력 추천 1) -->
+    <div class="card recommended">
+      <span class="badge">강력 추천 (W2)</span>
+      <div class="preview-box">
+        <img src="r4_wing_w2.svg" alt="W2">
+      </div>
+      <h3>샘플 W2</h3>
+      <p><b>날개 길이 14.0px</b><br>원호와 조화로우면서<br>크기조절 촉과 가장 완벽한 밸런스</p>
+    </div>
+
+    <!-- W3: 날개 15.0px (강력 추천 2) -->
+    <div class="card recommended">
+      <span class="badge">추천 2 (W3)</span>
+      <div class="preview-box">
+        <img src="r4_wing_w3.svg" alt="W3">
+      </div>
+      <h3>샘플 W3</h3>
+      <p><b>날개 길이 15.0px</b><br>시원하고 또렷하게 뻗은 날개<br>존재감 확실한 화살촉</p>
+    </div>
+
+    <!-- W1: 100% 수학적 비례 (16.7px) -->
+    <div class="card">
+      <span class="badge">수학적 1:1 환산 (W1)</span>
+      <div class="preview-box">
+        <img src="r4_wing_w1.svg" alt="W1">
+      </div>
+      <h3>샘플 W1</h3>
+      <p><b>날개 길이 16.7px</b><br>크기조절(8/48)을 100/100으로<br>100% 완전 정비례 연장</p>
+    </div>
+
+    <!-- W5: -6도 대칭 + 15.0px -->
+    <div class="card recommended">
+      <span class="badge">대칭 최적화 (W5)</span>
+      <div class="preview-box">
+        <img src="r4_wing_w5.svg" alt="W5">
+      </div>
+      <h3>샘플 W5</h3>
+      <p><b>-6도 대칭 + 날개 15.0px</b><br>바깥 날개 곡률 평행도와<br>시원한 날개 길이의 결합</p>
+    </div>
+
+    <!-- W4: 은은한 12.5px -->
+    <div class="card">
+      <span class="badge">단정형 (W4)</span>
+      <div class="preview-box">
+        <img src="r4_wing_w4.svg" alt="W4">
+      </div>
+      <h3>샘플 W4</h3>
+      <p><b>날개 길이 12.5px</b><br>기존(10px)보다 25% 연장된<br>단정하고 절제된 날개</p>
+    </div>
+  </div>
+
+  <div class="guide-box">
+    <h3 style="margin: 0 0 10px; font-size: 15px;">🔍 크기조절 핸들과 나란히 비교</h3>
+    <div class="pair-row">
+      <img src="r4_wing_w2.svg" alt="W2">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">W2 (날개 14.0px) + 크기조절 : 크기조절의 당당한 날개 길이감과 시각적으로 가장 자연스럽게 어울림</span>
+    </div>
+    <div class="pair-row">
+      <img src="r4_wing_w3.svg" alt="W3">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">W3 (날개 15.0px) + 크기조절 : 화살촉이 더 확실하고 큼직하게 날개를 펼침</span>
+    </div>
+    <div class="pair-row">
+      <img src="r4_wing_w1.svg" alt="W1">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">W1 (날개 16.7px) + 크기조절 : 48규격 대비 100규격의 수학적 1:1 환산 날개 길이</span>
+    </div>
+  </div>
+</body>
+</html>

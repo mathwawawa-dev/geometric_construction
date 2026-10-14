@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="45" fill="#fef08a" stroke="#ca8a04" stroke-width="3" />
+  
+  <!-- 상단 원호: 시작은 50,20 유지하고 끝점만 15도 더 회전 (105도, 몸통 6.5px) -->
+  <path d="M 50.0 20.0 A 30 30 0 0 1 79.0 57.8" fill="none" stroke="black" stroke-width="6.5" stroke-linecap="round" />
+  <!-- 곡선 접선 방향 회전 대칭 직각 화살촉 -->
+  <path d="M 74.6 50.1 L 79.0 57.8 L 86.6 53.4" fill="none" stroke="black" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- 하단 원호: 시작 50,80 유지하고 끝점만 15도 더 회전 -->
+  <path d="M 50.0 80.0 A 30 30 0 0 1 21.0 42.2" fill="none" stroke="black" stroke-width="6.5" stroke-linecap="round" />
+  <path d="M 25.4 49.9 L 21.0 42.2 L 13.4 46.6" fill="none" stroke="black" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>화살표 안쪽 안착(인워드 수축) 보완 샘플 비교</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+      background: #f8fafc;
+      padding: 36px;
+      color: #0f172a;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    p.desc {
+      color: #64748b;
+      margin-top: 0;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .ref-container {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      display: inline-flex;
+    }
+    .ref-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ref-item img {
+      width: 52px;
+      height: 52px;
+    }
+    .grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px 16px;
+      width: 175px;
+      text-align: center;
+      box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+      transition: all 0.2s;
+    }
+    .card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 16px -4px rgba(59, 130, 246, 0.15);
+    }
+    .card.recommended {
+      border-color: #f59e0b;
+      background: #fffdf5;
+    }
+    .card .preview-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 95px;
+      margin-bottom: 12px;
+    }
+    .card img {
+      width: 80px;
+      height: 80px;
+    }
+    .card .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: #e2e8f0;
+      color: #475569;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .card.recommended .badge {
+      background: #fef08a;
+      color: #854d0e;
+    }
+    .card h3 {
+      font-size: 16px;
+      margin: 4px 0 6px;
+    }
+    .card p {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.45;
+    }
+    .guide-box {
+      margin-top: 32px;
+      background: white;
+      border-radius: 14px;
+      padding: 20px 24px;
+      border: 1px solid #cbd5e1;
+      max-width: 680px;
+    }
+    .pair-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .pair-row img {
+      width: 44px;
+      height: 44px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🟡 화살표 안쪽 안착(인워드 수축) 보완 샘플</h1>
+  <p class="desc">기존 반지름 30.0에서 <b>반지름을 26.5 ~ 28.0으로 좁혀</b> 노란색 원 배경 안쪽으로 안정감 있게 쏙 들어오도록 여백을 확보한 샘플들입니다. 바깥 테두리와의 여유 공간이 충분해 답답하거나 튀어나가는 느낌이 완전히 해소되었습니다.</p>
+
+  <div class="ref-container">
+    <div class="ref-item">
+      <img src="r4_wing_w2.svg" alt="바깥쪽 치우쳤던 버전">
+      <div>
+        <div style="font-size: 12px; color: #854d0e; font-weight: bold;">[이전] 반지름 30.0</div>
+        <div style="font-size: 11px; color: #64748b;">테두리 쪽으로 바짝 붙어있었음</div>
+      </div>
+    </div>
+    <div style="width: 1px; height: 36px; background: #e2e8f0;"></div>
+    <div class="ref-item">
+      <img src="resize_sample_1.svg" alt="크기조절 핸들">
+      <div>
+        <div style="font-size: 12px; color: #16a34a; font-weight: bold;">크기조절 핸들</div>
+        <div style="font-size: 11px; color: #64748b;">배경 원 안쪽에 안정적으로 자리함</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- IN1: r=27.5, wing=13.5 (강력 추천 1) -->
+    <div class="card recommended">
+      <span class="badge">강력 추천 (IN1)</span>
+      <div class="preview-box">
+        <img src="r4_inward_1.svg" alt="IN1">
+      </div>
+      <h3>샘플 IN1</h3>
+      <p><b>반지름 27.5 + 날개 13.5</b><br>원 배경 안쪽으로 쏙 들어와<br>가장 편안하고 안정적인 여백</p>
+    </div>
+
+    <!-- IN5: r=27.5, 볼드 6.6, wing=14.0 (강력 추천 2) -->
+    <div class="card recommended">
+      <span class="badge">볼드 안착 (IN5)</span>
+      <div class="preview-box">
+        <img src="r4_inward_5.svg" alt="IN5">
+      </div>
+      <h3>샘플 IN5</h3>
+      <p><b>반지름 27.5 + 몸통 6.6px</b><br>안쪽 여백을 확보하면서도<br>볼드하고 또렷한 존재감</p>
+    </div>
+
+    <!-- IN3: r=28.0, wing=14.0 -->
+    <div class="card">
+      <span class="badge">와이드 안착 (IN3)</span>
+      <div class="preview-box">
+        <img src="r4_inward_3.svg" alt="IN3">
+      </div>
+      <h3>샘플 IN3</h3>
+      <p><b>반지름 28.0 + 날개 14.0</b><br>시원한 회전 반경을 유지하며<br>바깥 테두리와의 간격 확보</p>
+    </div>
+
+    <!-- IN2: r=27.0, wing=13.0 -->
+    <div class="card">
+      <span class="badge">깊숙한 안착 (IN2)</span>
+      <div class="preview-box">
+        <img src="r4_inward_2.svg" alt="IN2">
+      </div>
+      <h3>샘플 IN2</h3>
+      <p><b>반지름 27.0 + 날개 13.0</b><br>더욱 확실하게 안쪽 중심부로<br>모여든 안정감</p>
+    </div>
+
+    <!-- IN4: r=26.5, 컴팩트 -->
+    <div class="card">
+      <span class="badge">컴팩트형 (IN4)</span>
+      <div class="preview-box">
+        <img src="r4_inward_4.svg" alt="IN4">
+      </div>
+      <h3>샘플 IN4</h3>
+      <p><b>반지름 26.5 + 날개 12.5</b><br>가장 깊숙이 중앙에 안착된<br>단정하고 아담한 형태</p>
+    </div>
+  </div>
+
+  <div class="guide-box">
+    <h3 style="margin: 0 0 10px; font-size: 15px;">🔍 크기조절 핸들과 나란히 비교</h3>
+    <div class="pair-row">
+      <img src="r4_inward_1.svg" alt="IN1">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">IN1 (반지름 27.5, 안쪽 안착) + 크기조절 : 노란색 원과 초록색 원의 테두리 여백 비율이 완벽하게 일치하여 매우 안정적임</span>
+    </div>
+    <div class="pair-row">
+      <img src="r4_inward_5.svg" alt="IN5">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">IN5 (반지름 27.5 볼드) + 크기조절 : 안쪽 여백과 화살표의 볼드한 두께감이 균형을 이룸</span>
+    </div>
+  </div>
+</body>
+</html>

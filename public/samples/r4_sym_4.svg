@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="45" fill="#fef08a" stroke="#ca8a04" stroke-width="3" />
+  
+  <!-- 상단 원호: 몸통 두께 6.0px (시작 (45, 20.4) ~ 끝 (80, 50)) -->
+  <path d="M 45 20.4 A 30 30 0 0 1 80 50" fill="none" stroke="black" stroke-width="6.0" stroke-linecap="round" />
+  <!-- (80, 50) 기준: 깔끔하고 정확한 선대칭 직각 촉 -->
+  <path d="M 72 42 L 80 50 L 88 42" fill="none" stroke="black" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- 하단 원호: 몸통 두께 6.0px (시작 (55, 79.6) ~ 끝 (20, 50)) -->
+  <path d="M 55 79.6 A 30 30 0 0 1 20 50" fill="none" stroke="black" stroke-width="6.0" stroke-linecap="round" />
+  <path d="M 28 58 L 20 50 L 12 58" fill="none" stroke="black" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

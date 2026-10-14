@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>R4 화살촉을 크기조절 화살촉 스타일로 변경한 샘플 비교</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+      background: #f8fafc;
+      padding: 36px;
+      color: #0f172a;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    p.desc {
+      color: #64748b;
+      margin-top: 0;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .ref-container {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      display: inline-flex;
+    }
+    .ref-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ref-item img {
+      width: 50px;
+      height: 50px;
+    }
+    .grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px 16px;
+      width: 175px;
+      text-align: center;
+      box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+      transition: all 0.2s;
+    }
+    .card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 16px -4px rgba(59, 130, 246, 0.15);
+    }
+    .card.recommended {
+      border-color: #f59e0b;
+      background: #fffdf5;
+    }
+    .card .preview-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 95px;
+      margin-bottom: 12px;
+    }
+    .card img {
+      width: 80px;
+      height: 80px;
+    }
+    .card .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: #e2e8f0;
+      color: #475569;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .card.recommended .badge {
+      background: #fef08a;
+      color: #854d0e;
+    }
+    .card h3 {
+      font-size: 16px;
+      margin: 4px 0 6px;
+    }
+    .card p {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.45;
+    }
+    .pair-section {
+      margin-top: 36px;
+      background: white;
+      border-radius: 14px;
+      padding: 24px;
+      border: 1px solid #cbd5e1;
+      max-width: 680px;
+    }
+    .pair-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .pair-row img {
+      width: 44px;
+      height: 44px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔄 R4 원호에 크기조절 화살촉 스타일을 결합한 샘플</h1>
+  <p class="desc">R4 고유의 매끄러운 2중 대칭 원호는 100% 그대로 유지하면서, 화살촉 모양만 크기조절 핸들의 반듯한 직각 꺾임(90°) 화살촉으로 수정한 샘플들입니다.</p>
+
+  <div class="ref-container">
+    <div class="ref-item">
+      <img src="rotate_arc_4.svg" alt="현재 R4">
+      <div>
+        <div style="font-size: 12px; color: #854d0e; font-weight: bold;">[기존] R4 회전 핸들</div>
+        <div style="font-size: 11px; color: #64748b;">뾰족하고 좁은 V자 마커 촉</div>
+      </div>
+    </div>
+    <div style="width: 1px; height: 36px; background: #e2e8f0;"></div>
+    <div class="ref-item">
+      <img src="resize_sample_1.svg" alt="크기조절 핸들">
+      <div>
+        <div style="font-size: 12px; color: #16a34a; font-weight: bold;">[목표] 크기조절 핸들</div>
+        <div style="font-size: 11px; color: #64748b;">반듯한 직각 꺾임(90°) 폴리라인 촉</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- H3 (강력 추천) -->
+    <div class="card recommended">
+      <span class="badge">강력 추천 (H3)</span>
+      <div class="preview-box">
+        <img src="r4_arrow_sample_3.svg" alt="H3">
+      </div>
+      <h3>샘플 H3</h3>
+      <p><b>크기조절과 100% 동일한 직각 촉</b><br>마커 왜곡 없이 크기조절과 똑같이 직접 그린 또렷한 90도 촉</p>
+    </div>
+
+    <!-- H4 -->
+    <div class="card">
+      <span class="badge">슬림형 (H4)</span>
+      <div class="preview-box">
+        <img src="r4_arrow_sample_4.svg" alt="H4">
+      </div>
+      <h3>샘플 H4</h3>
+      <p><b>슬림 직각 촉</b><br>원호 4.5px, 화살촉 4.0px로 더 가볍고 세련된 느낌</p>
+    </div>
+
+    <!-- H1 -->
+    <div class="card">
+      <span class="badge">마커형 (H1)</span>
+      <div class="preview-box">
+        <img src="r4_arrow_sample_1.svg" alt="H1">
+      </div>
+      <h3>샘플 H1</h3>
+      <p><b>90도 직각 마커 촉</b><br>R4의 marker 구조를 유지한 직각 화살촉</p>
+    </div>
+
+    <!-- H2 -->
+    <div class="card">
+      <span class="badge">와이드형 (H2)</span>
+      <div class="preview-box">
+        <img src="r4_arrow_sample_2.svg" alt="H2">
+      </div>
+      <h3>샘플 H2</h3>
+      <p><b>와이드 마커 촉</b><br>날개가 조금 더 넓고 큼직한 화살촉</p>
+    </div>
+
+    <!-- H5 -->
+    <div class="card">
+      <span class="badge">라지 원호 (H5)</span>
+      <div class="preview-box">
+        <img src="r4_arrow_sample_5.svg" alt="H5">
+      </div>
+      <h3>샘플 H5</h3>
+      <p><b>넓은 회전 원호</b><br>반지름 32로 더 시원하게 돌아가는 곡선 + 직각 촉</p>
+    </div>
+  </div>
+
+  <div class="pair-section">
+    <h3 style="margin: 0 0 10px; font-size: 15px;">🔍 크기조절 핸들과 나란히 두었을 때의 화살촉 일체감</h3>
+    <div class="pair-row">
+      <img src="r4_arrow_sample_3.svg" alt="H3">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">H3 + 크기조절 : 화살촉의 꺾임 각도와 끝단 모양이 완벽한 쌍을 이룸</span>
+    </div>
+    <div class="pair-row">
+      <img src="r4_arrow_sample_4.svg" alt="H4">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">H4 + 크기조절 : 조금 더 슬림하고 단정한 조합</span>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>사용자 제안 회전(-5도) 기반 변형 샘플 비교</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+      background: #f8fafc;
+      padding: 36px;
+      color: #0f172a;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    p.desc {
+      color: #64748b;
+      margin-top: 0;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .ref-container {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      background: white;
+      border: 2px solid #facc15;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      display: inline-flex;
+    }
+    .ref-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ref-item img {
+      width: 52px;
+      height: 52px;
+    }
+    .grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px 16px;
+      width: 175px;
+      text-align: center;
+      box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+      transition: all 0.2s;
+    }
+    .card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 16px -4px rgba(59, 130, 246, 0.15);
+    }
+    .card.base {
+      border-color: #f59e0b;
+      background: #fffdf5;
+    }
+    .card .preview-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 95px;
+      margin-bottom: 12px;
+    }
+    .card img {
+      width: 80px;
+      height: 80px;
+    }
+    .card .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: #e2e8f0;
+      color: #475569;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .card.base .badge {
+      background: #fef08a;
+      color: #854d0e;
+    }
+    .card h3 {
+      font-size: 16px;
+      margin: 4px 0 6px;
+    }
+    .card p {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.45;
+    }
+    .guide-box {
+      margin-top: 32px;
+      background: white;
+      border-radius: 14px;
+      padding: 20px 24px;
+      border: 1px solid #cbd5e1;
+      max-width: 680px;
+    }
+    .pair-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .pair-row img {
+      width: 44px;
+      height: 44px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔄 사용자 작성 코드(-5도 회전) 기반 변형 샘플</h1>
+  <p class="desc">보내주신 SVG 코드의 <b>-5도 반시계 회전 직각 화살촉</b> 느낌을 바탕으로, 회전각(-3° ~ -8°), 볼드 두께 강화, 원호 길이 연장 등을 조정한 5종의 샘플입니다.</p>
+
+  <div class="ref-container">
+    <div class="ref-item">
+      <img src="r4_user_base.svg" alt="사용자 기본">
+      <div>
+        <div style="font-size: 13px; color: #854d0e; font-weight: bold;">[기준] 작성해주신 코드 (U0)</div>
+        <div style="font-size: 11px; color: #64748b;">-5도 회전된 직각 촉 / 몸통 6.2px</div>
+      </div>
+    </div>
+    <div style="width: 1px; height: 36px; background: #e2e8f0;"></div>
+    <div class="ref-item">
+      <img src="resize_sample_1.svg" alt="크기조절 핸들">
+      <div>
+        <div style="font-size: 12px; color: #16a34a; font-weight: bold;">크기조절 핸들 (초록)</div>
+        <div style="font-size: 11px; color: #64748b;">직각 폴리라인 촉</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- U0 (기본) -->
+    <div class="card base">
+      <span class="badge">보내주신 원본</span>
+      <div class="preview-box">
+        <img src="r4_user_base.svg" alt="U0">
+      </div>
+      <h3>샘플 U0 (원본)</h3>
+      <p><b>-5도 회전 촉</b><br>몸통 6.2px, 촉 5.5px<br>보내주신 그대로 100% 반영</p>
+    </div>
+
+    <!-- U1 (-8도) -->
+    <div class="card">
+      <span class="badge">-8도 회전</span>
+      <div class="preview-box">
+        <img src="r4_user_u1.svg" alt="U1">
+      </div>
+      <h3>샘플 U1</h3>
+      <p><b>-8도 추가 회전</b><br>바깥쪽 날개가 원 둘레와<br>더욱 나란해지는 각도</p>
+    </div>
+
+    <!-- U5 (-6도) -->
+    <div class="card">
+      <span class="badge">-6도 추천</span>
+      <div class="preview-box">
+        <img src="r4_user_u5.svg" alt="U5">
+      </div>
+      <h3>샘플 U5</h3>
+      <p><b>-6도 미세 튜닝</b><br>-5도와 -8도의 중간<br>가장 절묘한 대칭 밸런스</p>
+    </div>
+
+    <!-- U3 (볼드) -->
+    <div class="card">
+      <span class="badge">볼드 강화</span>
+      <div class="preview-box">
+        <img src="r4_user_u3.svg" alt="U3">
+      </div>
+      <h3>샘플 U3</h3>
+      <p><b>몸통 6.8px + 촉 6.0px</b><br>-5도 회전 각도 유지 +<br>두께를 더 굵고 묵직하게</p>
+    </div>
+
+    <!-- U4 (롱 원호) -->
+    <div class="card">
+      <span class="badge">롱 원호</span>
+      <div class="preview-box">
+        <img src="r4_user_u4.svg" alt="U4">
+      </div>
+      <h3>샘플 U4</h3>
+      <p><b>원호 115도 연장</b><br>몸통 길이가 살짝 더 길고<br>-5도 회전 촉 적용</p>
+    </div>
+
+    <!-- U2 (-3도) -->
+    <div class="card">
+      <span class="badge">-3도 회전</span>
+      <div class="preview-box">
+        <img src="r4_user_u2.svg" alt="U2">
+      </div>
+      <h3>샘플 U2</h3>
+      <p><b>-3도 회전</b><br>살짝 덜 회전시켜<br>부드러운 날개 각도</p>
+    </div>
+  </div>
+
+  <div class="guide-box">
+    <h3 style="margin: 0 0 10px; font-size: 15px;">🔍 크기조절 핸들과 나란히 비교</h3>
+    <div class="pair-row">
+      <img src="r4_user_base.svg" alt="U0">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">U0 (보내주신 코드) + 크기조절 : -5도 회전으로 화살촉 양날개의 시각적 균형이 안정적임</span>
+    </div>
+    <div class="pair-row">
+      <img src="r4_user_u5.svg" alt="U5">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">U5 (-6도 회전) + 크기조절 : 바깥쪽 날개와 안쪽 날개의 대칭 밸런스가 더욱 최적화됨</span>
+    </div>
+    <div class="pair-row">
+      <img src="r4_user_u3.svg" alt="U3">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">U3 (몸통 6.8px 볼드) + 크기조절 : 두께감이 확실하고 시원시원함</span>
+    </div>
+  </div>
+</body>
+</html>

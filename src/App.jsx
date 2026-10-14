@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.17_20261014_164300_0201버전스탬프DOM및폰트완전복원'
+const VERSION = 'v0.3.18_20261014_190600_스탬프프리뷰폰트통일'
 
 export default function App() {
   const canvasRef = useRef(null)

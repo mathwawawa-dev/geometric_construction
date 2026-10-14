@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>화살촉 선분 끝 추가 돌출 (Step 2) 샘플 비교</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+      background: #f8fafc;
+      padding: 36px;
+      color: #0f172a;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    p.desc {
+      color: #64748b;
+      margin-top: 0;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .ref-container {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      display: inline-flex;
+    }
+    .ref-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ref-item img {
+      width: 52px;
+      height: 52px;
+    }
+    .grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px 16px;
+      width: 175px;
+      text-align: center;
+      box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+      transition: all 0.2s;
+    }
+    .card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 16px -4px rgba(59, 130, 246, 0.15);
+    }
+    .card.recommended {
+      border-color: #f59e0b;
+      background: #fffdf5;
+    }
+    .card .preview-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 95px;
+      margin-bottom: 12px;
+    }
+    .card img {
+      width: 80px;
+      height: 80px;
+    }
+    .card .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: #e2e8f0;
+      color: #475569;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .card.recommended .badge {
+      background: #fef08a;
+      color: #854d0e;
+    }
+    .card h3 {
+      font-size: 16px;
+      margin: 4px 0 6px;
+    }
+    .card p {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.45;
+    }
+    .guide-box {
+      margin-top: 32px;
+      background: white;
+      border-radius: 14px;
+      padding: 20px 24px;
+      border: 1px solid #cbd5e1;
+      max-width: 680px;
+    }
+    .pair-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .pair-row img {
+      width: 44px;
+      height: 44px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏹 화살촉 선분 끝 추가 돌출 (한 단계 더 전진)</h1>
+  <p class="desc">이전 2.0px 돌출에서 <b>한 단계 더(3.5px ~ 5.0px) 선분 끝 바깥으로 전진 배치</b>하여, 화살촉의 꼭짓점뿐만 아니라 꺾임 날개까지 원호 몸통 끝에서 시원하게 돋보이도록 한 샘플들입니다.</p>
+
+  <div class="ref-container">
+    <div class="ref-item">
+      <img src="r4_out_u0.svg" alt="1단계 돌출 (2.0px)">
+      <div>
+        <div style="font-size: 12px; color: #854d0e; font-weight: bold;">[이전] 1단계 돌출 (2.0px)</div>
+        <div style="font-size: 11px; color: #64748b;">화살촉 팁이 살짝 나온 수준</div>
+      </div>
+    </div>
+    <div style="width: 1px; height: 36px; background: #e2e8f0;"></div>
+    <div class="ref-item">
+      <img src="resize_sample_1.svg" alt="크기조절 핸들">
+      <div>
+        <div style="font-size: 12px; color: #16a34a; font-weight: bold;">크기조절 핸들</div>
+        <div style="font-size: 11px; color: #64748b;">화살촉 전체가 선 끝에 당당히 뻗음</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Q2: 4.0px 돌출 (강력 추천) -->
+    <div class="card recommended">
+      <span class="badge">강력 추천 (Q2)</span>
+      <div class="preview-box">
+        <img src="r4_step2_q2.svg" alt="Q2">
+      </div>
+      <h3>샘플 Q2</h3>
+      <p><b>4.0px 돌출 (2배 전진)</b><br>화살촉 꼭짓점이 확실히 뻗어나와<br>크기조절 핸들과 딱 맞는 실루엣</p>
+    </div>
+
+    <!-- Q1: 3.5px 돌출 -->
+    <div class="card">
+      <span class="badge">자연스러운 추가 전진 (Q1)</span>
+      <div class="preview-box">
+        <img src="r4_step2_q1.svg" alt="Q1">
+      </div>
+      <h3>샘플 Q1</h3>
+      <p><b>3.5px 돌출</b><br>과하지 않고 절제된<br>기분 좋은 1단계 추가 전진</p>
+    </div>
+
+    <!-- Q3: -6도 + 4.0px -->
+    <div class="card recommended">
+      <span class="badge">대칭 튜닝 (Q3)</span>
+      <div class="preview-box">
+        <img src="r4_step2_q3.svg" alt="Q3">
+      </div>
+      <h3>샘플 Q3</h3>
+      <p><b>-6도 회전 + 4.0px 돌출</b><br>양 날개 대칭 밸런스 최적화<br>+ 확실한 선 끝 돌출감</p>
+    </div>
+
+    <!-- Q4: 볼드 + 4.0px -->
+    <div class="card">
+      <span class="badge">볼드 돌출 (Q4)</span>
+      <div class="preview-box">
+        <img src="r4_step2_q4.svg" alt="Q4">
+      </div>
+      <h3>샘플 Q4</h3>
+      <p><b>몸통 6.8px + 4.0px 돌출</b><br>두꺼운 원호 몸통과 어우러져<br>묵직하고 선명한 화살표</p>
+    </div>
+
+    <!-- Q5: 5.0px 강한 돌출 -->
+    <div class="card">
+      <span class="badge">최대 돌출 (Q5)</span>
+      <div class="preview-box">
+        <img src="r4_step2_q5.svg" alt="Q5">
+      </div>
+      <h3>샘플 Q5</h3>
+      <p><b>5.0px 강한 돌출</b><br>화살촉이 원호 끝에서 완전히<br>독립적으로 시원하게 뻗어 나옴</p>
+    </div>
+  </div>
+
+  <div class="guide-box">
+    <h3 style="margin: 0 0 10px; font-size: 15px;">🔍 크기조절 핸들과 나란히 비교</h3>
+    <div class="pair-row">
+      <img src="r4_step2_q2.svg" alt="Q2">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">Q2 (4.0px 추가 돌출) + 크기조절 : 화살촉이 원호 끝에서 확실하게 전진하여 크기조절 화살표의 뻗음감과 완벽하게 일치함</span>
+    </div>
+    <div class="pair-row">
+      <img src="r4_step2_q3.svg" alt="Q3">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">Q3 (-6도 튜닝 + 4.0px 돌출) + 크기조절 : 대칭 각도와 돌출감의 밸런스가 매우 뛰어남</span>
+    </div>
+  </div>
+</body>
+</html>

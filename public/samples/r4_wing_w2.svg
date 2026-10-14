@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="45" fill="#fef08a" stroke="#ca8a04" stroke-width="3" />
+  
+  <path d="M 47.4 20.1 A 30 30 0 0 1 79.5 55.2" fill="none" stroke="black" stroke-width="6.2" stroke-linecap="round" />
+  <!-- 선분 끝 4.0px 돌출 + 날개 길이 14.0px (가장 시각적 균형감이 뛰어난 추천 길이) -->
+  <g transform="translate(-0.69, 3.94)">
+    <path transform="rotate(-5 79.5 55.2)" d="M 91.0 47.1 L 79.5 55.2 L 71.4 43.8" fill="none" stroke="black" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+  
+  <path d="M 52.6 79.9 A 30 30 0 0 1 20.5 44.8" fill="none" stroke="black" stroke-width="6.2" stroke-linecap="round" />
+  <g transform="translate(0.69, -3.94)">
+    <path transform="rotate(-5 20.5 44.8)" d="M 9.0 52.9 L 20.5 44.8 L 28.6 56.2" fill="none" stroke="black" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>

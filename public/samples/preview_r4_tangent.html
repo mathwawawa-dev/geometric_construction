@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>R4 곡선 접선 방향 회전 대칭 화살촉 & 몸통 연장 샘플 비교</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+      background: #f8fafc;
+      padding: 36px;
+      color: #0f172a;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    p.desc {
+      color: #64748b;
+      margin-top: 0;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .ref-container {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      display: inline-flex;
+    }
+    .ref-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ref-item img {
+      width: 50px;
+      height: 50px;
+    }
+    .grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px 16px;
+      width: 175px;
+      text-align: center;
+      box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+      transition: all 0.2s;
+    }
+    .card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 16px -4px rgba(59, 130, 246, 0.15);
+    }
+    .card.recommended {
+      border-color: #f59e0b;
+      background: #fffdf5;
+    }
+    .card .preview-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 95px;
+      margin-bottom: 12px;
+    }
+    .card img {
+      width: 80px;
+      height: 80px;
+    }
+    .card .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: #e2e8f0;
+      color: #475569;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .card.recommended .badge {
+      background: #fef08a;
+      color: #854d0e;
+    }
+    .card h3 {
+      font-size: 16px;
+      margin: 4px 0 6px;
+    }
+    .card p {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.45;
+    }
+    .guide-box {
+      margin-top: 32px;
+      background: white;
+      border-radius: 14px;
+      padding: 20px 24px;
+      border: 1px solid #cbd5e1;
+      max-width: 680px;
+    }
+    .pair-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .pair-row img {
+      width: 44px;
+      height: 44px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔄 곡선 접선 방향 회전 대칭 화살촉 & 몸통 연장 샘플</h1>
+  <p class="desc">화살촉이 곡선이 진행하는 <b>실제 접선 각도에 정확히 맞춰 회전</b>되도록 벡터 계산을 적용하여, 휘어진 원호 위에서도 날개 양쪽이 완벽한 대칭 직각(90°)을 이루도록 정밀 제작했습니다. 몸통 길이도 살짝 더 길게 연장했습니다.</p>
+
+  <div class="ref-container">
+    <div class="ref-item">
+      <img src="rotate_arc_4.svg" alt="기존 R4">
+      <div>
+        <div style="font-size: 12px; color: #854d0e; font-weight: bold;">[기존] R4</div>
+        <div style="font-size: 11px; color: #64748b;">원호 90도 / 몸통 5.0px</div>
+      </div>
+    </div>
+    <div style="width: 1px; height: 36px; background: #e2e8f0;"></div>
+    <div class="ref-item">
+      <img src="resize_sample_1.svg" alt="크기조절 핸들">
+      <div>
+        <div style="font-size: 12px; color: #16a34a; font-weight: bold;">[기준] 크기조절 핸들</div>
+        <div style="font-size: 11px; color: #64748b;">반듯한 직각(90°) 폴리라인 촉</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- T1 -->
+    <div class="card recommended">
+      <span class="badge">강력 추천 (T1)</span>
+      <div class="preview-box">
+        <img src="r4_tangent_1.svg" alt="T1">
+      </div>
+      <h3>샘플 T1</h3>
+      <p><b>105도 원호 + 몸통 6.2px</b><br>접선 각도 완벽 정렬 직각 촉<br>자연스럽고 편안한 대칭감</p>
+    </div>
+
+    <!-- T2 -->
+    <div class="card recommended">
+      <span class="badge">추천 2 (T2)</span>
+      <div class="preview-box">
+        <img src="r4_tangent_2.svg" alt="T2">
+      </div>
+      <h3>샘플 T2</h3>
+      <p><b>115도 원호 + 몸통 6.6px</b><br>몸통 길이가 살짝 더 길어<br>더 둥글고 볼드한 순환 루프</p>
+    </div>
+
+    <!-- T5 -->
+    <div class="card">
+      <span class="badge">밸런스형 (T5)</span>
+      <div class="preview-box">
+        <img src="r4_tangent_5.svg" alt="T5">
+      </div>
+      <h3>샘플 T5</h3>
+      <p><b>110도 원호 + 몸통 6.3px</b><br>양쪽으로 균등하게 10도 연장<br>단정하고 안정적인 비율</p>
+    </div>
+
+    <!-- T3 -->
+    <div class="card">
+      <span class="badge">롱 원호 볼드 (T3)</span>
+      <div class="preview-box">
+        <img src="r4_tangent_3.svg" alt="T3">
+      </div>
+      <h3>샘플 T3</h3>
+      <p><b>125도 원호 + 몸통 7.0px</b><br>몸통이 확실하게 길고<br>묵직한 두께감</p>
+    </div>
+
+    <!-- T4 -->
+    <div class="card">
+      <span class="badge">시작점 고정 (T4)</span>
+      <div class="preview-box">
+        <img src="r4_tangent_4.svg" alt="T4">
+      </div>
+      <h3>샘플 T4</h3>
+      <p><b>105도 원호 + 몸통 6.5px</b><br>위/아래 정점 시작점 유지<br>끝점 방향으로만 15도 연장</p>
+    </div>
+  </div>
+
+  <div class="guide-box">
+    <h3 style="margin: 0 0 10px; font-size: 15px;">🔍 크기조절 핸들과 나란히 비교</h3>
+    <div class="pair-row">
+      <img src="r4_tangent_1.svg" alt="T1">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">T1 (105도 연장 + 접선 회전 직각 촉) + 크기조절 : 곡선 방향을 따라 화살촉이 자연스럽게 회전하여 양 날개가 완전한 대칭을 이룸</span>
+    </div>
+    <div class="pair-row">
+      <img src="r4_tangent_2.svg" alt="T2">
+      <img src="resize_sample_1.svg" alt="크기">
+      <span style="font-size: 13px; font-weight: 600;">T2 (115도 연장 + 몸통 6.6px) + 크기조절 : 몸통이 좀 더 길고 풍성하게 감싸는 원형 회전 핸들</span>
+    </div>
+  </div>
+</body>
+</html>
