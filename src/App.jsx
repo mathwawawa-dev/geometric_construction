@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.34_20261015_001000_실행취소시최신도형2개삭제버그수정'
+const VERSION = 'v0.3.35_20261015_001900_실행취소최대횟수30회증가'
 
 export default function App() {
   const canvasRef = useRef(null)

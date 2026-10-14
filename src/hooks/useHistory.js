@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react'
 
-const MAX_HISTORY = 25
+const MAX_HISTORY = 30
 
 export function useHistory(canvasRef, getStateRef, restoreState) {
   const historyRef = useRef([])
