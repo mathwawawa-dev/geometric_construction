@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.09_20261014_120500_각도기중심점1연필찍은점스냅추가'
+const VERSION = 'v0.3.10_20261014_120800_주황색상추가및버튼간격축소'
 
 export default function App() {
   const canvasRef = useRef(null)

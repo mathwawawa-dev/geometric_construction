@@ -1,4 +1,4 @@
-﻿# UI 개체 식별자 사전 (UI Element Registry)
+# UI 개체 식별자 사전 (UI Element Registry)
 
 | 코드명 | 한국어 설명 | 유형 | 파일 경로 |
 |--------|------------|------|-----------|
@@ -22,6 +22,7 @@
 | colorPresetBtn_blue | 색상 프리셋 버튼 (파랑) | 버튼 | src/components/Toolbar.jsx |
 | colorPresetBtn_pink | 색상 프리셋 버튼 (핑크) | 버튼 | src/components/Toolbar.jsx |
 | colorPresetBtn_green | 색상 프리셋 버튼 (초록) | 버튼 | src/components/Toolbar.jsx |
+| colorPresetBtn_orange | 색상 프리셋 버튼 (주황) | 버튼 | src/components/Toolbar.jsx |
 | highlightToggleBtn | 형광펜 모드 토글 버튼 | 버튼 | src/components/Toolbar.jsx |
 | snapToggleBtn | 자석 스냅 토글 버튼 | 버튼 | src/components/Toolbar.jsx |
 | compassSnapToggleBtn | 컴퍼스 스냅 토글 버튼 | 버튼 | src/components/Toolbar.jsx |

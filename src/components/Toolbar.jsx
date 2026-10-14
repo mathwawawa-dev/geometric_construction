@@ -12,6 +12,7 @@ const COLOR_PRESETS = [
   { color: '#2563eb', label: '파랑', bg: '#2563eb' },
   { color: '#F719C0', label: '핑크', bg: '#F719C0' },
   { color: '#16a34a', label: '초록', bg: '#16a34a' },
+  { color: '#ea580c', label: '주황', bg: '#ea580c' },
 ]
 
 export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, onUndo, onRedo, onClear, onSave, highlightMode, setHighlightMode, snapEnabled, setSnapEnabled, compassSnapEnabled, setCompassSnapEnabled, slideCount, currentSlideIdx, onPrevSlide, onNextSlide, onAddSlide, onDeleteSlide, onSessionSave, onSessionLoad }) {
@@ -155,8 +156,8 @@ export default function Toolbar({ strokeColor, strokeWidth, setColor, setWidth, 
       <div className="w-px h-6 bg-gray-300" />
 
       {/* 색상 선택 + 프리셋 */}
-      <div className="flex items-center gap-1.5">
-        <label className="flex items-center gap-1 text-xs text-gray-600">
+      <div className="flex items-center gap-0.5">
+        <label className="flex items-center gap-0.5 text-xs text-gray-600">
           색상
           <input
             type="color"
