@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.26_20261014_234000_사이드바도구선택시레이아웃시프트방지'
+const VERSION = 'v0.3.27_20261014_234100_사이드바도장텍스트제거'
 
 export default function App() {
   const canvasRef = useRef(null)

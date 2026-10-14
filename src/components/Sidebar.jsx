@@ -110,7 +110,6 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
       <div className="w-10 border-t border-gray-300 my-1" />
 
       {/* ─── 넘버스탬프 (단일 스마트 위젯) ─── */}
-      <span className="text-[9px] text-gray-400 leading-none">도장</span>
       <div className="relative flex flex-col items-center">
         <div
           onWheel={handleWidgetWheel}
