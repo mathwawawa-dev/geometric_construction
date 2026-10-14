@@ -96,10 +96,10 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
             }
           }}
           title={m.label}
-          className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center text-xl transition-all
+          className={`w-12 h-12 rounded-xl border flex flex-col items-center justify-center text-xl transition-colors
             ${drawMode === m.id && !stampMode
-              ? 'bg-blue-100 ring-2 ring-blue-500 shadow'
-              : 'bg-white hover:bg-gray-100 border border-gray-200'
+              ? 'bg-blue-100 border-blue-500 ring-1 ring-blue-500 shadow'
+              : 'bg-white hover:bg-gray-100 border-gray-200'
             }`}
         >
           <span>{m.icon}</span>
@@ -119,10 +119,10 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
             setShowPicker(prev => !prev)
           }}
           title={`넘버스탬프 ${currentStamp}\n• 클릭: 켜기/끄기\n• 휠/화살표: 번호 변경\n• 우클릭: 전체 번호 목록`}
-          className={`w-12 rounded-xl flex flex-col items-center justify-between p-1 transition-all select-none ${
+          className={`w-12 rounded-xl border flex flex-col items-center justify-between p-1 transition-colors select-none ${
             stampMode
-              ? 'bg-orange-100 ring-2 ring-orange-400 text-orange-700 shadow'
-              : 'bg-white hover:bg-orange-50/50 border border-gray-200 text-gray-700'
+              ? 'bg-orange-100 border-orange-400 ring-1 ring-orange-400 text-orange-700 shadow'
+              : 'bg-white hover:bg-orange-50/50 border-gray-200 text-gray-700'
           }`}
         >
           {/* 다음 번호(증가) ▲ */}
@@ -215,10 +215,10 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
             key={t.id}
             onClick={() => toggleTool(t.id)}
             title={`${t.label} ${isOn ? '숨기기' : '표시'}`}
-            className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center text-xl transition-all
+            className={`w-12 h-12 rounded-xl border flex flex-col items-center justify-center text-xl transition-colors
               ${isOn
-                ? 'bg-emerald-50 ring-2 ring-emerald-500 shadow'
-                : 'bg-white hover:bg-gray-100 border border-gray-200'
+                ? 'bg-emerald-50 border-emerald-500 ring-1 ring-emerald-500 shadow'
+                : 'bg-white hover:bg-gray-100 border-gray-200'
               }`}
           >
             <span>{t.icon}</span>
@@ -233,7 +233,7 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
       <button
         onClick={() => fileRef.current?.click()}
         title="배경 이미지 업로드"
-        className="w-12 h-12 rounded-xl flex flex-col items-center justify-center text-xl bg-white hover:bg-gray-100 border border-gray-200 transition-all"
+        className="w-12 h-12 rounded-xl border border-gray-200 flex flex-col items-center justify-center text-xl bg-white hover:bg-gray-100 transition-colors"
       >
         <span>🖼️</span>
         <span className="text-[9px] text-gray-500 leading-none mt-0.5">배경</span>
@@ -245,8 +245,8 @@ export default function Sidebar({ drawMode, setDrawMode, toggleTool, toolsVisibl
           <button
             onClick={() => setBackground({ locked: !background.locked })}
             title={background.locked ? '배경 잠금 해제' : '배경 잠금'}
-            className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center text-xl transition-all
-              ${background.locked ? 'bg-red-50 border-red-300 border' : 'bg-white border border-gray-200'}`}
+            className={`w-12 h-12 rounded-xl border flex flex-col items-center justify-center text-xl transition-colors
+              ${background.locked ? 'bg-red-50 border-red-300' : 'bg-white border-gray-200'}`}
           >
             <span>{background.locked ? '🔒' : '🔓'}</span>
             <span className="text-[9px] text-gray-500 leading-none mt-0.5">잠금</span>

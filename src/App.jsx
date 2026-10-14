@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-const VERSION = 'v0.3.25_20261014_233542_실행취소횟수30으로증가'
+const VERSION = 'v0.3.26_20261014_234000_사이드바도구선택시레이아웃시프트방지'
 
 export default function App() {
   const canvasRef = useRef(null)
